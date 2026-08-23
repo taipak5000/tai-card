@@ -739,7 +739,7 @@
           </div>
           <div id="ecoStatFields"></div>
           <div class="hint-box">
-            🔧 「実データと連携」を押すと、この端末に保存されている<b>アイテム所持管理・エモート所持率管理・精霊ツリー管理・楽譜作成ツール・創作物管理ツール</b>の実データを自動で読み込みます(該当サイトを一度でも開いたことがある場合のみ反映されます)。連携後も手入力で上書きできます。
+            🔧 「実データと連携」を押すと、この端末に保存されている<b>アイテム所持管理・エモート所持率管理・姉妹サイト・創作物管理ツール</b>の実データを自動で読み込みます(該当サイトを一度でも開いたことがある場合のみ反映されます)。連携後も手入力で上書きできます。
           </div>
         </div>
 
@@ -916,8 +916,8 @@
   const ECO_STATS = [
     { id:'item',      icon:'🗂️', label:'アイテム所持率',       source:'アイテム所持管理',   value:'', placeholder:'例: 82%', visible:true },
     { id:'emote',     icon:'🎭', label:'エモート所持率',       source:'エモート所持率管理',  value:'', placeholder:'例: 65%', visible:true },
-    { id:'spirit',    icon:'✨', label:'精霊ツリー進行度',     source:'精霊ツリー管理',    value:'', placeholder:'例: 47%', visible:true },
-    { id:'score',     icon:'🎵', label:'作った曲数',          source:'楽譜作成ツール',    value:'', placeholder:'例: 24曲', visible:true },
+    { id:'spirit',    icon:'✨', label:'精霊ツリー進行度',     source:'姉妹サイト',    value:'', placeholder:'例: 47%', visible:true },
+    { id:'score',     icon:'🎵', label:'作った曲数',          source:'姉妹サイト',    value:'', placeholder:'例: 24曲', visible:true },
     { id:'share',     icon:'📌', label:'シェア中の作品数',     source:'創作物管理ツール',   value:'', placeholder:'例: 6件', visible:true },
   ];
 
@@ -967,7 +967,7 @@
         lc_half:{ icon:'🔦', name:'光を辿る探検家', desc:'光の子を62体（半数）発見', descEn:'Found 62 Children of Light (half)' },
         lc_all:{ icon:'🌟', name:'光の子コンプリート', desc:'光の子124体すべてを発見', descEn:'Found all 124 Children of Light' },
       } },
-    spirit: { storageKey:'spiritCatalogTitles_v1', namespaced:true, source:'精霊ツリー管理',
+    spirit: { storageKey:'spiritCatalogTitles_v1', namespaced:true, source:'姉妹サイト',
       extract: d => Object.keys(d || {}),
       titles: {
         pct1:{ icon:'🌱', name:'芽吹きの精霊使い', desc:'精霊ツリーのノードを1%以上解放した', descEn:'Unlocked 1%+ of all spirit tree nodes' },
@@ -976,7 +976,7 @@
         pct50:{ icon:'🌳', name:'満開の森の守り人', desc:'精霊ツリーのノードを50%以上解放した', descEn:'Unlocked 50%+ of all spirit tree nodes' },
         pct100:{ icon:'👑', name:'精霊の森の賢者', desc:'精霊ツリーの全ノードをコンプリートした', descEn:'Unlocked 100% of all spirit tree nodes' },
       } },
-    score: { storageKey:'taiScoreTitles_v1', namespaced:false, source:'楽譜作成ツール',
+    score: { storageKey:'taiScoreTitles_v1', namespaced:false, source:'姉妹サイト',
       extract: d => ((d && d.earned) || []).map(e => e.id),
       titles: {
         firstSong:{ icon:'🎼', name:'はじめの一歩', desc:'はじめての1曲をライブラリに加えた', descEn:'Added your first song to the library' },
@@ -1732,7 +1732,7 @@
     return (pct > 0 && pct < 100 ? Math.round(pct * 10) / 10 : Math.round(pct)) + '%';
   }
 
-  // 精霊ツリー管理：解放済みノード数 ÷ 全トラック対象ノード数（ワープ用ノードを除いた数のスナップショット）
+  // 姉妹サイト：解放済みノード数 ÷ 全トラック対象ノード数（ワープ用ノードを除いた数のスナップショット）
   function syncSpiritStat(){
     const TOTAL_TRACKABLE_NODES = 2351; // spirit-tree-data.jsから算出したノード総数のスナップショット
     let map;
@@ -1746,7 +1746,7 @@
     return (pct > 0 && pct < 100 ? Math.round(pct * 10) / 10 : Math.round(pct)) + '%';
   }
 
-  // 楽譜作成ツール：プロフィール機構を使わないグローバルキーなので、nsKey()を通さず直接読む
+  // 姉妹サイト：プロフィール機構を使わないグローバルキーなので、nsKey()を通さず直接読む
   function syncScoreStat(){
     let songs;
     try { songs = JSON.parse(localStorage.getItem('taiScoreSongs_v1')); } catch (_) { songs = null; }
