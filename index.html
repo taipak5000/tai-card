@@ -372,22 +372,24 @@
   .card-clock-range.na{ font-family:"Zen Kaku Gothic New",sans-serif; font-size:12px; font-weight:400; color:var(--text-3); }
   .card-clock-range.na::before{ color:var(--text-3); }
 
-  /* ── Cape level widget: kept as its own dark inset panel (faithful to 羽トラッカー), a deliberate contrast moment inside the light card ── */
+  /* ── Cape level widget: 羽トラッカーの意匠（ひし形ピップ・二重リング・スパーク）を踏襲しつつ、
+     冷たい漆黒ではなく、このカード自身の--text/--teal-inkと同じ暖色系の深緑をベースにした
+     「夜の草原に灯る光」トーンに変更（--goldの明るい版を光の色として使う） ── */
   .cape-widget{
-    background: linear-gradient(160deg, #1b2333 0%, #05070d 100%);
-    border-radius: 16px; padding: 16px 16px 14px; margin-top: 6px; color: #fff;
-    box-shadow: 0 6px 18px rgba(20,20,30,0.18);
+    background: linear-gradient(160deg, #33493E 0%, #1A241D 100%);
+    border-radius: 16px; padding: 16px 16px 14px; margin-top: 6px; color: #F7EFDD;
+    box-shadow: 0 6px 18px rgba(37,53,46,0.26);
   }
-  .cape-widget-title{ font-size:12.5px; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:5px; }
-  .cape-widget-sub{ font-size:11px; color:rgba(255,255,255,0.65); margin-bottom:10px; }
-  .cape-level-label{ font-size:18px; font-weight:800; text-align:center; margin-bottom:12px; }
+  .cape-widget-title{ font-size:12.5px; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:5px; color:#EFC98A; }
+  .cape-widget-sub{ font-size:11px; color:rgba(247,239,221,0.68); margin-bottom:10px; }
+  .cape-level-label{ font-size:18px; font-weight:800; text-align:center; margin-bottom:12px; color:#EFC98A; }
   .cape-pips{ display:flex; flex-direction:column-reverse; gap:8px; align-items:center; }
-  .cape-pip{ position:relative; width:11px; height:11px; transform:rotate(45deg); background:rgba(255,255,255,0.85); border:1.3px solid rgba(255,255,255,0.85); }
-  .cape-pip.tier2, .cape-pip.tier3{ width:19px; height:19px; background:transparent; border:2px solid #fff; box-shadow:0 0 5px rgba(255,255,255,0.65); display:flex; align-items:center; justify-content:center; }
-  .cape-pip-inner{ width:7px; height:7px; background:#fff; box-shadow:0 0 4px rgba(255,255,255,0.9); }
-  .cape-pip.tier3{ box-shadow:0 0 8px rgba(255,255,255,0.9); }
-  .cape-pip.tier3 .cape-pip-inner{ box-shadow:0 0 6px #fff, 0 0 12px rgba(255,255,255,0.6); }
-  .cape-spark{ position:absolute; width:3px; height:3px; border-radius:50%; background:#fff; box-shadow:0 0 3px #fff; transform:rotate(-45deg); }
+  .cape-pip{ position:relative; width:11px; height:11px; transform:rotate(45deg); background:rgba(239,201,138,0.85); border:1.3px solid rgba(239,201,138,0.85); }
+  .cape-pip.tier2, .cape-pip.tier3{ width:19px; height:19px; background:transparent; border:2px solid #EFC98A; box-shadow:0 0 5px rgba(239,201,138,0.55); display:flex; align-items:center; justify-content:center; }
+  .cape-pip-inner{ width:7px; height:7px; background:#EFC98A; box-shadow:0 0 4px rgba(239,201,138,0.9); }
+  .cape-pip.tier3{ box-shadow:0 0 8px rgba(239,201,138,0.85); }
+  .cape-pip.tier3 .cape-pip-inner{ box-shadow:0 0 6px #EFC98A, 0 0 12px rgba(239,201,138,0.55); }
+  .cape-spark{ position:absolute; width:3px; height:3px; border-radius:50%; background:#EFC98A; box-shadow:0 0 3px #EFC98A; transform:rotate(-45deg); }
   .cape-spark.t{ top:-6px; left:50%; margin-left:-1.5px; }
   .cape-spark.b{ bottom:-6px; left:50%; margin-left:-1.5px; }
   .cape-spark.l{ left:-6px; top:50%; margin-top:-1.5px; }
