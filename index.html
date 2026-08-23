@@ -320,7 +320,6 @@
   .detail-chip .dc-body{ min-width:0; display:flex; flex-direction:column; gap:2px; }
   .detail-chip .dc-label{ font-family:"IBM Plex Mono", monospace; font-size:9px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-3); }
   .detail-chip .dc-value{ font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; font-size:12.5px; color:var(--text); line-height:1.4; word-break:break-word; }
-  .detail-chip.na .dc-value{ font-family:"Zen Kaku Gothic New",sans-serif; font-weight:400; font-size:11px; color:var(--text-3); }
 
   /* 収集状況：フル幅の縦積みではなく、ケープレベル(dark)と並ぶ2〜3列のタイル群にする */
   .card-eco-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(128px, 1fr)); gap:8px; }
@@ -1584,21 +1583,25 @@
       staggerRows(ptEl, '.card-clock-range');
     } else { setSection(ptEl, ''); }
 
-    // details — 9項目の縦積みリストではなく、折り返すタグのモザイク(card-detail-mosaic)にする
+    // details — 9項目の縦積みリストではなく、折り返すタグのモザイク(card-detail-mosaic)にする。
+    // 何も選択されていない項目は「ー」で埋めず、タイルごと出さない（未回答を見せない設計）。
     const dtEl = document.getElementById('cardDetailsWrap');
     if (state.vis.details) {
-      let html = `
-        <div class="card-sec-title">DETAILS</div>
-        <div class="card-sec-heading">詳細プロフィール</div>
-        <div class="card-detail-mosaic">`;
-      DETAIL_GROUPS.forEach(g => {
+      const chips = DETAIL_GROUPS.map(g => {
         const selected = state.detail[g.id] || [];
-        const v = selected.map(x => x === FREE_TEXT ? (state.detailFreeText[g.id] || FREE_TEXT) : x).join('・') || null;
-        html += `<div class="detail-chip${v ? '' : ' na'}"><span class="dc-icon">${g.icon}</span><div class="dc-body"><span class="dc-label">${g.label}</span><span class="dc-value">${v || 'ー'}</span></div></div>`;
-      });
-      html += '</div>';
-      setSection(dtEl, html);
-      staggerRows(dtEl, '.detail-chip');
+        const v = selected.map(x => x === FREE_TEXT ? (state.detailFreeText[g.id] || FREE_TEXT) : x).join('・');
+        if (!v) return '';
+        return `<div class="detail-chip"><span class="dc-icon">${g.icon}</span><div class="dc-body"><span class="dc-label">${g.label}</span><span class="dc-value">${v}</span></div></div>`;
+      }).join('');
+      if (chips) {
+        setSection(dtEl, `
+          <div class="card-sec-title">DETAILS</div>
+          <div class="card-sec-heading">詳細プロフィール</div>
+          <div class="card-detail-mosaic">${chips}</div>`);
+        staggerRows(dtEl, '.detail-chip');
+      } else {
+        setSection(dtEl, '');
+      }
     } else { setSection(dtEl, ''); }
 
     // cape level — kept as its own dark inset panel (faithful callback to 羽トラッカー's own branding)
