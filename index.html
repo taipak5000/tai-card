@@ -215,20 +215,6 @@
   .clock-range-remove:hover{ color:var(--danger); }
   #irregularBtn.selected{ background:var(--teal-bg); border-color:var(--teal); color:var(--teal-ink); }
 
-  /* サブ垢：シルエットをタップすると人数が増えていく、遊び心のあるUI */
-  .sub-tap-widget{
-    appearance:none; cursor:pointer; display:flex; align-items:center; gap:12px;
-    background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-sm);
-    padding:12px 16px; width:100%; font-family:inherit; transition:transform .15s var(--ease-snap);
-  }
-  .sub-tap-widget:hover{ border-color:var(--teal); }
-  .sub-tap-widget:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
-  .sub-tap-widget:active{ transform:scale(0.98); }
-  .sub-tap-icons{ display:flex; gap:2px; font-size:20px; min-width:26px; transition:transform .18s var(--ease-pop); }
-  .sub-tap-icons.pulse{ transform:scale(1.25) rotate(-6deg); }
-  .sub-tap-icons .empty{ opacity:0.3; }
-  .sub-tap-label{ font-size:13px; font-weight:600; color:var(--text); }
-  .sub-tap-hint{ font-size:10.5px; color:var(--text-3); margin-left:auto; }
 
   /* ── Preview ── */
   .preview-col{ position:sticky; top:20px; }
@@ -674,12 +660,12 @@
 </div>
 
 <div class="site-dock" role="navigation" aria-label="クイックメニュー">
-  <button type="button" id="toolsDockBtn">
-    <span class="dock-icon">☰</span><span class="dock-label">他のツール</span>
-  </button>
   <a href="https://taipak5000.github.io/tai-transfer/">
     <span class="dock-icon">🔄</span><span class="dock-label">データ連携</span>
   </a>
+  <button type="button" id="toolsDockBtn">
+    <span class="dock-icon">☰</span><span class="dock-label">他のツール</span>
+  </button>
   <a href="https://taipak5000.github.io/tai-info/">
     <span class="dock-icon">⚙️</span><span class="dock-label">設定・情報</span>
   </a>
@@ -743,7 +729,6 @@
 
   const DETAIL_GROUPS = [
     { id:'playStyle',      icon:'🎮', label:'プレイスタイル', options:['ソロ','サブと','フレンド', FREE_TEXT] },
-    { id:'sub',            icon:'👥', label:'サブ',          options:['1つ','複数','なし'] },
     { id:'friendRecruit',  icon:'🤝', label:'フレンド募集',   options:['募集中','フレ申大歓迎','していない', FREE_TEXT] },
     { id:'chat',           icon:'💬', label:'チャット解放',   options:['フレコで解放する','ミュートしたい','ミュートされたい','開放しない', FREE_TEXT] },
     { id:'heartTrade',     icon:'❤️', label:'ハート交換',    options:['募集中','頼まれたらやる','やらない'] },
@@ -1199,34 +1184,6 @@
     wrap.innerHTML = `<div class="chip-label"><span class="ic">${g.icon}</span>${g.label}</div>`;
     detailGroupsEl.appendChild(wrap);
 
-    // サブ垢だけは、シルエットをタップすると人数がその場で増えていく専用UIにする
-    if (g.id === 'sub') {
-      const SUB_STATES = [null, '1つ', '複数'];
-      let subIdx = 0;
-      const btn = el('button', 'sub-tap-widget');
-      btn.type = 'button';
-      btn.setAttribute('aria-label', 'タップしてサブ垢の人数を選択');
-      btn.innerHTML = `<span class="sub-tap-icons" id="subTapIcons"></span><span class="sub-tap-label" id="subTapLabel"></span><span class="sub-tap-hint">タップで切替</span>`;
-      wrap.appendChild(btn);
-      const iconsEl = btn.querySelector('#subTapIcons');
-      const labelEl = btn.querySelector('#subTapLabel');
-      function drawSub(){
-        const count = subIdx;
-        iconsEl.innerHTML = count > 0 ? Array.from({ length: count }, () => '👤').join('') : '<span class="empty">👤</span>';
-        labelEl.textContent = SUB_STATES[subIdx] || 'なし（未回答）';
-      }
-      btn.addEventListener('click', () => {
-        subIdx = (subIdx + 1) % SUB_STATES.length;
-        state.detail.sub = SUB_STATES[subIdx];
-        iconsEl.classList.add('pulse');
-        setTimeout(() => iconsEl.classList.remove('pulse'), 140);
-        drawSub();
-        renderCard();
-      });
-      drawSub();
-      return;
-    }
-
     const chips = el('div', 'chips');
     wrap.appendChild(chips);
     const freeTextWrap = el('div', 'free-text-input');
@@ -1435,14 +1392,8 @@
         <div class="card-sec-heading">詳細プロフィール</div>
         <div class="card-detail-mosaic">`;
       DETAIL_GROUPS.forEach(g => {
-        // 'sub' だけはタップ式カウンターの単一値。それ以外は複数選択の配列を「・」で連結して表示する
-        let v;
-        if (g.id === 'sub') {
-          v = state.detail[g.id];
-        } else {
-          const selected = state.detail[g.id] || [];
-          v = selected.map(x => x === FREE_TEXT ? (state.detailFreeText[g.id] || FREE_TEXT) : x).join('・') || null;
-        }
+        const selected = state.detail[g.id] || [];
+        const v = selected.map(x => x === FREE_TEXT ? (state.detailFreeText[g.id] || FREE_TEXT) : x).join('・') || null;
         html += `<span class="detail-chip${v ? '' : ' na'}"><span class="dc-icon">${g.icon}</span><span class="dc-label">${g.label}</span><span class="dc-value">${v || 'ー'}</span></span>`;
       });
       html += '</div>';
