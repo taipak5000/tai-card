@@ -308,15 +308,18 @@
   .soft-row .progress-bar{ height:4px; border-radius:100px; background:var(--surface-3); margin-top:7px; overflow:hidden; }
   .soft-row .progress-bar-fill{ height:100%; background:var(--teal); border-radius:100px; }
 
-  /* 詳細プロフィール：9項目を一行ずつ積むリストではなく、折り返すタグのモザイクにする */
-  .card-detail-mosaic{ display:flex; flex-wrap:wrap; gap:8px; }
+  /* 詳細プロフィール：一行ずつ積むリストでも、長さがバラバラなピルが並ぶモザイクでもなく、
+     複数選択で値の長さが大きく変わっても揃って見える「均一グリッドのタイル」にする
+     （収集状況のcard-eco-gridと同じ考え方。アイコン＋ラベルの下に値を2行目として折り返す） */
+  .card-detail-mosaic{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:8px; }
   .detail-chip{
-    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.65); border:1px solid var(--border);
-    border-radius:100px; padding:6px 13px 6px 9px;
+    display:flex; align-items:flex-start; gap:8px; background:rgba(255,255,255,0.65); border:1px solid var(--border);
+    border-radius:14px; padding:10px 12px; min-width:0;
   }
-  .detail-chip .dc-icon{ font-size:13px; }
+  .detail-chip .dc-icon{ font-size:14px; flex-shrink:0; line-height:1.3; }
+  .detail-chip .dc-body{ min-width:0; display:flex; flex-direction:column; gap:2px; }
   .detail-chip .dc-label{ font-family:"IBM Plex Mono", monospace; font-size:9px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-3); }
-  .detail-chip .dc-value{ font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; font-size:12.5px; color:var(--text); }
+  .detail-chip .dc-value{ font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; font-size:12.5px; color:var(--text); line-height:1.4; word-break:break-word; }
   .detail-chip.na .dc-value{ font-family:"Zen Kaku Gothic New",sans-serif; font-weight:400; font-size:11px; color:var(--text-3); }
 
   /* 収集状況：フル幅の縦積みではなく、ケープレベル(dark)と並ぶ2〜3列のタイル群にする */
@@ -1553,7 +1556,7 @@
       DETAIL_GROUPS.forEach(g => {
         const selected = state.detail[g.id] || [];
         const v = selected.map(x => x === FREE_TEXT ? (state.detailFreeText[g.id] || FREE_TEXT) : x).join('・') || null;
-        html += `<span class="detail-chip${v ? '' : ' na'}"><span class="dc-icon">${g.icon}</span><span class="dc-label">${g.label}</span><span class="dc-value">${v || 'ー'}</span></span>`;
+        html += `<div class="detail-chip${v ? '' : ' na'}"><span class="dc-icon">${g.icon}</span><div class="dc-body"><span class="dc-label">${g.label}</span><span class="dc-value">${v || 'ー'}</span></div></div>`;
       });
       html += '</div>';
       setSection(dtEl, html);
