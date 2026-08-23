@@ -757,9 +757,9 @@
   const DETAIL_GROUPS = [
     { id:'playStyle',      icon:'🎮', label:'プレイスタイル', options:['ソロ','サブと','フレンド', FREE_TEXT] },
     { id:'sub',            icon:'👥', label:'サブ',          options:['1つ','複数','なし'] },
-    { id:'friendRecruit',  icon:'🤝', label:'フレンド募集',   options:['してる','仲良くなってから','してない'] },
-    { id:'chat',           icon:'💬', label:'チャット解放',   options:['OK','仲良くなってから','NG'] },
-    { id:'heartTrade',     icon:'❤️', label:'ハート交換',    options:['OK','相談可','NG'] },
+    { id:'friendRecruit',  icon:'🤝', label:'フレンド募集',   options:['募集中','フレ申大歓迎','していない', FREE_TEXT] },
+    { id:'chat',           icon:'💬', label:'チャット解放',   options:['フレコで解放する','ミュートしたい','ミュートされたい','開放しない', FREE_TEXT] },
+    { id:'heartTrade',     icon:'❤️', label:'ハート交換',    options:['募集中','頼まれたらやる','やらない'] },
     { id:'warp',           icon:'🌀', label:'ワープ',        options:['したい','されたい', FREE_TEXT] },
     { id:'candleMarathon', icon:'🕯️', label:'キャンマラ',    options:['毎日灰まで','毎日15本くらい','マイペースに','しない'] },
     { id:'carry',          icon:'🎒', label:'キャリー',      options:['まかせろ','お願いしたい','どちらでも可能'] },
@@ -1253,21 +1253,24 @@
       renderCard();
     });
 
+    // 複数選択：グループごとに選ばれた選択肢の配列を保持し、タップのたびに配列への出し入れを行う
     function draw(){
       chips.innerHTML = '';
+      const selected = state.detail[g.id] || [];
       g.options.forEach(opt => {
         const b = document.createElement('button');
-        b.type = 'button'; b.className = 'chip-opt' + (state.detail[g.id] === opt ? ' selected' : '');
+        b.type = 'button'; b.className = 'chip-opt' + (selected.includes(opt) ? ' selected' : '');
         b.textContent = opt;
         b.addEventListener('click', () => {
-          state.detail[g.id] = (state.detail[g.id] === opt) ? null : opt;
+          const cur = state.detail[g.id] || [];
+          state.detail[g.id] = cur.includes(opt) ? cur.filter(x => x !== opt) : [...cur, opt];
           draw();
-          freeTextWrap.style.display = (state.detail[g.id] === FREE_TEXT) ? 'block' : 'none';
+          freeTextWrap.style.display = state.detail[g.id].includes(FREE_TEXT) ? 'block' : 'none';
           renderCard();
         });
         chips.appendChild(b);
       });
-      freeTextWrap.style.display = (state.detail[g.id] === FREE_TEXT) ? 'block' : 'none';
+      freeTextWrap.style.display = selected.includes(FREE_TEXT) ? 'block' : 'none';
     }
     draw();
   });
@@ -1454,8 +1457,14 @@
         <div class="card-sec-heading" style="${dim?'opacity:.4':''}">詳細プロフィール</div>
         <div class="card-detail-mosaic" style="${dim?'opacity:.4':''}">`;
       DETAIL_GROUPS.forEach(g => {
-        let v = state.detail[g.id];
-        if (v === FREE_TEXT) v = state.detailFreeText[g.id] || FREE_TEXT;
+        // 'sub' だけはタップ式カウンターの単一値。それ以外は複数選択の配列を「・」で連結して表示する
+        let v;
+        if (g.id === 'sub') {
+          v = state.detail[g.id];
+        } else {
+          const selected = state.detail[g.id] || [];
+          v = selected.map(x => x === FREE_TEXT ? (state.detailFreeText[g.id] || FREE_TEXT) : x).join('・') || null;
+        }
         html += `<span class="detail-chip${v ? '' : ' na'}"><span class="dc-icon">${g.icon}</span><span class="dc-label">${g.label}</span><span class="dc-value">${v || 'ー'}</span></span>`;
       });
       html += '</div>';
