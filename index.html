@@ -536,12 +536,17 @@
   .profile-row-titles-toggle:hover{ text-decoration:underline; }
   .profile-row-titles-toggle .prt-caret{ font-size:9px; transition:transform .15s var(--ease-snap); }
   .profile-row-titles-toggle[aria-expanded="true"] .prt-caret{ transform:rotate(180deg); }
-  .profile-row-titles{ display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
-  .profile-title-chip{
-    display:inline-flex; align-items:center; gap:4px; padding:3px 9px 3px 7px; border-radius:100px;
-    background:var(--gold-bg); border:1px solid rgba(201,154,74,0.28); font-size:11px; color:var(--gold-ink);
+  .profile-row-titles{
+    display:flex; flex-direction:column; gap:7px; margin-top:7px; padding:9px 10px;
+    background:var(--surface-2); border-radius:var(--r-sm);
+  }
+  .profile-row-titles[hidden]{ display:none; } /* [hidden]属性はauthor側のdisplay:flexに負けて無視されるため、明示的に上書きする */
+  .profile-title-item{
+    display:flex; align-items:flex-start; gap:6px; font-size:11.5px; color:var(--text-2); line-height:1.5;
     font-family:"Zen Kaku Gothic New",sans-serif;
   }
+  .profile-title-icon{ flex-shrink:0; font-size:14px; line-height:1.5; }
+  .profile-title-text b{ color:var(--text); }
   .profile-row-titles-empty{ font-size:11px; color:var(--text-3); margin:6px 0 0; }
   .profile-add-row{ display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
   .profile-add-row input{
@@ -932,58 +937,78 @@
     item: { storageKey:'itemTitles_v1', namespaced:true, source:'アイテム所持管理',
       extract: d => Object.keys((d && d.earned) || {}),
       titles: {
-        rate25:{ icon:'🕯️', name:'灯火の旅人' }, rate50:{ icon:'🌙', name:'星屑の収集家' },
-        rate75:{ icon:'✨', name:'煌めきの探究者' }, rate100:{ icon:'👑', name:'光の守護者' },
-        catmaster1:{ icon:'🏅', name:'コレクションの第一歩' }, catmaster6:{ icon:'🏆', name:'熟練コレクター' },
+        rate25:{ icon:'🕯️', name:'灯火の旅人', desc:'全アイテムの所持率が25%に到達', descEn:'Reached 25% overall ownership' },
+        rate50:{ icon:'🌙', name:'星屑の収集家', desc:'全アイテムの所持率が50%に到達', descEn:'Reached 50% overall ownership' },
+        rate75:{ icon:'✨', name:'煌めきの探究者', desc:'全アイテムの所持率が75%に到達', descEn:'Reached 75% overall ownership' },
+        rate100:{ icon:'👑', name:'光の守護者', desc:'登録した全アイテムを100%所持', descEn:'Reached 100% overall ownership' },
+        catmaster1:{ icon:'🏅', name:'コレクションの第一歩', desc:'いずれか1カテゴリを100%達成', descEn:'Completed at least 1 category' },
+        catmaster6:{ icon:'🏆', name:'熟練コレクター', desc:'6カテゴリ以上を100%達成', descEn:'Completed 6 or more categories' },
       } },
     emote: { storageKey:'emoteTitles_v1', namespaced:true, source:'エモート所持率管理',
       extract: d => Object.keys(d || {}),
       titles: {
-        apprentice:{ icon:'🔰', name:'一芸見習い' }, performer:{ icon:'🎭', name:'芸達者' },
-        grandmaster:{ icon:'👑', name:'エモート完全制覇' }, completionist:{ icon:'🗺️', name:'全種踏破' },
-        guideFan:{ icon:'🧭', name:'案内人めぐり' },
+        apprentice:{ icon:'🔰', name:'一芸見習い', desc:'所持レベル数が全体の10%に到達', descEn:'Owned levels reached 10% of the total' },
+        performer:{ icon:'🎭', name:'芸達者', desc:'所持レベル数が全体の50%に到達', descEn:'Owned levels reached 50% of the total' },
+        grandmaster:{ icon:'👑', name:'エモート完全制覇', desc:'全エモートの全レベルを所持', descEn:'Owns every level of every emote' },
+        completionist:{ icon:'🗺️', name:'全種踏破', desc:'全エモートを最低1レベルずつ所持', descEn:'Owns at least one level of every emote' },
+        guideFan:{ icon:'🧭', name:'案内人めぐり', desc:'「案内人」エモートを全種最低1レベルずつ所持', descEn:'Owns at least one level of every Guide emote' },
       } },
     wings: { storageKey:'wingsTitles_v1', namespaced:true, source:'羽トラッカー',
       extract: d => Object.keys(d || {}),
       titles: {
-        cape_lv5:{ icon:'🪶', name:'羽ばたきの証' }, cape_lv10:{ icon:'🧥', name:'旅するケープ使い' },
-        cape_lv13:{ icon:'👑', name:'光の翼、極めし者' }, lc_half:{ icon:'🔦', name:'光を辿る探検家' },
-        lc_all:{ icon:'🌟', name:'光の子コンプリート' },
+        cape_lv5:{ icon:'🪶', name:'羽ばたきの証', desc:'ケープレベル5に到達（光の翼20枚）', descEn:'Reached Cape Level 5 (20 Wings of Light)' },
+        cape_lv10:{ icon:'🧥', name:'旅するケープ使い', desc:'ケープレベル10に到達（光の翼120枚）', descEn:'Reached Cape Level 10 (120 Wings of Light)' },
+        cape_lv13:{ icon:'👑', name:'光の翼、極めし者', desc:'ケープレベル最大の13に到達（光の翼250枚）', descEn:'Reached the max Cape Level 13 (250 Wings of Light)' },
+        lc_half:{ icon:'🔦', name:'光を辿る探検家', desc:'光の子を62体（半数）発見', descEn:'Found 62 Children of Light (half)' },
+        lc_all:{ icon:'🌟', name:'光の子コンプリート', desc:'光の子124体すべてを発見', descEn:'Found all 124 Children of Light' },
       } },
     spirit: { storageKey:'spiritCatalogTitles_v1', namespaced:true, source:'精霊ツリー管理',
       extract: d => Object.keys(d || {}),
       titles: {
-        pct1:{ icon:'🌱', name:'芽吹きの精霊使い' }, pct10:{ icon:'🕯️', name:'灯火の道しるべ' },
-        pct25:{ icon:'🌿', name:'深緑の探求者' }, pct50:{ icon:'🌳', name:'満開の森の守り人' },
-        pct100:{ icon:'👑', name:'精霊の森の賢者' },
+        pct1:{ icon:'🌱', name:'芽吹きの精霊使い', desc:'精霊ツリーのノードを1%以上解放した', descEn:'Unlocked 1%+ of all spirit tree nodes' },
+        pct10:{ icon:'🕯️', name:'灯火の道しるべ', desc:'精霊ツリーのノードを10%以上解放した', descEn:'Unlocked 10%+ of all spirit tree nodes' },
+        pct25:{ icon:'🌿', name:'深緑の探求者', desc:'精霊ツリーのノードを25%以上解放した', descEn:'Unlocked 25%+ of all spirit tree nodes' },
+        pct50:{ icon:'🌳', name:'満開の森の守り人', desc:'精霊ツリーのノードを50%以上解放した', descEn:'Unlocked 50%+ of all spirit tree nodes' },
+        pct100:{ icon:'👑', name:'精霊の森の賢者', desc:'精霊ツリーの全ノードをコンプリートした', descEn:'Unlocked 100% of all spirit tree nodes' },
       } },
     score: { storageKey:'taiScoreTitles_v1', namespaced:false, source:'楽譜作成ツール',
       extract: d => ((d && d.earned) || []).map(e => e.id),
       titles: {
-        firstSong:{ icon:'🎼', name:'はじめの一歩' }, apprentice:{ icon:'🎶', name:'作曲家見習い' },
-        craftsman:{ icon:'🎹', name:'楽譜職人' }, legend:{ icon:'🏅', name:'伝説の作曲家' },
-        passionate:{ icon:'🔥', name:'情熱の演奏者' }, virtuoso:{ icon:'⚡', name:'超絶技巧' },
+        firstSong:{ icon:'🎼', name:'はじめの一歩', desc:'はじめての1曲をライブラリに加えた', descEn:'Added your first song to the library' },
+        apprentice:{ icon:'🎶', name:'作曲家見習い', desc:'曲を5曲、ライブラリに加えた', descEn:'Added 5 songs to the library' },
+        craftsman:{ icon:'🎹', name:'楽譜職人', desc:'曲を20曲、ライブラリに加えた', descEn:'Added 20 songs to the library' },
+        legend:{ icon:'🏅', name:'伝説の作曲家', desc:'曲を50曲、ライブラリに加えた', descEn:'Added 50 songs to the library' },
+        passionate:{ icon:'🔥', name:'情熱の演奏者', desc:'1曲に100音を超える演奏を詰め込んだ', descEn:'Packed over 100 notes into a single song' },
+        virtuoso:{ icon:'⚡', name:'超絶技巧', desc:'1曲に300音を超える演奏を詰め込んだ', descEn:'Packed over 300 notes into a single song' },
       } },
     share: { storageKey:'shareTitles_v1', namespaced:true, source:'創作物管理ツール',
       extract: d => ((d && d.earned) || []).map(e => e.id),
       titles: {
-        first:{ icon:'🌱', name:'はじめての一歩' }, apprentice:{ icon:'🔨', name:'見習い設置職人' },
-        skilled:{ icon:'🏗️', name:'熟練の設置職人' }, master:{ icon:'🏛️', name:'創作の匠' },
-        legend:{ icon:'👑', name:'伝説の創作者' },
+        first:{ icon:'🌱', name:'はじめての一歩', desc:'創作物をはじめて追加した', descEn:'Added your first creation' },
+        apprentice:{ icon:'🔨', name:'見習い設置職人', desc:'累計5個の創作物を追加した', descEn:'5 creations added (lifetime)' },
+        skilled:{ icon:'🏗️', name:'熟練の設置職人', desc:'累計15個の創作物を追加した', descEn:'15 creations added (lifetime)' },
+        master:{ icon:'🏛️', name:'創作の匠', desc:'累計30個の創作物を追加した', descEn:'30 creations added (lifetime)' },
+        legend:{ icon:'👑', name:'伝説の創作者', desc:'累計50個の創作物を追加した', descEn:'50 creations added (lifetime)' },
       } },
     nomacan: { storageKey:'skyNomacanTitles_v1', namespaced:true, source:'ノマキャン計算機',
       extract: d => Object.keys((d && d.earned) || {}),
       titles: {
-        streak3:{ icon:'🔥', name:'灯し始め' }, streak7:{ icon:'🕯️', name:'一週間の灯火' },
-        streak30:{ icon:'🌟', name:'絶やさぬ灯' }, hold100:{ icon:'🕯️', name:'灯の蓄え' },
-        hold300:{ icon:'🏮', name:'光の貯蔵庫' }, hold600:{ icon:'👑', name:'灯火の富豪' },
+        streak3:{ icon:'🔥', name:'灯し始め', desc:'3日連続で記録', descEn:'Recorded 3 days in a row' },
+        streak7:{ icon:'🕯️', name:'一週間の灯火', desc:'7日連続で記録', descEn:'Recorded 7 days in a row' },
+        streak30:{ icon:'🌟', name:'絶やさぬ灯', desc:'30日連続で記録', descEn:'Recorded 30 days in a row' },
+        hold100:{ icon:'🕯️', name:'灯の蓄え', desc:'所持本数が100本に到達', descEn:'Reached 100 candles held' },
+        hold300:{ icon:'🏮', name:'光の貯蔵庫', desc:'所持本数が300本に到達', descEn:'Reached 300 candles held' },
+        hold600:{ icon:'👑', name:'灯火の富豪', desc:'所持本数が600本に到達', descEn:'Reached 600 candles held' },
       } },
     starcandle: { storageKey:'skyStarCandleCalc_titles_v1', namespaced:true, source:'星のキャンドル計算機',
       extract: d => Object.keys(d || {}),
       titles: {
-        streak_3:{ icon:'🕯️', name:'灯を絶やさぬ者' }, streak_7:{ icon:'🔥', name:'一週間の灯火番' },
-        streak_20:{ icon:'🌌', name:'常夜の灯守' }, candle_30:{ icon:'⭐', name:'星屑の蒐集者' },
-        candle_100:{ icon:'🌟', name:'百連の灯' }, candle_300:{ icon:'👑', name:'星々の帳を統べる者' },
+        streak_3:{ icon:'🕯️', name:'灯を絶やさぬ者', desc:'赤闇を3日連続で取りこぼさず回収', descEn:'Collected shard rewards 3 days in a row without missing one' },
+        streak_7:{ icon:'🔥', name:'一週間の灯火番', desc:'赤闇を7日連続で取りこぼさず回収', descEn:'Collected shard rewards 7 days in a row without missing one' },
+        streak_20:{ icon:'🌌', name:'常夜の灯守', desc:'赤闇を20日連続で取りこぼさず回収', descEn:'Collected shard rewards 20 days in a row without missing one' },
+        candle_30:{ icon:'⭐', name:'星屑の蒐集者', desc:'所持本数が最高30本に到達', descEn:'Held 30 candles at once for the first time' },
+        candle_100:{ icon:'🌟', name:'百連の灯', desc:'所持本数が最高100本に到達', descEn:'Held 100 candles at once for the first time' },
+        candle_300:{ icon:'👑', name:'星々の帳を統べる者', desc:'所持本数が最高300本に到達', descEn:'Held 300 candles at once for the first time' },
       } },
   };
 
@@ -1781,7 +1806,7 @@
       ids.forEach(id => {
         const def = tool.titles[id];
         if (!def) return; // 未知のid（想定外のデータ形式）は無視する
-        earned.push({ key: `${toolId}:${id}`, icon: def.icon, name: def.name, source: tool.source });
+        earned.push({ key: `${toolId}:${id}`, icon: def.icon, name: def.name, desc: def.desc, descEn: def.descEn, source: tool.source });
       });
     });
     return earned;
@@ -1797,7 +1822,7 @@
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'chip-opt' + (state.titles.selected.includes(t.key) ? ' selected' : '');
-      b.title = t.source;
+      b.title = t.desc ? `${t.source} — ${t.desc}` : t.source;
       b.innerHTML = `<span>${t.icon}</span> ${t.name}`;
       b.addEventListener('click', () => {
         const idx = state.titles.selected.indexOf(t.key);
@@ -2203,7 +2228,11 @@
         </div>
         ${earnedTitles.length
           ? `<button type="button" class="profile-row-titles-toggle" data-act="toggle-titles" aria-expanded="false">🏆 ${earnedTitles.length}個の称号<span class="prt-caret">▾</span></button>
-             <div class="profile-row-titles" hidden>${earnedTitles.map(t => `<span class="profile-title-chip" title="${escapeHtml(t.source)}"><span>${t.icon}</span>${escapeHtml(t.name)}</span>`).join('')}</div>`
+             <div class="profile-row-titles" hidden>${earnedTitles.map(t => `
+               <div class="profile-title-item" title="${escapeHtml(t.source)}">
+                 <span class="profile-title-icon">${t.icon}</span>
+                 <span class="profile-title-text"><b>${escapeHtml(t.name)}</b>${t.desc ? ` — ${escapeHtml(t.desc)}` : ''}</span>
+               </div>`).join('')}</div>`
           : `<p class="profile-row-titles-empty">まだ称号を獲得していません</p>`}`;
       if (p.id !== activeId) row.querySelector('[data-act="switch"]').addEventListener('click', () => switchProfile(p.id));
       row.querySelector('[data-act="rename"]').addEventListener('click', () => {
