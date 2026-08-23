@@ -256,7 +256,7 @@
      asymmetrically instead of one uniform stacked column. Each module's wrapper div gets display:none
      via setSection() when it has no content, so a hidden module never leaves a phantom grid cell. ── */
   .card-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:16px 14px; margin-top:2px; }
-  #cardJourney, #cardDetailsWrap, #cardTrendWrap, #cardFcWrap{ grid-column:1 / -1; }
+  #cardJourney, #cardDetailsWrap, #cardTitlesWrap, #cardTrendWrap, #cardFcWrap{ grid-column:1 / -1; }
   #cardSnsWrap, #cardPlayTimeWrap{ grid-column:span 3; }
   #cardCapeWrap{ grid-column:span 2; }
   #cardEcoWrap{ grid-column:span 4; }
@@ -328,6 +328,18 @@
   }
   .detail-chip .dc-value-part{ white-space:nowrap; overflow-wrap:anywhere; }
   .detail-chip .dc-value-sep{ color:var(--text-3); }
+
+  /* 称号バッジ：他ツールで獲得した実績を「見せびらかす」場所なので、他の淡いタイルより
+     一段華やかに、ゴールドのグラデーション＋うっすらした光沢で特別感を出す */
+  .card-titles-strip{ display:flex; flex-wrap:wrap; gap:8px; }
+  .card-title-badge{
+    display:inline-flex; align-items:center; gap:6px; padding:7px 14px 7px 10px; border-radius:100px;
+    background:linear-gradient(135deg, var(--gold-bg) 0%, rgba(255,255,255,0.55) 100%);
+    border:1px solid rgba(201,154,74,0.38); box-shadow:0 2px 7px rgba(168,122,50,0.14);
+    font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; font-size:12.5px; color:var(--gold-ink);
+  }
+  .card-title-badge .ctb-icon{ font-size:15px; }
+  .title-picker-empty{ font-size:12px; color:var(--text-3); margin:0 0 8px; }
 
   /* 収集状況：フル幅の縦積みではなく、ケープレベル(dark)と並ぶ2〜3列のタイル群にする */
   .card-eco-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(128px, 1fr)); gap:8px; }
@@ -656,6 +668,20 @@
         </div>
 
         <div class="sec">
+          <div class="sec-head">
+            <div class="sec-title">🏆 称号 <span class="n">獲得した称号をカードに飾れる</span></div>
+            <label class="switch"><input type="checkbox" id="vis_titles" checked><span class="track"></span><span class="knob"></span></label>
+          </div>
+          <div class="eco-sync-row">
+            <button type="button" class="eco-sync-btn" id="titleSyncBtn"><span>🔄</span>称号を読み込む</button>
+          </div>
+          <div id="titlePickerArea"></div>
+          <div class="hint-box">
+            🔧 「称号を読み込む」を押すと、この端末に保存されている他ツールで獲得済みの称号を読み込みます。飾りたいものだけタップして選んでください(複数選択可)。
+          </div>
+        </div>
+
+        <div class="sec">
           <div class="sec-head"><div class="sec-title">📈 入手グラフ <span class="n">任意・各サイトの推移チャート</span></div></div>
           <div id="trendGraphFields"></div>
           <div class="hint-box">
@@ -690,6 +716,7 @@
               <div id="cardSnsWrap"></div>
               <div id="cardPlayTimeWrap"></div>
               <div id="cardDetailsWrap"></div>
+              <div id="cardTitlesWrap"></div>
               <div id="cardCapeWrap"></div>
               <div id="cardEcoWrap"></div>
               <div id="cardTrendWrap"></div>
@@ -806,6 +833,56 @@
     { id:'starcandle', icon:'🕯️', label:'星のキャンドルの入手推移', source:'星のキャンドル計算機', visible:false, sample:[40,95,150,220,290,340] },
   ];
 
+  // ── 称号カタログ：他ツールに実装済みの称号（実績）システムの定義を、tai-card側にも
+  // ミラーとして持っておく（同一オリジンのlocalStorageは読めても、他ツールの称号名の
+  // 定義そのものは取りに行けないため）。各ツールが実際に採用したストレージ形状は
+  // バラバラ（フラットなid→{earnedAt}のもの、{earned:{...}}や{earned:[...]}でラップした
+  // ものなど）なので、extract()でそれぞれの形から「獲得済みidの配列」に正規化する。
+  const TITLE_CATALOG = {
+    item: { storageKey:'itemTitles_v1', namespaced:true, source:'アイテム所持管理',
+      extract: d => Object.keys((d && d.earned) || {}),
+      titles: {
+        rate25:{ icon:'🕯️', name:'灯火の旅人' }, rate50:{ icon:'🌙', name:'星屑の収集家' },
+        rate75:{ icon:'✨', name:'煌めきの探究者' }, rate100:{ icon:'👑', name:'光の守護者' },
+        catmaster1:{ icon:'🏅', name:'コレクションの第一歩' }, catmaster6:{ icon:'🏆', name:'熟練コレクター' },
+      } },
+    emote: { storageKey:'emoteTitles_v1', namespaced:true, source:'エモート所持率管理',
+      extract: d => Object.keys(d || {}),
+      titles: {
+        apprentice:{ icon:'🔰', name:'一芸見習い' }, performer:{ icon:'🎭', name:'芸達者' },
+        grandmaster:{ icon:'👑', name:'エモート完全制覇' }, completionist:{ icon:'🗺️', name:'全種踏破' },
+        guideFan:{ icon:'🧭', name:'案内人めぐり' },
+      } },
+    wings: { storageKey:'wingsTitles_v1', namespaced:true, source:'羽トラッカー',
+      extract: d => Object.keys(d || {}),
+      titles: {
+        cape_lv5:{ icon:'🪶', name:'羽ばたきの証' }, cape_lv10:{ icon:'🧥', name:'旅するケープ使い' },
+        cape_lv13:{ icon:'👑', name:'光の翼、極めし者' }, lc_half:{ icon:'🔦', name:'光を辿る探検家' },
+        lc_all:{ icon:'🌟', name:'光の子コンプリート' },
+      } },
+    spirit: { storageKey:'spiritCatalogTitles_v1', namespaced:true, source:'精霊ツリー管理',
+      extract: d => Object.keys(d || {}),
+      titles: {
+        pct1:{ icon:'🌱', name:'芽吹きの精霊使い' }, pct10:{ icon:'🕯️', name:'灯火の道しるべ' },
+        pct25:{ icon:'🌿', name:'深緑の探求者' }, pct50:{ icon:'🌳', name:'満開の森の守り人' },
+        pct100:{ icon:'👑', name:'精霊の森の賢者' },
+      } },
+    score: { storageKey:'taiScoreTitles_v1', namespaced:false, source:'楽譜作成ツール',
+      extract: d => ((d && d.earned) || []).map(e => e.id),
+      titles: {
+        firstSong:{ icon:'🎼', name:'はじめの一歩' }, apprentice:{ icon:'🎶', name:'作曲家見習い' },
+        craftsman:{ icon:'🎹', name:'楽譜職人' }, legend:{ icon:'🏅', name:'伝説の作曲家' },
+        passionate:{ icon:'🔥', name:'情熱の演奏者' }, virtuoso:{ icon:'⚡', name:'超絶技巧' },
+      } },
+    share: { storageKey:'shareTitles_v1', namespaced:true, source:'創作物管理ツール',
+      extract: d => ((d && d.earned) || []).map(e => e.id),
+      titles: {
+        first:{ icon:'🌱', name:'はじめての一歩' }, apprentice:{ icon:'🔨', name:'見習い設置職人' },
+        skilled:{ icon:'🏗️', name:'熟練の設置職人' }, master:{ icon:'🏛️', name:'創作の匠' },
+        legend:{ icon:'👑', name:'伝説の創作者' },
+      } },
+  };
+
   const state = {
     theme: 'night',
     avatarImage: { src: null, zoom: 1, offsetX: 0, offsetY: 0 },
@@ -821,7 +898,8 @@
     detailFreeText: {},
     friendCode: '',
     friendCodeContact: null,
-    vis: { sns:true, playTime:true, details:true, friendCode:true, ecoStats:true, cape:true },
+    titles: { selected: [] },
+    vis: { sns:true, playTime:true, details:true, friendCode:true, ecoStats:true, cape:true, titles:true },
   };
 
   function el(tag, cls, html){ const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
@@ -933,7 +1011,7 @@
   drawFriendContactChips();
 
   // ── Section visibility toggles ──
-  [['vis_sns','sns'],['vis_playTime','playTime'],['vis_details','details'],['vis_friendCode','friendCode'],['vis_ecoStats','ecoStats'],['vis_cape','cape']].forEach(([elId,key]) => {
+  [['vis_sns','sns'],['vis_playTime','playTime'],['vis_details','details'],['vis_friendCode','friendCode'],['vis_ecoStats','ecoStats'],['vis_cape','cape'],['vis_titles','titles']].forEach(([elId,key]) => {
     const cb = document.getElementById(elId);
     cb.checked = state.vis[key];
     cb.addEventListener('change', e => { state.vis[key] = e.target.checked; renderCard(); });
@@ -1386,6 +1464,64 @@
       : '連携できるデータが見つかりませんでした（各サイトを一度開いてから、もう一度お試しください）');
   });
 
+  // ── 称号：他ツールで獲得済みの称号を読み込み、飾りたいものだけタップで選べるようにする ──
+  let syncedTitlesCache = [];
+  const titlePickerEl = document.getElementById('titlePickerArea');
+
+  function syncEarnedTitles(){
+    const earned = [];
+    Object.keys(TITLE_CATALOG).forEach(toolId => {
+      const tool = TITLE_CATALOG[toolId];
+      const key = tool.namespaced ? skyActiveProfileNsKey(tool.storageKey) : tool.storageKey;
+      let data;
+      try { data = JSON.parse(localStorage.getItem(key)); } catch (_) { data = null; }
+      let ids = [];
+      try { ids = tool.extract(data) || []; } catch (_) { ids = []; }
+      ids.forEach(id => {
+        const def = tool.titles[id];
+        if (!def) return; // 未知のid（想定外のデータ形式）は無視する
+        earned.push({ key: `${toolId}:${id}`, icon: def.icon, name: def.name, source: tool.source });
+      });
+    });
+    return earned;
+  }
+
+  function drawTitlePicker(){
+    if (!syncedTitlesCache.length) {
+      titlePickerEl.innerHTML = '<p class="title-picker-empty">まだ称号が見つかっていません。「称号を読み込む」を押してください。</p>';
+      return;
+    }
+    const wrap = el('div', 'chips');
+    syncedTitlesCache.forEach(t => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip-opt' + (state.titles.selected.includes(t.key) ? ' selected' : '');
+      b.title = t.source;
+      b.innerHTML = `<span>${t.icon}</span> ${t.name}`;
+      b.addEventListener('click', () => {
+        const idx = state.titles.selected.indexOf(t.key);
+        if (idx === -1) state.titles.selected.push(t.key); else state.titles.selected.splice(idx, 1);
+        drawTitlePicker();
+        renderCard();
+      });
+      wrap.appendChild(b);
+    });
+    titlePickerEl.innerHTML = '';
+    titlePickerEl.appendChild(wrap);
+  }
+  drawTitlePicker();
+
+  document.getElementById('titleSyncBtn').addEventListener('click', () => {
+    syncedTitlesCache = syncEarnedTitles();
+    // 前回選んでいたが今回の同期結果に無くなったキーは、選択からも外して整合を取る
+    state.titles.selected = state.titles.selected.filter(k => syncedTitlesCache.some(t => t.key === k));
+    drawTitlePicker();
+    renderCard();
+    showToast(syncedTitlesCache.length > 0
+      ? `${syncedTitlesCache.length}個の称号を読み込みました`
+      : '称号が見つかりませんでした（各サイトで称号を獲得してから、もう一度お試しください）');
+  });
+
   // ── 入手グラフ（数値の手入力はなし。プロフィールに反映するかどうかのスイッチのみ） ──
   const trendEditEl = document.getElementById('trendGraphFields');
   TREND_GRAPHS.forEach(g => {
@@ -1612,6 +1748,18 @@
         setSection(dtEl, '');
       }
     } else { setSection(dtEl, ''); }
+
+    // titles — 他ツールで獲得した称号のうち、選んで飾ることにしたものだけをバッジで見せる
+    const titlesWrapEl = document.getElementById('cardTitlesWrap');
+    const selectedTitles = syncedTitlesCache.filter(t => state.titles.selected.includes(t.key));
+    if (state.vis.titles && selectedTitles.length) {
+      const badges = selectedTitles.map(t => `<span class="card-title-badge"><span class="ctb-icon">${t.icon}</span>${t.name}</span>`).join('');
+      setSection(titlesWrapEl, `
+        <div class="card-sec-title">TITLES</div>
+        <div class="card-sec-heading">称号</div>
+        <div class="card-titles-strip">${badges}</div>`);
+      staggerRows(titlesWrapEl, '.card-title-badge');
+    } else { setSection(titlesWrapEl, ''); }
 
     // cape level — kept as its own dark inset panel (faithful callback to 羽トラッカー's own branding)
     const capeEl = document.getElementById('cardCapeWrap');
