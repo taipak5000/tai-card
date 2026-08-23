@@ -422,7 +422,7 @@
   .card-clock-vibe{
     display:inline-flex; align-items:center; gap:5px; margin-top:4px; align-self:flex-start;
     font-family:"Zen Kaku Gothic New",sans-serif; font-size:11.5px; font-weight:700; color:var(--ca, var(--gold-ink));
-    background:color-mix(in srgb, var(--ca, var(--gold)) 14%, white);
+    background:rgba(var(--ca-rgb, 201,154,74), 0.14);
     border:1px solid var(--border); border-radius:100px; padding:4px 11px 4px 8px;
   }
   .card-clock-vibe span{ font-size:13px; }
@@ -2043,12 +2043,22 @@
     return QUARTERS[bestIdx];
   }
 
+  // #card配下は画像保存(html2canvas)の撮影対象になるが、html2canvasはcolor-mix()や
+  // その計算結果であるcolor(srgb ...)を解釈できずクラッシュする（「画像の生成に失敗しました」の原因）。
+  // そのためcolor-mix()は使わず、あらかじめ計算したRGB値をrgba()に渡す形にする。
+  function hexToRgbString(hex){
+    const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex || '');
+    if (!m) return '201,154,74'; // --goldのRGB（フォールバック）
+    return [1,2,3].map(i => parseInt(m[i], 16)).join(',');
+  }
+
   function renderCard(){
     const card = document.getElementById('card');
     const theme = THEMES.find(t => t.id === state.theme);
     card.style.setProperty('--card-grad', theme.grad);
     card.style.setProperty('--ca', theme.ca);
     card.style.setProperty('--ca2', theme.ca2);
+    card.style.setProperty('--ca-rgb', hexToRgbString(theme.ca));
 
     const avatarEl = document.getElementById('cardAvatar');
     if (state.avatarImage.src) {
