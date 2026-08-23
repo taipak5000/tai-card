@@ -391,6 +391,16 @@
   .card-clock-range.na{ font-family:"Zen Kaku Gothic New",sans-serif; font-size:12px; font-weight:400; color:var(--text-3); }
   .card-clock-range.na::before{ color:var(--text-3); }
 
+  /* 時間帯が1つ・短めだとダイヤル横の余白が目立つため、選んだ時間帯から導いた「夜ふかし型」等の
+     一言タグを添えて余白を意味のある情報で埋める（テーマの--ca色でうっすら染める） */
+  .card-clock-vibe{
+    display:inline-flex; align-items:center; gap:5px; margin-top:4px; align-self:flex-start;
+    font-family:"Zen Kaku Gothic New",sans-serif; font-size:11.5px; font-weight:700; color:var(--ca, var(--gold-ink));
+    background:color-mix(in srgb, var(--ca, var(--gold)) 14%, white);
+    border:1px solid var(--border); border-radius:100px; padding:4px 11px 4px 8px;
+  }
+  .card-clock-vibe span{ font-size:13px; }
+
   /* ── Cape level widget: 羽トラッカーの意匠（ひし形ピップ・二重リング・スパーク）を踏襲しつつ、
      冷たい漆黒ではなく、このカード自身の--text/--teal-inkと同じ暖色系の深緑をベースにした
      「夜の草原に灯る光」トーンに変更（--goldの明るい版を光の色として使う） ── */
@@ -1487,6 +1497,32 @@
     </div>`;
   }
 
+  // 時間帯が1つだけ・短めだと、ダイヤル横の余白が間延びして見えるため、選んだ時間帯から
+  // 「夜ふかし型」のようなふんわりしたタイプを添えて、余白を意味のある一言で埋める。
+  function playTimeVibeLabel(ranges){
+    if (!ranges.length) return null;
+    const QUARTERS = [
+      { icon:'🌙', text:'夜ふかし型' }, // 0-6時
+      { icon:'🌅', text:'朝型' },      // 6-12時
+      { icon:'☀️', text:'昼型' },      // 12-18時
+      { icon:'🌆', text:'夕方型' },    // 18-24時
+    ];
+    const hoursByQuarter = [0, 0, 0, 0];
+    let totalHours = 0;
+    ranges.forEach(r => {
+      let e = r.end;
+      if (e <= r.start) e += 24; // 日をまたぐ範囲を展開する
+      for (let h = r.start; h < e; h++) {
+        hoursByQuarter[Math.floor((h % 24) / 6)]++;
+        totalHours++;
+      }
+    });
+    if (totalHours >= 16) return { icon:'🌈', text:'いつでも歓迎' };
+    let bestIdx = 0;
+    hoursByQuarter.forEach((v, i) => { if (v > hoursByQuarter[bestIdx]) bestIdx = i; });
+    return QUARTERS[bestIdx];
+  }
+
   function renderCard(){
     const card = document.getElementById('card');
     const theme = THEMES.find(t => t.id === state.theme);
@@ -1536,12 +1572,14 @@
         : filledRanges.length
           ? filledRanges.map(r => `<div class="card-clock-range">${r.start}時〜${r.end}時</div>`).join('')
           : `<div class="card-clock-range na">未設定</div>`;
+      const vibe = !state.playTimeIrregular ? playTimeVibeLabel(filledRanges) : null;
+      const vibeHtml = vibe ? `<div class="card-clock-vibe"><span>${vibe.icon}</span>${vibe.text}</div>` : '';
       setSection(ptEl, `
         <div class="card-sec-title">PLAY TIME</div>
         <div class="card-sec-heading">よく遊ぶ時間帯</div>
         <div class="card-clock-module">
           ${renderCardClockHtml(theme)}
-          <div class="card-clock-list">${listHtml}</div>
+          <div class="card-clock-list">${listHtml}${vibeHtml}</div>
         </div>`);
       staggerRows(ptEl, '.card-clock-range');
     } else { setSection(ptEl, ''); }
