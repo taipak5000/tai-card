@@ -498,8 +498,9 @@
   .tools-modal-links a:hover{ background:var(--gold-bg); color:var(--gold-ink); }
 
   /* ── プロフィール切替モーダル（他のtaipak5000.github.io系ツールと同じ複数保存枠の仕組み） ── */
-  .profile-row{ display:flex; align-items:center; gap:6px; padding:9px 4px; border-bottom:1px solid var(--border); }
+  .profile-row{ padding:9px 4px; border-bottom:1px solid var(--border); }
   .profile-row:last-child{ border-bottom:none; }
+  .profile-row-top{ display:flex; align-items:center; gap:6px; }
   .profile-row-name{
     flex:1; min-width:0; font-family:"Zen Kaku Gothic New",sans-serif; font-size:13.5px; color:var(--text);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
@@ -511,6 +512,23 @@
   }
   .profile-row-btn:hover{ background:var(--gold-bg); border-color:rgba(201,154,74,0.3); color:var(--gold-ink); }
   .profile-row-btn.current{ background:var(--teal-bg); border-color:var(--teal); color:var(--teal-ink); pointer-events:none; }
+
+  /* プロフィールごとに獲得済みの称号を、切替モーダルの中でまとめて確認できるようにする折りたたみ表示 */
+  .profile-row-titles-toggle{
+    appearance:none; cursor:pointer; background:none; border:none; padding:6px 0 0; margin:0;
+    font-size:11px; font-family:"Zen Kaku Gothic New",sans-serif; font-weight:700; color:var(--gold-ink);
+    display:flex; align-items:center; gap:4px;
+  }
+  .profile-row-titles-toggle:hover{ text-decoration:underline; }
+  .profile-row-titles-toggle .prt-caret{ font-size:9px; transition:transform .15s var(--ease-snap); }
+  .profile-row-titles-toggle[aria-expanded="true"] .prt-caret{ transform:rotate(180deg); }
+  .profile-row-titles{ display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+  .profile-title-chip{
+    display:inline-flex; align-items:center; gap:4px; padding:3px 9px 3px 7px; border-radius:100px;
+    background:var(--gold-bg); border:1px solid rgba(201,154,74,0.28); font-size:11px; color:var(--gold-ink);
+    font-family:"Zen Kaku Gothic New",sans-serif;
+  }
+  .profile-row-titles-empty{ font-size:11px; color:var(--text-3); margin:6px 0 0; }
   .profile-add-row{ display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
   .profile-add-row input{
     flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-sm);
@@ -994,12 +1012,16 @@
     const list = ensureProfilesInit();
     return list.find(p => p.id === getActiveProfileId()) || list[0];
   }
-  // 保存キーをプロフィールごとに名前空間化する（他ツールのnsKey()と同じ規則）。
+  // 保存キーを指定したプロフィールIDで名前空間化する（他ツールのnsKey()と同じ規則）。
   // 「メイン」（defaultプロフィール）はキーをそのまま返すので、この機能を追加する前の
-  // データも無改造で引き継がれる。
+  // データも無改造で引き継がれる。プロフィール切替モーダルで「他のプロフィールが持つ
+  // 称号」も読みに行けるよう、対象プロフィールIDを明示的に渡せるようにしている。
+  function nsKeyFor(rawKey, profileId){
+    return profileId === DEFAULT_PROFILE_ID ? rawKey : `${rawKey}__p_${profileId}`;
+  }
   function nsKey(rawKey){
     const id = getActiveProfileId();
-    return id === DEFAULT_PROFILE_ID ? rawKey : `${rawKey}__p_${id}`;
+    return nsKeyFor(rawKey, id);
   }
 
   function switchProfile(id){
@@ -1645,11 +1667,14 @@
   let syncedTitlesCache = [];
   const titlePickerEl = document.getElementById('titlePickerArea');
 
-  function syncEarnedTitles(){
+  // profileIdを省略すると現在アクティブなプロフィールを対象にする。プロフィール切替
+  // モーダルから「他のプロフィールの称号」をまとめて確認するために、対象を明示できるようにしている。
+  function syncEarnedTitles(profileId){
+    const pid = profileId || getActiveProfileId();
     const earned = [];
     Object.keys(TITLE_CATALOG).forEach(toolId => {
       const tool = TITLE_CATALOG[toolId];
-      const key = tool.namespaced ? nsKey(tool.storageKey) : tool.storageKey;
+      const key = tool.namespaced ? nsKeyFor(tool.storageKey, pid) : tool.storageKey;
       let data;
       try { data = JSON.parse(localStorage.getItem(key)); } catch (_) { data = null; }
       let ids = [];
@@ -2053,12 +2078,19 @@
     const activeId = getActiveProfileId();
     area.innerHTML = '';
     list.forEach(p => {
+      const earnedTitles = syncEarnedTitles(p.id); // このプロフィールが他ツールで獲得済みの称号を、まとめて確認できるようにする
       const row = el('div', 'profile-row' + (p.id === activeId ? ' active' : ''));
       row.innerHTML = `
-        <span class="profile-row-name">${escapeHtml(pfDisplayName(p))}</span>
-        <button type="button" class="profile-row-btn${p.id === activeId ? ' current' : ''}" data-act="switch">${p.id === activeId ? '選択中' : '切替'}</button>
-        <button type="button" class="profile-row-btn" data-act="rename">名前変更</button>
-        ${list.length > 1 ? '<button type="button" class="profile-row-btn" data-act="delete">削除</button>' : ''}`;
+        <div class="profile-row-top">
+          <span class="profile-row-name">${escapeHtml(pfDisplayName(p))}</span>
+          <button type="button" class="profile-row-btn${p.id === activeId ? ' current' : ''}" data-act="switch">${p.id === activeId ? '選択中' : '切替'}</button>
+          <button type="button" class="profile-row-btn" data-act="rename">名前変更</button>
+          ${list.length > 1 ? '<button type="button" class="profile-row-btn" data-act="delete">削除</button>' : ''}
+        </div>
+        ${earnedTitles.length
+          ? `<button type="button" class="profile-row-titles-toggle" data-act="toggle-titles" aria-expanded="false">🏆 ${earnedTitles.length}個の称号<span class="prt-caret">▾</span></button>
+             <div class="profile-row-titles" hidden>${earnedTitles.map(t => `<span class="profile-title-chip" title="${escapeHtml(t.source)}"><span>${t.icon}</span>${escapeHtml(t.name)}</span>`).join('')}</div>`
+          : `<p class="profile-row-titles-empty">まだ称号を獲得していません</p>`}`;
       if (p.id !== activeId) row.querySelector('[data-act="switch"]').addEventListener('click', () => switchProfile(p.id));
       row.querySelector('[data-act="rename"]').addEventListener('click', () => {
         const cur = pfDisplayName(p);
@@ -2069,6 +2101,15 @@
       if (deleteBtn) deleteBtn.addEventListener('click', () => {
         if (confirm(`「${pfDisplayName(p)}」を削除しますか？この操作は取り消せません。`)) deleteProfile(p.id);
       });
+      const titlesToggle = row.querySelector('[data-act="toggle-titles"]');
+      if (titlesToggle) {
+        titlesToggle.addEventListener('click', () => {
+          const detail = row.querySelector('.profile-row-titles');
+          const willShow = detail.hidden;
+          detail.hidden = !willShow;
+          titlesToggle.setAttribute('aria-expanded', String(willShow));
+        });
+      }
       area.appendChild(row);
     });
   }
