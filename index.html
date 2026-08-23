@@ -232,11 +232,6 @@
 
   /* ── Preview ── */
   .preview-col{ position:sticky; top:20px; }
-  .mode-switch{ display:flex; gap:3px; background:var(--surface-2); border:1px solid var(--border); border-radius:100px; padding:3px; }
-  .mode-btn{ appearance:none; border:none; background:transparent; color:var(--text-2); font-family:"Zen Kaku Gothic New", sans-serif; font-size:12px; font-weight:700; padding:7px 14px; border-radius:100px; cursor:pointer; transition:transform .15s var(--ease-snap); }
-  .mode-btn.active{ background:#fff; color:var(--teal-ink); box-shadow:0 1px 3px rgba(60,50,80,0.12); }
-  .mode-btn:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
-  .mode-btn:active{ transform:scale(0.95); }
 
   .card-frame{ padding:22px; max-width:640px; margin:0 auto; }
   .card{
@@ -325,7 +320,7 @@
   .detail-chip .dc-value{ font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; font-size:12.5px; color:var(--text); }
   .detail-chip.na .dc-value{ font-family:"Zen Kaku Gothic New",sans-serif; font-weight:400; font-size:11px; color:var(--text-3); }
 
-  /* 収集スタッツ：フル幅の縦積みではなく、ケープレベル(dark)と並ぶ2〜3列のタイル群にする */
+  /* 収集状況：フル幅の縦積みではなく、ケープレベル(dark)と並ぶ2〜3列のタイル群にする */
   .card-eco-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(128px, 1fr)); gap:8px; }
 
   /* 入手グラフ：各サイトに実在する推移チャートを模した、面グラフ＋折れ線のミニスパークライン */
@@ -401,10 +396,6 @@
   .card-foot{ margin-top:18px; padding-top:14px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-size:10.5px; color:var(--text-3); }
   .card-foot .tag{ font-family:"IBM Plex Mono", monospace; }
 
-  .card.is-editor .sec-off{ opacity:0.35; }
-  .hidden-badge{ display:none; align-items:center; gap:3px; font-family:"IBM Plex Mono", monospace; font-size:8.5px; color:#fff; background:var(--danger); padding:1px 5px; border-radius:100px; margin-left:5px; }
-  .card.is-editor .hidden-badge{ display:inline-flex; }
-
   footer{ margin-top:44px; padding-top:18px; border-top:1px solid var(--border); color:var(--text-3); font-size:12px; text-align:center; line-height:1.7; }
   footer p{ margin:0; }
   footer a{ color:var(--teal-ink); text-decoration:underline; text-underline-offset:2px; }
@@ -456,16 +447,16 @@
   }
   .tools-modal-links a:hover{ background:var(--gold-bg); color:var(--gold-ink); }
 
-  /* ── カードを画像で保存 / Xへ投稿（アイテム所持管理のhtml2canvasによる書き出しと同じ仕組み） ── */
-  .share-action-row{ display:flex; justify-content:center; margin-top:16px; }
+  /* ── カードを画像で保存 / Xへ投稿（アイテム所持管理のhtml2canvasによる書き出しと同じ仕組み）。
+     panel-headはsticky指定なので、カードがどれだけ縦に伸びてもスクロールせず常に押せる ── */
   .share-btn{
-    appearance:none; cursor:pointer; border:none; border-radius:100px; padding:13px 26px;
+    appearance:none; cursor:pointer; border:none; border-radius:100px; padding:9px 18px;
     background:linear-gradient(135deg, var(--gold) 0%, var(--gold-ink) 100%); color:#fff;
-    font-family:"Zen Kaku Gothic New",sans-serif; font-size:14px; font-weight:700;
-    display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 14px rgba(168,122,50,0.32);
+    font-family:"Zen Kaku Gothic New",sans-serif; font-size:12.5px; font-weight:700; white-space:nowrap;
+    display:inline-flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(168,122,50,0.32);
     transition:transform .15s var(--ease-snap), box-shadow .15s;
   }
-  .share-btn:hover{ transform:translateY(-1px); box-shadow:0 6px 18px rgba(168,122,50,0.4); }
+  .share-btn:hover{ transform:translateY(-1px); box-shadow:0 5px 14px rgba(168,122,50,0.4); }
   .share-btn:active{ transform:translateY(0); }
   .share-btn:disabled{ opacity:0.6; cursor:default; transform:none; }
 
@@ -614,7 +605,7 @@
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">📊 収集スタッツ <span class="n">自分のサイトから将来自動反映</span></div>
+            <div class="sec-title">📊 収集状況 <span class="n">自分のサイトから将来自動反映</span></div>
             <label class="switch"><input type="checkbox" id="vis_ecoStats" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div id="ecoStatFields"></div>
@@ -638,10 +629,9 @@
       <section class="panel">
         <div class="panel-head">
           <h2>👀 プレビュー</h2>
-          <div class="mode-switch" role="group" aria-label="プレビューモード">
-            <button type="button" class="mode-btn active" data-mode="public" id="modePublicBtn">公開ビュー</button>
-            <button type="button" class="mode-btn" data-mode="editor" id="modeEditorBtn">編集ビュー</button>
-          </div>
+          <button type="button" class="share-btn" id="shareImageBtn">
+            <span>🖼️</span>画像を保存してXへ投稿
+          </button>
         </div>
         <div class="card-frame">
           <div class="card" id="card">
@@ -669,11 +659,6 @@
               <span class="tag" id="cardDate"></span>
             </div>
           </div>
-        </div>
-        <div class="share-action-row">
-          <button type="button" class="share-btn" id="shareImageBtn">
-            <span>🖼️</span>画像を保存してXへ投稿
-          </button>
         </div>
       </section>
     </div>
@@ -799,7 +784,6 @@
     friendCodeContact: null,
     vis: { sns:true, playTime:true, details:true, friendCode:true, ecoStats:true, cape:true },
   };
-  let mode = 'public';
 
   function el(tag, cls, html){ const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
 
@@ -1388,8 +1372,6 @@
     card.style.setProperty('--card-grad', theme.grad);
     card.style.setProperty('--ca', theme.ca);
     card.style.setProperty('--ca2', theme.ca2);
-    card.classList.toggle('is-editor', mode === 'editor');
-    const showAll = mode === 'editor';
 
     const avatarEl = document.getElementById('cardAvatar');
     if (state.avatarImage.src) {
@@ -1414,23 +1396,19 @@
 
     // sns (複数) — soft rounded card rows, one per platform
     const snsEl = document.getElementById('cardSnsWrap');
-    const snsOn = state.vis.sns;
     const filledSns = state.snsList.filter(s => s.id);
-    if ((snsOn || showAll) && filledSns.length) {
-      const dim = !snsOn && showAll;
+    if (state.vis.sns && filledSns.length) {
       const rows = filledSns.map(s => `<div class="soft-row"><div class="soft-row-icon">📱</div><div class="soft-row-body"><div class="soft-row-label">${s.platform}</div><div class="soft-row-value">@${s.id}</div></div></div>`).join('');
       setSection(snsEl, `
-        <div class="card-sec-title" style="${dim?'opacity:.4':''}">SNS${dim ? '<span class="hidden-badge">🔒</span>' : ''}</div>
-        <div class="soft-rows" style="${dim?'opacity:.4':''}">${rows}</div>`);
+        <div class="card-sec-title">SNS</div>
+        <div class="soft-rows">${rows}</div>`);
       staggerRows(snsEl, '.soft-row');
     } else { setSection(snsEl, ''); }
 
     // play time — 実際の時計ダイヤル(renderCardClockHtml)＋時刻レンジの一覧を横並びで見せる。
     // データが未入力でも、セクションごと消さずニュートラルなダイヤルを出す（編集パネルと同じ挙動）。
     const ptEl = document.getElementById('cardPlayTimeWrap');
-    const ptOn = state.vis.playTime;
-    if (ptOn || showAll) {
-      const dim = !ptOn && showAll;
+    if (state.vis.playTime) {
       const filledRanges = state.playTimeRanges.filter(r => r.start != null && r.end != null);
       const listHtml = state.playTimeIrregular
         ? `<div class="card-clock-range">${PLAY_TIME_IRREGULAR}</div>`
@@ -1438,9 +1416,9 @@
           ? filledRanges.map(r => `<div class="card-clock-range">${r.start}時〜${r.end}時</div>`).join('')
           : `<div class="card-clock-range na">未設定</div>`;
       setSection(ptEl, `
-        <div class="card-sec-title" style="${dim?'opacity:.4':''}">PLAY TIME${dim ? '<span class="hidden-badge">🔒</span>' : ''}</div>
-        <div class="card-sec-heading" style="${dim?'opacity:.4':''}">よく遊ぶ時間帯</div>
-        <div class="card-clock-module" style="${dim?'opacity:.4':''}">
+        <div class="card-sec-title">PLAY TIME</div>
+        <div class="card-sec-heading">よく遊ぶ時間帯</div>
+        <div class="card-clock-module">
           ${renderCardClockHtml(theme)}
           <div class="card-clock-list">${listHtml}</div>
         </div>`);
@@ -1449,13 +1427,11 @@
 
     // details — 9項目の縦積みリストではなく、折り返すタグのモザイク(card-detail-mosaic)にする
     const dtEl = document.getElementById('cardDetailsWrap');
-    const detOn = state.vis.details;
-    if (detOn || showAll) {
-      const dim = !detOn && showAll;
+    if (state.vis.details) {
       let html = `
-        <div class="card-sec-title" style="${dim?'opacity:.4':''}">DETAILS${dim ? '<span class="hidden-badge">🔒 セクション非公開</span>' : ''}</div>
-        <div class="card-sec-heading" style="${dim?'opacity:.4':''}">詳細プロフィール</div>
-        <div class="card-detail-mosaic" style="${dim?'opacity:.4':''}">`;
+        <div class="card-sec-title">DETAILS</div>
+        <div class="card-sec-heading">詳細プロフィール</div>
+        <div class="card-detail-mosaic">`;
       DETAIL_GROUPS.forEach(g => {
         // 'sub' だけはタップ式カウンターの単一値。それ以外は複数選択の配列を「・」で連結して表示する
         let v;
@@ -1474,18 +1450,16 @@
 
     // cape level — kept as its own dark inset panel (faithful callback to 羽トラッカー's own branding)
     const capeEl = document.getElementById('cardCapeWrap');
-    const capeOn = state.vis.cape;
     const wingTotalNum = parseInt(String(state.wingTotal).replace(/[^0-9]/g, ''), 10);
-    if ((capeOn || showAll) && !isNaN(wingTotalNum) && wingTotalNum >= 0) {
-      const dim = !capeOn && showAll;
+    if (state.vis.cape && !isNaN(wingTotalNum) && wingTotalNum >= 0) {
       const c = computeCape(wingTotalNum);
       const sub = c.isMax
         ? `現在 光の翼 ${wingTotalNum}枚 — 最大ケープレベル ${CAPE_LEVELS.length} に到達済み！`
         : `現在 光の翼 ${wingTotalNum}枚（レベル${c.reachedLevel + 1}まであと ${c.remain}枚）`;
       setSection(capeEl, `
-        <div class="card-sec-title" style="${dim?'opacity:.4':''}">CAPE LEVEL${dim ? '<span class="hidden-badge">🔒</span>' : ''}</div>
-        <div class="card-sec-heading" style="${dim?'opacity:.4':''}">ケープレベル</div>
-        <div class="cape-widget" style="${dim?'opacity:.4':''}">
+        <div class="card-sec-title">CAPE LEVEL</div>
+        <div class="card-sec-heading">ケープレベル</div>
+        <div class="cape-widget">
           <div class="cape-widget-title">✦ ケープレベル</div>
           <div class="cape-widget-sub">${sub}</div>
           <div class="cape-level-label">Lv${c.reachedLevel}</div>
@@ -1496,23 +1470,19 @@
     // eco stats — 縦積みの soft-rows ではなく、ケープレベル(dark)の隣に並ぶ card-eco-grid のタイル群にする。
     // タイル自体は soft-row クラスも併せ持たせ、アイコン円・ラベル・値・progress-barのスタイルを流用する。
     const ecoWrapEl = document.getElementById('cardEcoWrap');
-    const ecoOn = state.vis.ecoStats;
-    const hasAnyEco = ECO_STATS.some(f => f.value && (f.visible || showAll));
-    if ((ecoOn || showAll) && hasAnyEco) {
-      const sectionDim = !ecoOn && showAll;
+    const hasAnyEco = ECO_STATS.some(f => f.value && f.visible);
+    if (state.vis.ecoStats && hasAnyEco) {
       let html = `
-        <div class="card-sec-title" style="${sectionDim?'opacity:.4':''}">COLLECTION${sectionDim ? '<span class="hidden-badge">🔒 セクション非公開</span>' : ''}</div>
-        <div class="card-sec-heading" style="${sectionDim?'opacity:.4':''}">収集スタッツ</div>
-        <div class="card-eco-grid" style="${sectionDim?'opacity:.4':''}">`;
+        <div class="card-sec-title">COLLECTION</div>
+        <div class="card-sec-heading">収集状況</div>
+        <div class="card-eco-grid">`;
       ECO_STATS.forEach(f => {
-        if (!f.value && !showAll) return;
-        if (!f.visible && !showAll) return;
-        const itemDim = !f.visible && showAll;
+        if (!f.value || !f.visible) return;
         const pctMatch = /^(\d{1,3})%$/.exec((f.value || '').trim());
         const pct = pctMatch ? Math.max(0, Math.min(100, Number(pctMatch[1]))) : null;
         const bar = pct !== null ? `<div class="progress-bar"><div class="progress-bar-fill" style="width:${pct}%"></div></div>` : '';
         const valueHtml = `<div class="soft-row-value ${f.value ? '' : 'na'}">${f.value || '未入力'}</div>${bar}`;
-        html += `<div class="eco-tile soft-row" style="${itemDim?'opacity:.5':''}"><div class="soft-row-icon">${f.icon}</div><div class="soft-row-body"><div class="soft-row-label">${f.label}${itemDim ? '<span class="hidden-badge">🔒</span>' : ''}</div>${valueHtml}</div></div>`;
+        html += `<div class="eco-tile soft-row"><div class="soft-row-icon">${f.icon}</div><div class="soft-row-body"><div class="soft-row-label">${f.label}</div>${valueHtml}</div></div>`;
       });
       html += '</div>';
       setSection(ecoWrapEl, html);
@@ -1521,15 +1491,14 @@
 
     // 入手グラフ（数値の手入力はなし。ONの項目はサンプル推移で表示する）
     const trendWrapEl = document.getElementById('cardTrendWrap');
-    const visibleTrends = TREND_GRAPHS.filter(g => g.visible || showAll);
+    const visibleTrends = TREND_GRAPHS.filter(g => g.visible);
     if (visibleTrends.length) {
       let html = `
         <div class="card-sec-title">ACQUISITION</div>
         <div class="card-sec-heading">入手グラフ</div>`;
       visibleTrends.forEach(g => {
-        const dim = !g.visible && showAll;
-        html += `<div class="trend-block" style="${dim?'opacity:.5':''}">
-          <div class="trend-block-label">${g.icon} ${g.label}<span class="trend-sample-badge">サンプル</span>${dim ? '<span class="hidden-badge">🔒</span>' : ''}</div>
+        html += `<div class="trend-block">
+          <div class="trend-block-label">${g.icon} ${g.label}<span class="trend-sample-badge">サンプル</span></div>
           ${renderTrendSparklineHtml(g.sample)}
         </div>`;
       });
@@ -1538,31 +1507,16 @@
 
     // friend code
     const fcEl = document.getElementById('cardFcWrap');
-    const fcOn = state.vis.friendCode;
-    if (state.friendCode && (fcOn || showAll)) {
-      const dim = !fcOn && showAll;
+    if (state.friendCode && state.vis.friendCode) {
       const contactTag = state.friendCodeContact ? `<span class="fc-contact-tag">${state.friendCodeContact}</span>` : '';
       setSection(fcEl, `
-        <div class="card-sec-title" style="${dim?'opacity:.4':''}">FRIEND CODE${dim ? '<span class="hidden-badge">🔒</span>' : ''}</div>
-        <div class="card-sec-heading" style="${dim?'opacity:.4':''}">フレンドコード</div>
-        <div class="card-fc" style="${dim?'opacity:.4':''}"><span>${state.friendCode}</span>${contactTag}</div>`);
+        <div class="card-sec-title">FRIEND CODE</div>
+        <div class="card-sec-heading">フレンドコード</div>
+        <div class="card-fc"><span>${state.friendCode}</span>${contactTag}</div>`);
     } else { setSection(fcEl, ''); }
 
     document.getElementById('cardDate').textContent = '発行日 ' + new Date().toISOString().slice(0,10).replace(/-/g,'.');
   }
-
-  document.getElementById('modePublicBtn').addEventListener('click', () => {
-    mode = 'public';
-    document.getElementById('modePublicBtn').classList.add('active');
-    document.getElementById('modeEditorBtn').classList.remove('active');
-    renderCard();
-  });
-  document.getElementById('modeEditorBtn').addEventListener('click', () => {
-    mode = 'editor';
-    document.getElementById('modeEditorBtn').classList.add('active');
-    document.getElementById('modePublicBtn').classList.remove('active');
-    renderCard();
-  });
 
   renderCard();
 
@@ -1682,9 +1636,6 @@
     shareBtn.disabled = true;
     showToast('画像を生成中…');
     const cardEl = document.getElementById('card');
-    // 編集ビュー表示中に押しても、書き出す画像は必ず公開ビューの見た目にする
-    const wasEditorMode = cardEl.classList.contains('is-editor');
-    if (wasEditorMode) cardEl.classList.remove('is-editor');
     try {
       await ensureHtml2Canvas();
       const canvas = await html2canvas(cardEl, { backgroundColor: null, scale: 2, useCORS: true });
@@ -1701,7 +1652,6 @@
       console.error(err);
       showToast('画像の生成に失敗しました');
     } finally {
-      if (wasEditorMode) cardEl.classList.add('is-editor');
       shareBtn.disabled = false;
     }
   });
