@@ -924,6 +924,20 @@
         skilled:{ icon:'🏗️', name:'熟練の設置職人' }, master:{ icon:'🏛️', name:'創作の匠' },
         legend:{ icon:'👑', name:'伝説の創作者' },
       } },
+    nomacan: { storageKey:'skyNomacanTitles_v1', namespaced:true, source:'ノマキャン計算機',
+      extract: d => Object.keys((d && d.earned) || {}),
+      titles: {
+        streak3:{ icon:'🔥', name:'灯し始め' }, streak7:{ icon:'🕯️', name:'一週間の灯火' },
+        streak30:{ icon:'🌟', name:'絶やさぬ灯' }, hold100:{ icon:'🕯️', name:'灯の蓄え' },
+        hold300:{ icon:'🏮', name:'光の貯蔵庫' }, hold600:{ icon:'👑', name:'灯火の富豪' },
+      } },
+    starcandle: { storageKey:'skyStarCandleCalc_titles_v1', namespaced:true, source:'星のキャンドル計算機',
+      extract: d => Object.keys(d || {}),
+      titles: {
+        streak_3:{ icon:'🕯️', name:'灯を絶やさぬ者' }, streak_7:{ icon:'🔥', name:'一週間の灯火番' },
+        streak_20:{ icon:'🌌', name:'常夜の灯守' }, candle_30:{ icon:'⭐', name:'星屑の蒐集者' },
+        candle_100:{ icon:'🌟', name:'百連の灯' }, candle_300:{ icon:'👑', name:'星々の帳を統べる者' },
+      } },
   };
 
   const state = {
