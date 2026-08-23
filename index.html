@@ -497,6 +497,31 @@
   }
   .tools-modal-links a:hover{ background:var(--gold-bg); color:var(--gold-ink); }
 
+  /* ── プロフィール切替モーダル（他のtaipak5000.github.io系ツールと同じ複数保存枠の仕組み） ── */
+  .profile-row{ display:flex; align-items:center; gap:6px; padding:9px 4px; border-bottom:1px solid var(--border); }
+  .profile-row:last-child{ border-bottom:none; }
+  .profile-row-name{
+    flex:1; min-width:0; font-family:"Zen Kaku Gothic New",sans-serif; font-size:13.5px; color:var(--text);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .profile-row.active .profile-row-name{ color:var(--teal-ink); font-weight:700; }
+  .profile-row-btn{
+    appearance:none; cursor:pointer; background:var(--surface-2); border:1px solid var(--border); border-radius:8px;
+    padding:5px 9px; font-size:11.5px; font-family:"Zen Kaku Gothic New",sans-serif; color:var(--text-2); flex-shrink:0;
+  }
+  .profile-row-btn:hover{ background:var(--gold-bg); border-color:rgba(201,154,74,0.3); color:var(--gold-ink); }
+  .profile-row-btn.current{ background:var(--teal-bg); border-color:var(--teal); color:var(--teal-ink); pointer-events:none; }
+  .profile-add-row{ display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+  .profile-add-row input{
+    flex:1; min-width:0; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-sm);
+    padding:8px 10px; font-family:inherit; font-size:13px; color:var(--text); outline:none;
+  }
+  .profile-add-row input:focus{ border-color:var(--teal); }
+  .profile-add-row button{
+    appearance:none; cursor:pointer; background:var(--gold); color:#fff; border:none; border-radius:var(--r-sm);
+    padding:8px 14px; font-weight:700; font-size:12.5px; font-family:"Zen Kaku Gothic New",sans-serif; white-space:nowrap;
+  }
+
   /* ── カードを画像で保存 / Xへ投稿（アイテム所持管理のhtml2canvasによる書き出しと同じ仕組み）。
      panel-headはsticky指定なので、カードがどれだけ縦に伸びてもスクロールせず常に押せる ── */
   .share-btn{
@@ -740,6 +765,9 @@
 </div>
 
 <div class="site-dock" role="navigation" aria-label="クイックメニュー">
+  <button type="button" id="profileDockBtn">
+    <span class="dock-icon">🗂️</span><span class="dock-label" id="siteDockProfileLabel">メイン</span>
+  </button>
   <a href="https://taipak5000.github.io/tai-transfer/">
     <span class="dock-icon">🔄</span><span class="dock-label">データ連携</span>
   </a>
@@ -786,6 +814,21 @@
     </div>
     <div class="preview-action-row" id="previewTwitterRow" style="display:none;">
       <a id="previewTwitterLink" class="preview-action-btn twitter" href="" target="_blank" rel="noopener noreferrer">📤 Xの投稿画面を開く</a>
+    </div>
+  </div>
+</div>
+
+<div class="tools-modal-overlay" id="profileModalOverlay">
+  <div class="tools-modal" style="max-width:340px;">
+    <div class="tools-modal-head">
+      <span>🗂️ プロフィール切替</span>
+      <button type="button" class="tools-modal-close" id="profileModalCloseBtn" aria-label="閉じる">×</button>
+    </div>
+    <p class="tools-modal-hint">プロフィールを切り替えると、この端末の他のツール(アイテム所持管理など)のアクティブな保存枠も一緒に切り替わります。称号もプロフィールごとに獲得できます。</p>
+    <div id="profileListArea"></div>
+    <div class="profile-add-row">
+      <input type="text" id="profileNewNameInput" placeholder="新しいプロフィール名" maxlength="30">
+      <button type="button" id="profileAddBtn">＋追加</button>
     </div>
   </div>
 </div>
@@ -902,7 +945,132 @@
     vis: { sns:true, playTime:true, details:true, friendCode:true, ecoStats:true, cape:true, titles:true },
   };
 
+  // ── 複数プロフィール（保存枠）機構：taipak5000.github.io系ツール共通のprofiles.jsを
+  // このカード用に移植したもの。プロフィールの一覧・アクティブIDは全ツール共有の
+  // localStorageキーなので、ここで切り替えると他ツール（アイテム所持管理など）の
+  // アクティブな保存枠も一緒に切り替わる（＝獲得できる称号もプロフィールごとに変わる）。
+  const PROFILES_KEY = 'skyProfiles_v1';
+  const ACTIVE_PROFILE_KEY = 'skyActiveProfile_v1';
+  const DEFAULT_PROFILE_ID = 'default';
+
+  function pfIsSafeId(id){ return typeof id === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(id); }
+  function pfDisplayName(p){ return p.isDefaultName ? 'メイン' : p.name; }
+
+  function loadProfiles(){
+    try {
+      let list = JSON.parse(localStorage.getItem(PROFILES_KEY));
+      if (!Array.isArray(list)) return null;
+      list = list.filter(p => p && pfIsSafeId(p.id) && typeof p.name === 'string');
+      if (list.length > 0) return list;
+    } catch (_) {}
+    return null;
+  }
+  function saveProfiles(list){ localStorage.setItem(PROFILES_KEY, JSON.stringify(list)); }
+  function ensureProfilesInit(){
+    let list = loadProfiles();
+    if (!list) {
+      list = [{ id: DEFAULT_PROFILE_ID, name: '', isDefaultName: true }];
+      saveProfiles(list);
+    }
+    if (!localStorage.getItem(ACTIVE_PROFILE_KEY)) localStorage.setItem(ACTIVE_PROFILE_KEY, DEFAULT_PROFILE_ID);
+    return list;
+  }
+  function getActiveProfileId(){ return localStorage.getItem(ACTIVE_PROFILE_KEY) || DEFAULT_PROFILE_ID; }
+  function getActiveProfile(){
+    const list = ensureProfilesInit();
+    return list.find(p => p.id === getActiveProfileId()) || list[0];
+  }
+  // 保存キーをプロフィールごとに名前空間化する（他ツールのnsKey()と同じ規則）。
+  // 「メイン」（defaultプロフィール）はキーをそのまま返すので、この機能を追加する前の
+  // データも無改造で引き継がれる。
+  function nsKey(rawKey){
+    const id = getActiveProfileId();
+    return id === DEFAULT_PROFILE_ID ? rawKey : `${rawKey}__p_${id}`;
+  }
+
+  function switchProfile(id){
+    if (id === getActiveProfileId()) return;
+    flushSaveState(); // 切り替え前に、今のプロフィールの内容を必ず保存しておく
+    localStorage.setItem(ACTIVE_PROFILE_KEY, id);
+    location.reload();
+  }
+  function createProfile(name){
+    const trimmed = (name || '').trim();
+    if (!trimmed) return;
+    const list = ensureProfilesInit();
+    const id = 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    list.push({ id, name: trimmed });
+    saveProfiles(list);
+    switchProfile(id);
+  }
+  function renameProfile(id, name){
+    const trimmed = (name || '').trim();
+    if (!trimmed) return;
+    const list = ensureProfilesInit();
+    const p = list.find(pr => pr.id === id);
+    if (!p) return;
+    p.name = trimmed;
+    p.isDefaultName = false;
+    saveProfiles(list);
+    renderProfileDockLabel();
+    drawProfileModalList();
+  }
+  function deleteProfile(id){
+    const list = ensureProfilesInit();
+    if (list.length <= 1) return; // 最後の1件は削除させない
+    const remaining = list.filter(p => p.id !== id);
+    saveProfiles(remaining);
+    if (getActiveProfileId() === id) {
+      localStorage.setItem(ACTIVE_PROFILE_KEY, remaining[0].id);
+      location.reload();
+      return;
+    }
+    drawProfileModalList();
+  }
+
+  // ── 状態の永続化：プロフィールごとにnsKey()で名前空間化して保存する。
+  // renderCard()の末尾から毎回呼ぶが、入力のたびに毎回同期書き込みするのは重いため
+  // 400ms のデバウンスをかける。アバター画像が大きくて容量超過（QuotaExceededError）
+  // になった場合は、画像だけ諦めて残りのデータだけ保存し直す。 ──
+  const STATE_KEY = 'taiCardState_v1';
+  let saveStateTimer = null;
+  function flushSaveState(){
+    clearTimeout(saveStateTimer);
+    try {
+      localStorage.setItem(nsKey(STATE_KEY), JSON.stringify(state));
+    } catch (err) {
+      try {
+        const light = Object.assign({}, state, { avatarImage: Object.assign({}, state.avatarImage, { src: null }) });
+        localStorage.setItem(nsKey(STATE_KEY), JSON.stringify(light));
+        showToast('画像サイズが大きいため、プロフィール画像は保存されませんでした');
+      } catch (err2) { /* それでも失敗する場合は諦める（入力操作自体は止めない） */ }
+    }
+  }
+  function saveState(){
+    clearTimeout(saveStateTimer);
+    saveStateTimer = setTimeout(flushSaveState, 400);
+  }
+  function loadState(){
+    try {
+      const raw = localStorage.getItem(nsKey(STATE_KEY));
+      if (!raw) return null;
+      const saved = JSON.parse(raw);
+      return (saved && typeof saved === 'object') ? saved : null;
+    } catch (_) { return null; }
+  }
+
+  ensureProfilesInit();
+  const savedState = loadState();
+  if (savedState) Object.assign(state, savedState);
+
   function el(tag, cls, html){ const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+
+  // 自由入力（名前・ひとこと・SNS ID・自由記述・プロフィール名など）はテンプレート文字列で
+  // innerHTMLへ直接埋め込んでいるため、埋め込み前に必ずこれを通す（さもないと<img onerror=…>等の
+  // ストアド型XSSが自分自身のブラウザ内で実行されてしまう）。
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
 
   // ── Theme swatches（ホバーで名前を出さない。aria-labelのみでスクリーンリーダーに対応） ──
   const themeRow = document.getElementById('themeRow');
@@ -1364,13 +1532,8 @@
   });
 
   // ── 収集状況：実データ連携（同一オリジンの他ツールのlocalStorageを直接読む） ──
-  // taipak5000.github.io系ツール共通の「アクティブな共有プロフィール」を解決するヘルパー。
-  // tai-card自体はプロフィール機構を持たないが、読みに行く先の各ツールが使っている
-  // プロフィールと同じものを見に行く必要があるため、item/profiles.jsと同じnsKey()を再実装する。
-  function skyActiveProfileNsKey(rawKey){
-    const id = localStorage.getItem('skyActiveProfile_v1') || 'default';
-    return id === 'default' ? rawKey : `${rawKey}__p_${id}`;
-  }
+  // アクティブな共有プロフィールの解決には、上で定義済みのnsKey()をそのまま使う
+  // （tai-card自身のデータと同じプロフィールを見に行くのが正しい挙動のため）。
 
   // アイテム所持管理：12カテゴリ分のgameItems_<catKey>を合算し、訪問済みカテゴリのみで所持率を出す
   // （アイテム所持管理自身の集計ロジックと同じ挙動）
@@ -1379,7 +1542,7 @@
     let owned = 0, total = 0, registered = 0;
     CAT_KEYS.forEach(catKey => {
       try {
-        const d = JSON.parse(localStorage.getItem(skyActiveProfileNsKey('gameItems_' + catKey)));
+        const d = JSON.parse(localStorage.getItem(nsKey('gameItems_' + catKey)));
         if (d && typeof d.total === 'number' && d.total > 0) {
           owned += (typeof d.owned === 'number' ? d.owned : 0);
           total += d.total;
@@ -1395,7 +1558,7 @@
   function syncEmoteStat(){
     const EMOTE_TOTAL_LEVELS = 477; // エモート側のEMOTES_DATA合計（新シーズン追加で増える可能性あり）
     let data;
-    try { data = JSON.parse(localStorage.getItem(skyActiveProfileNsKey('emoteOwned_v1'))); } catch (_) { data = null; }
+    try { data = JSON.parse(localStorage.getItem(nsKey('emoteOwned_v1'))); } catch (_) { data = null; }
     if (!data || typeof data !== 'object') return null;
     let owned = 0;
     for (const id in data) { if (Array.isArray(data[id])) owned += data[id].length; }
@@ -1408,7 +1571,7 @@
   function syncSpiritStat(){
     const TOTAL_TRACKABLE_NODES = 2351; // spirit-tree-data.jsから算出したノード総数のスナップショット
     let map;
-    try { map = JSON.parse(localStorage.getItem(skyActiveProfileNsKey('spiritCatalogUnlocked_v1'))); } catch (_) { map = null; }
+    try { map = JSON.parse(localStorage.getItem(nsKey('spiritCatalogUnlocked_v1'))); } catch (_) { map = null; }
     if (!map || typeof map !== 'object') return null;
     const owned = Object.values(map).filter(Boolean).length;
     if (!owned) return null;
@@ -1429,7 +1592,7 @@
   // 創作物管理ツール：一時停止しておらず、設置から14日以内（＝今も現地に見えている）作品の数
   function syncShareStat(){
     let decoded;
-    try { decoded = JSON.parse(localStorage.getItem(skyActiveProfileNsKey('sky_tracker_storage'))); } catch (_) { decoded = null; }
+    try { decoded = JSON.parse(localStorage.getItem(nsKey('sky_tracker_storage'))); } catch (_) { decoded = null; }
     const items = decoded && Array.isArray(decoded.placedItems) ? decoded.placedItems : [];
     if (!items.length) return null;
     const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -1472,7 +1635,7 @@
     const earned = [];
     Object.keys(TITLE_CATALOG).forEach(toolId => {
       const tool = TITLE_CATALOG[toolId];
-      const key = tool.namespaced ? skyActiveProfileNsKey(tool.storageKey) : tool.storageKey;
+      const key = tool.namespaced ? nsKey(tool.storageKey) : tool.storageKey;
       let data;
       try { data = JSON.parse(localStorage.getItem(key)); } catch (_) { data = null; }
       let ids = [];
@@ -1509,6 +1672,9 @@
     titlePickerEl.innerHTML = '';
     titlePickerEl.appendChild(wrap);
   }
+  // 初回表示時にも自動で1回同期しておく。そうしないと、前回選んで保存されていた称号が
+  // （syncedTitlesCacheが空のままで）カードから消えて見えてしまう。
+  syncedTitlesCache = syncEarnedTitles();
   drawTitlePicker();
 
   document.getElementById('titleSyncBtn').addEventListener('click', () => {
@@ -1687,10 +1853,10 @@
     const jEl = document.getElementById('cardJourney');
     let jItems = '';
     if (state.journeyYear) {
-      jItems += `<span class="card-pill-badge">星の子が生まれた時期：${state.journeyYear}</span>`;
+      jItems += `<span class="card-pill-badge">星の子が生まれた時期：${escapeHtml(state.journeyYear)}</span>`;
     }
     const filledFavs = state.favorites.filter(f => f.label && f.value);
-    jItems += filledFavs.map(f => `<span class="jr-pill"><span class="jr-fav-label">好き${f.label}</span><span class="jr-fav-value">${f.value}</span></span>`).join('');
+    jItems += filledFavs.map(f => `<span class="jr-pill"><span class="jr-fav-label">好き${escapeHtml(f.label)}</span><span class="jr-fav-value">${escapeHtml(f.value)}</span></span>`).join('');
     setSection(jEl, jItems ? `<div class="card-journey-strip">${jItems}</div>` : '');
     staggerRows(jEl, '.card-pill-badge, .jr-pill');
 
@@ -1698,7 +1864,7 @@
     const snsEl = document.getElementById('cardSnsWrap');
     const filledSns = state.snsList.filter(s => s.id);
     if (state.vis.sns && filledSns.length) {
-      const rows = filledSns.map(s => `<div class="soft-row"><div class="soft-row-icon">📱</div><div class="soft-row-body"><div class="soft-row-label">${s.platform}</div><div class="soft-row-value">@${s.id}</div></div></div>`).join('');
+      const rows = filledSns.map(s => `<div class="soft-row"><div class="soft-row-icon">📱</div><div class="soft-row-body"><div class="soft-row-label">${s.platform}</div><div class="soft-row-value">@${escapeHtml(s.id)}</div></div></div>`).join('');
       setSection(snsEl, `
         <div class="card-sec-title">SNS</div>
         <div class="soft-rows">${rows}</div>`);
@@ -1735,7 +1901,7 @@
         const selected = state.detail[g.id] || [];
         const parts = selected.map(x => x === FREE_TEXT ? (state.detailFreeText[g.id] || FREE_TEXT) : x).filter(Boolean);
         if (!parts.length) return '';
-        const valueHtml = parts.map((p, i) => (i > 0 ? '<span class="dc-value-sep">・</span>' : '') + `<span class="dc-value-part">${p}</span>`).join('');
+        const valueHtml = parts.map((p, i) => (i > 0 ? '<span class="dc-value-sep">・</span>' : '') + `<span class="dc-value-part">${escapeHtml(p)}</span>`).join('');
         return `<div class="detail-chip"><span class="dc-icon">${g.icon}</span><div class="dc-body"><span class="dc-label">${g.label}</span><span class="dc-value">${valueHtml}</span></div></div>`;
       }).join('');
       if (chips) {
@@ -1794,7 +1960,7 @@
         const pctMatch = /^(\d{1,3})%$/.exec((f.value || '').trim());
         const pct = pctMatch ? Math.max(0, Math.min(100, Number(pctMatch[1]))) : null;
         const bar = pct !== null ? `<div class="progress-bar"><div class="progress-bar-fill" style="width:${pct}%"></div></div>` : '';
-        const valueHtml = `<div class="soft-row-value ${f.value ? '' : 'na'}">${f.value || '未入力'}</div>${bar}`;
+        const valueHtml = `<div class="soft-row-value ${f.value ? '' : 'na'}">${f.value ? escapeHtml(f.value) : '未入力'}</div>${bar}`;
         html += `<div class="eco-tile soft-row"><div class="soft-row-icon">${f.icon}</div><div class="soft-row-body"><div class="soft-row-label">${f.label}</div>${valueHtml}</div></div>`;
       });
       html += '</div>';
@@ -1825,10 +1991,11 @@
       setSection(fcEl, `
         <div class="card-sec-title">FRIEND CODE</div>
         <div class="card-sec-heading">フレンドコード</div>
-        <div class="card-fc"><span>${state.friendCode}</span>${contactTag}</div>`);
+        <div class="card-fc"><span>${escapeHtml(state.friendCode)}</span>${contactTag}</div>`);
     } else { setSection(fcEl, ''); }
 
     document.getElementById('cardDate').textContent = '発行日 ' + new Date().toISOString().slice(0,10).replace(/-/g,'.');
+    saveState();
   }
 
   renderCard();
@@ -1860,6 +2027,49 @@
   document.getElementById('toolsModalCloseBtn').addEventListener('click', closeToolsModal);
   toolsModalOverlay.addEventListener('click', e => { if (e.target === toolsModalOverlay) closeToolsModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeToolsModal(); });
+
+  // ── プロフィール切替モーダル ──
+  const profileModalOverlay = document.getElementById('profileModalOverlay');
+  function renderProfileDockLabel(){
+    document.getElementById('siteDockProfileLabel').textContent = pfDisplayName(getActiveProfile());
+  }
+  function drawProfileModalList(){
+    const area = document.getElementById('profileListArea');
+    const list = ensureProfilesInit();
+    const activeId = getActiveProfileId();
+    area.innerHTML = '';
+    list.forEach(p => {
+      const row = el('div', 'profile-row' + (p.id === activeId ? ' active' : ''));
+      row.innerHTML = `
+        <span class="profile-row-name">${escapeHtml(pfDisplayName(p))}</span>
+        <button type="button" class="profile-row-btn${p.id === activeId ? ' current' : ''}" data-act="switch">${p.id === activeId ? '選択中' : '切替'}</button>
+        <button type="button" class="profile-row-btn" data-act="rename">名前変更</button>
+        ${list.length > 1 ? '<button type="button" class="profile-row-btn" data-act="delete">削除</button>' : ''}`;
+      if (p.id !== activeId) row.querySelector('[data-act="switch"]').addEventListener('click', () => switchProfile(p.id));
+      row.querySelector('[data-act="rename"]').addEventListener('click', () => {
+        const cur = pfDisplayName(p);
+        const name = prompt('新しい名前を入力してください', cur === 'メイン' ? '' : cur);
+        if (name && name.trim()) renameProfile(p.id, name.trim());
+      });
+      const deleteBtn = row.querySelector('[data-act="delete"]');
+      if (deleteBtn) deleteBtn.addEventListener('click', () => {
+        if (confirm(`「${pfDisplayName(p)}」を削除しますか？この操作は取り消せません。`)) deleteProfile(p.id);
+      });
+      area.appendChild(row);
+    });
+  }
+  function openProfileModal(){ drawProfileModalList(); profileModalOverlay.classList.add('show'); }
+  function closeProfileModal(){ profileModalOverlay.classList.remove('show'); }
+  document.getElementById('profileDockBtn').addEventListener('click', openProfileModal);
+  document.getElementById('profileModalCloseBtn').addEventListener('click', closeProfileModal);
+  profileModalOverlay.addEventListener('click', e => { if (e.target === profileModalOverlay) closeProfileModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfileModal(); });
+  document.getElementById('profileAddBtn').addEventListener('click', () => {
+    const input = document.getElementById('profileNewNameInput');
+    if (!input.value.trim()) return;
+    createProfile(input.value.trim());
+  });
+  renderProfileDockLabel();
 
   // ── カードを画像で保存 / Xへ投稿（アイテム所持管理のhtml2canvas書き出しと同じ仕組みを移植） ──
   const SITE_URL = 'https://taipak5000.github.io/tai-card/';
