@@ -456,6 +456,56 @@
   }
   .tools-modal-links a:hover{ background:var(--gold-bg); color:var(--gold-ink); }
 
+  /* ── カードを画像で保存 / Xへ投稿（アイテム所持管理のhtml2canvasによる書き出しと同じ仕組み） ── */
+  .share-action-row{ display:flex; justify-content:center; margin-top:16px; }
+  .share-btn{
+    appearance:none; cursor:pointer; border:none; border-radius:100px; padding:13px 26px;
+    background:linear-gradient(135deg, var(--gold) 0%, var(--gold-ink) 100%); color:#fff;
+    font-family:"Zen Kaku Gothic New",sans-serif; font-size:14px; font-weight:700;
+    display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 14px rgba(168,122,50,0.32);
+    transition:transform .15s var(--ease-snap), box-shadow .15s;
+  }
+  .share-btn:hover{ transform:translateY(-1px); box-shadow:0 6px 18px rgba(168,122,50,0.4); }
+  .share-btn:active{ transform:translateY(0); }
+  .share-btn:disabled{ opacity:0.6; cursor:default; transform:none; }
+
+  .toast{
+    position:fixed; bottom:calc(84px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%) translateY(20px);
+    background:rgba(37,53,46,0.92); color:#fff; padding:10px 18px; border-radius:100px;
+    font-size:13px; font-weight:500; font-family:"Zen Kaku Gothic New",sans-serif;
+    opacity:0; transition:opacity .2s, transform .2s; z-index:300; pointer-events:none;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .preview-modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(37,53,46,0.4); backdrop-filter:blur(2px);
+    z-index:210; align-items:center; justify-content:center; padding:20px;
+  }
+  .preview-modal-overlay.show{ display:flex; }
+  .preview-modal{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
+    box-shadow:var(--shadow); width:100%; max-width:380px; max-height:88vh; overflow-y:auto; padding:18px;
+  }
+  .preview-modal-head{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+    font-family:"Fraunces","Zen Old Mincho",serif; font-size:15px; color:var(--text);
+  }
+  .preview-modal-close{ border:none; background:none; font-size:20px; line-height:1; color:var(--text-3); cursor:pointer; padding:2px 6px; }
+  .preview-modal-hint{
+    display:flex; align-items:flex-start; gap:8px; font-size:12px; color:var(--text-2);
+    background:var(--gold-bg); border:1px solid rgba(201,154,74,0.22); border-radius:var(--r-sm);
+    padding:10px 12px; margin-bottom:12px; line-height:1.6;
+  }
+  .preview-img{ width:100%; border-radius:var(--r-sm); border:1px solid var(--border); display:block; margin-bottom:14px; }
+  .preview-action-row{ display:flex; }
+  .preview-action-row + .preview-action-row{ margin-top:8px; }
+  .preview-action-btn{
+    flex:1; text-align:center; padding:12px; border-radius:100px; font-weight:700; font-size:13.5px;
+    font-family:"Zen Kaku Gothic New",sans-serif; text-decoration:none; cursor:pointer; border:none;
+  }
+  .preview-action-btn.primary{ background:var(--gold); color:#fff; }
+  .preview-action-btn.twitter{ background:#000; color:#fff; }
+
   @media (max-width:600px){
     .wrap{ padding:26px 14px 92px; }
     .panel-body{ padding:4px 14px 18px; }
@@ -620,6 +670,11 @@
             </div>
           </div>
         </div>
+        <div class="share-action-row">
+          <button type="button" class="share-btn" id="shareImageBtn">
+            <span>🖼️</span>画像を保存してXへ投稿
+          </button>
+        </div>
       </section>
     </div>
   </div>
@@ -663,6 +718,27 @@
   </div>
 </div>
 
+<div class="preview-modal-overlay" id="imagePreviewOverlay">
+  <div class="preview-modal">
+    <div class="preview-modal-head">
+      <span id="previewModalTitle">🖼️ 画像を保存</span>
+      <button type="button" class="preview-modal-close" id="previewModalCloseBtn" aria-label="閉じる">×</button>
+    </div>
+    <div class="preview-modal-hint">
+      <span>👆</span><span id="previewHintText"></span>
+    </div>
+    <img id="previewImg" class="preview-img" src="" alt="保存用のカード画像">
+    <div class="preview-action-row">
+      <a id="previewDownloadLink" class="preview-action-btn primary" href="" download="">⬇️ ダウンロード</a>
+    </div>
+    <div class="preview-action-row" id="previewTwitterRow" style="display:none;">
+      <a id="previewTwitterLink" class="preview-action-btn twitter" href="" target="_blank" rel="noopener noreferrer">📤 Xの投稿画面を開く</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
 (function(){
   const THEMES = [
@@ -684,10 +760,10 @@
     { id:'friendRecruit',  icon:'🤝', label:'フレンド募集',   options:['してる','仲良くなってから','してない'] },
     { id:'chat',           icon:'💬', label:'チャット解放',   options:['OK','仲良くなってから','NG'] },
     { id:'heartTrade',     icon:'❤️', label:'ハート交換',    options:['OK','相談可','NG'] },
-    { id:'warp',           icon:'🌀', label:'ワープ',        options:['OK','場合による','NG'] },
-    { id:'candleMarathon', icon:'🕯️', label:'キャンマラ',    options:['ガチ勢','ほぼ毎日','たまに','しない'] },
-    { id:'carry',          icon:'🎒', label:'キャリー',      options:['したい派','されたい派','どっちもOK'] },
-    { id:'eden',           icon:'⛰️', label:'原罪',          options:['毎週','たまに','必要時のみ'] },
+    { id:'warp',           icon:'🌀', label:'ワープ',        options:['したい','されたい', FREE_TEXT] },
+    { id:'candleMarathon', icon:'🕯️', label:'キャンマラ',    options:['毎日灰まで','毎日15本くらい','マイペースに','しない'] },
+    { id:'carry',          icon:'🎒', label:'キャリー',      options:['まかせろ','お願いしたい','どちらでも可能'] },
+    { id:'eden',           icon:'⛰️', label:'原罪',          options:['毎週','月に2、3回','不定期','必要時のみ'] },
   ];
 
   const ECO_STATS = [
@@ -1508,5 +1584,117 @@
   document.getElementById('toolsModalCloseBtn').addEventListener('click', closeToolsModal);
   toolsModalOverlay.addEventListener('click', e => { if (e.target === toolsModalOverlay) closeToolsModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeToolsModal(); });
+
+  // ── カードを画像で保存 / Xへ投稿（アイテム所持管理のhtml2canvas書き出しと同じ仕組みを移植） ──
+  const SITE_URL = 'https://taipak5000.github.io/tai-card/';
+  const SHARE_HASHTAG = '#Sky星紡ぎカード';
+  function buildShareText(){
+    return `✨ 星紡ぎカードで自己紹介カードを作りました！\n\nあなたもプロフィールを作ってみてね！\n\n${SITE_URL}\n${SHARE_HASHTAG}`;
+  }
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  function sanitizeFilename(str){
+    return String(str).replace(/[\\/:*?"<>|]/g, '_').trim() || 'hoshi-tsumugi-card';
+  }
+
+  // html2canvasは書き出しが必要になった時点でCDNから読み込む（初期表示を重くしないため）
+  let html2canvasLoading = null;
+  function ensureHtml2Canvas(){
+    if (window.html2canvas) return Promise.resolve();
+    if (html2canvasLoading) return html2canvasLoading;
+    html2canvasLoading = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      s.onload = () => resolve();
+      s.onerror = () => { html2canvasLoading = null; reject(new Error('html2canvas load failed')); };
+      document.head.appendChild(s);
+    });
+    return html2canvasLoading;
+  }
+
+  // PCはWeb Share APIに対応していても「画像＋テキストを受け取れる共有先」が無いことが多いため、
+  // スマホ端末に限定してネイティブ共有シートを試す（他ツールと同じ判定基準）
+  function isMobileDevice(){
+    if (navigator.userAgentData && typeof navigator.userAgentData.mobile === 'boolean') {
+      return navigator.userAgentData.mobile;
+    }
+    const ua = navigator.userAgent || '';
+    if (/Android|iPhone|iPod|iPad/i.test(ua)) return true;
+    if (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1) return true;
+    return false;
+  }
+
+  async function tryShareImage(canvas, filename, text){
+    if (!isMobileDevice()) return 'unsupported';
+    if (!navigator.share || !navigator.canShare) return 'unsupported';
+    try {
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) return 'unsupported';
+      const file = new File([blob], filename, { type: 'image/png' });
+      const shareData = text ? { files: [file], text } : { files: [file] };
+      if (!navigator.canShare(shareData)) return 'unsupported';
+      await navigator.share(shareData);
+      return 'success';
+    } catch (err) {
+      if (err && err.name === 'AbortError') return 'cancelled';
+      return 'unsupported';
+    }
+  }
+
+  // Web Share非対応・失敗時のフォールバック：画像プレビューを開き、ダウンロード＋Xの投稿画面導線を提示する
+  const imagePreviewOverlay = document.getElementById('imagePreviewOverlay');
+  function openImagePreview(dataUrl, filename, shareText){
+    document.getElementById('previewImg').src = dataUrl;
+    const link = document.getElementById('previewDownloadLink');
+    link.href = dataUrl; link.download = filename;
+
+    document.getElementById('previewModalTitle').textContent = '🖼️ 画像を保存してXへ投稿';
+    document.getElementById('previewHintText').textContent =
+      '① 下の「ダウンロード」で画像を保存 → ② 「Xの投稿画面を開く」を押して、保存した画像を添付して投稿してください';
+    document.getElementById('previewTwitterLink').href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText);
+    document.getElementById('previewTwitterRow').style.display = '';
+
+    imagePreviewOverlay.classList.add('show');
+  }
+  function closeImagePreview(){ imagePreviewOverlay.classList.remove('show'); }
+  document.getElementById('previewModalCloseBtn').addEventListener('click', closeImagePreview);
+  imagePreviewOverlay.addEventListener('click', e => { if (e.target === imagePreviewOverlay) closeImagePreview(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImagePreview(); });
+
+  const shareBtn = document.getElementById('shareImageBtn');
+  shareBtn.addEventListener('click', async () => {
+    shareBtn.disabled = true;
+    showToast('画像を生成中…');
+    const cardEl = document.getElementById('card');
+    // 編集ビュー表示中に押しても、書き出す画像は必ず公開ビューの見た目にする
+    const wasEditorMode = cardEl.classList.contains('is-editor');
+    if (wasEditorMode) cardEl.classList.remove('is-editor');
+    try {
+      await ensureHtml2Canvas();
+      const canvas = await html2canvas(cardEl, { backgroundColor: null, scale: 2, useCORS: true });
+      const filename = sanitizeFilename('星紡ぎカード_' + (state.name || 'card')) + '.png';
+      const shareText = buildShareText();
+
+      const shareResult = await tryShareImage(canvas, filename, shareText);
+      if (shareResult === 'success') {
+        showToast('共有しました！');
+      } else if (shareResult !== 'cancelled') {
+        openImagePreview(canvas.toDataURL('image/png'), filename, shareText);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('画像の生成に失敗しました');
+    } finally {
+      if (wasEditorMode) cardEl.classList.add('is-editor');
+      shareBtn.disabled = false;
+    }
+  });
 })();
 </script>
