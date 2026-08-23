@@ -104,13 +104,14 @@
   .eco-sync-btn:hover{ background:var(--teal); color:#fff; }
   .eco-sync-btn:active{ transform:scale(0.97); }
   .eco-sync-btn:disabled{ opacity:0.6; cursor:default; transform:none; }
-  .f input, .f select{
+  .f input, .f select, .f textarea{
     width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-sm);
     color:var(--text); font-family:inherit; font-size:13.5px; padding:8px 10px; outline:none;
     transition:border-color .12s ease, background .12s ease;
   }
-  .f input::placeholder{ color:var(--text-3); }
-  .f input:focus-visible, .f select:focus-visible{ border-color:var(--teal); background:#fff; box-shadow:0 0 0 3px rgba(79,124,110,0.14); }
+  .f textarea{ resize:vertical; font-family:inherit; line-height:1.6; }
+  .f input::placeholder, .f textarea::placeholder{ color:var(--text-3); }
+  .f input:focus-visible, .f select:focus-visible, .f textarea:focus-visible{ border-color:var(--teal); background:#fff; box-shadow:0 0 0 3px rgba(79,124,110,0.14); }
 
   /* theme swatches (no label) */
   .theme-row{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -131,6 +132,9 @@
   .crop-controls input[type="range"]{ width:100%; accent-color:var(--teal); }
   .crop-hint{ font-size:11px; color:var(--text-3); margin-top:6px; }
   .remove-img-btn{ margin-top:10px; font-size:11.5px; color:var(--danger); background:none; border:none; cursor:pointer; padding:0; font-family:inherit; text-decoration:underline; }
+  .custom-note-preview{ display:flex; align-items:center; gap:10px; margin-top:10px; }
+  .custom-note-preview img{ width:56px; height:56px; object-fit:cover; border-radius:var(--r-sm); border:1px solid var(--border); flex-shrink:0; }
+  .custom-note-preview .remove-img-btn{ margin-top:0; }
 
   /* chip select groups */
   .chipgroup{ margin-bottom:14px; }
@@ -420,6 +424,11 @@
   }
   .card-clock-vibe span{ font-size:13px; }
 
+  /* カスタム欄：時計横の余白に自由なテキスト・画像を差し込めるようにする */
+  .card-custom-note{ display:flex; flex-direction:column; gap:6px; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); }
+  .card-custom-note-img{ width:100%; max-height:120px; object-fit:cover; border-radius:12px; border:1px solid var(--border); }
+  .card-custom-note-text{ font-family:"Zen Kaku Gothic New",sans-serif; font-size:12.5px; line-height:1.6; color:var(--text-2); white-space:pre-wrap; overflow-wrap:anywhere; }
+
   /* ── Cape level widget: 羽トラッカーの意匠（ひし形ピップ・二重リング・スパーク）を踏襲しつつ、
      冷たい漆黒ではなく、このカード自身の--text/--teal-inkと同じ暖色系の深緑をベースにした
      「夜の草原に灯る光」トーンに変更（--goldの明るい版を光の色として使う） ── */
@@ -668,6 +677,19 @@
             <div class="clock-num-inputs" id="playTimeRangeRows"></div>
             <button type="button" class="fav-add-btn" id="playTimeAddBtn">＋時間帯を追加</button>
             <button type="button" class="chip-opt" id="irregularBtn">不定期</button>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head">
+            <div class="sec-title">📝 カスタム欄 <span class="n">時計横の余白に自由な内容を</span></div>
+            <label class="switch"><input type="checkbox" id="vis_customNote" checked><span class="track"></span><span class="knob"></span></label>
+          </div>
+          <div class="f"><textarea id="in_customNoteText" rows="3" maxlength="200" placeholder="自由にどうぞ（一言メッセージ、こだわりポイントなど）"></textarea></div>
+          <label class="upload-btn">🖼️ 画像を追加<input type="file" accept="image/*" id="customNoteFileInput"></label>
+          <div class="custom-note-preview" id="customNotePreview" style="display:none;">
+            <img id="customNoteImgPreview" src="" alt="">
+            <button type="button" class="remove-img-btn" id="removeCustomNoteImgBtn">画像を削除する</button>
           </div>
         </div>
 
@@ -974,7 +996,8 @@
     friendCode: '',
     friendCodeContact: null,
     titles: { selected: [] },
-    vis: { sns:true, playTime:true, details:true, friendCode:true, ecoStats:true, cape:true, titles:true },
+    customNote: { text: '', image: null },
+    vis: { sns:true, playTime:true, details:true, friendCode:true, ecoStats:true, cape:true, titles:true, customNote:true },
   };
 
   // ── 複数プロフィール（保存枠）機構：taipak5000.github.io系ツール共通のprofiles.jsを
@@ -1066,8 +1089,8 @@
 
   // ── 状態の永続化：プロフィールごとにnsKey()で名前空間化して保存する。
   // renderCard()の末尾から毎回呼ぶが、入力のたびに毎回同期書き込みするのは重いため
-  // 400ms のデバウンスをかける。アバター画像が大きくて容量超過（QuotaExceededError）
-  // になった場合は、画像だけ諦めて残りのデータだけ保存し直す。 ──
+  // 400ms のデバウンスをかける。アバター画像・カスタム欄画像が大きくて容量超過
+  // （QuotaExceededError）になった場合は、画像だけ諦めて残りのデータだけ保存し直す。 ──
   const STATE_KEY = 'taiCardState_v1';
   let saveStateTimer = null;
   function flushSaveState(){
@@ -1076,9 +1099,12 @@
       localStorage.setItem(nsKey(STATE_KEY), JSON.stringify(state));
     } catch (err) {
       try {
-        const light = Object.assign({}, state, { avatarImage: Object.assign({}, state.avatarImage, { src: null }) });
+        const light = Object.assign({}, state, {
+          avatarImage: Object.assign({}, state.avatarImage, { src: null }),
+          customNote: Object.assign({}, state.customNote, { image: null }),
+        });
         localStorage.setItem(nsKey(STATE_KEY), JSON.stringify(light));
-        showToast('画像サイズが大きいため、プロフィール画像は保存されませんでした');
+        showToast('画像サイズが大きいため、一部の画像は保存されませんでした');
       } catch (err2) { /* それでも失敗する場合は諦める（入力操作自体は止めない） */ }
     }
   }
@@ -1098,6 +1124,7 @@
   ensureProfilesInit();
   const savedState = loadState();
   if (savedState) Object.assign(state, savedState);
+  if (savedState && savedState.vis && !('customNote' in savedState.vis)) state.vis.customNote = true;
 
   function el(tag, cls, html){ const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
 
@@ -1183,6 +1210,64 @@
     renderCard();
   });
 
+  // ── カスタム欄：時計横の余白に自由なテキスト・画像を差し込める欄。
+  // アバターと違い1プロフィールに2枚目の画像を持たせることになるため、容量対策として
+  // ここだけアップロード時にcanvasで縮小・再圧縮してからlocalStorageに載せる。
+  function resizeImageDataUrl(dataUrl, maxDim, quality){
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+          else { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  }
+
+  const customNoteTextEl = document.getElementById('in_customNoteText');
+  const customNotePreviewEl = document.getElementById('customNotePreview');
+  const customNoteImgPreviewEl = document.getElementById('customNoteImgPreview');
+
+  customNoteTextEl.value = state.customNote.text || '';
+  customNoteTextEl.addEventListener('input', e => {
+    state.customNote.text = e.target.value;
+    renderCard();
+  });
+
+  function showCustomNotePreview(src){
+    customNoteImgPreviewEl.src = src;
+    customNotePreviewEl.style.display = 'flex';
+  }
+  if (state.customNote.image && state.customNote.image.src) showCustomNotePreview(state.customNote.image.src);
+
+  document.getElementById('customNoteFileInput').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      resizeImageDataUrl(ev.target.result, 800, 0.85).then(resized => {
+        state.customNote.image = { src: resized };
+        showCustomNotePreview(resized);
+        renderCard();
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('removeCustomNoteImgBtn').addEventListener('click', () => {
+    state.customNote.image = null;
+    customNotePreviewEl.style.display = 'none';
+    renderCard();
+  });
+
   // ── Basic text inputs ──
   function bindText(inputId, stateKey){
     const inp = document.getElementById(inputId);
@@ -1215,7 +1300,7 @@
   drawFriendContactChips();
 
   // ── Section visibility toggles ──
-  [['vis_sns','sns'],['vis_playTime','playTime'],['vis_details','details'],['vis_friendCode','friendCode'],['vis_ecoStats','ecoStats'],['vis_cape','cape'],['vis_titles','titles']].forEach(([elId,key]) => {
+  [['vis_sns','sns'],['vis_playTime','playTime'],['vis_details','details'],['vis_friendCode','friendCode'],['vis_ecoStats','ecoStats'],['vis_cape','cape'],['vis_titles','titles'],['vis_customNote','customNote']].forEach(([elId,key]) => {
     const cb = document.getElementById(elId);
     cb.checked = state.vis[key];
     cb.addEventListener('change', e => { state.vis[key] = e.target.checked; renderCard(); });
@@ -1922,14 +2007,19 @@
           : `<div class="card-clock-range na">未設定</div>`;
       const vibe = !state.playTimeIrregular ? playTimeVibeLabel(filledRanges) : null;
       const vibeHtml = vibe ? `<div class="card-clock-vibe"><span>${vibe.icon}</span>${vibe.text}</div>` : '';
+      const noteImg = state.customNote.image && state.customNote.image.src;
+      const noteText = (state.customNote.text || '').trim();
+      const noteHtml = (state.vis.customNote && (noteImg || noteText))
+        ? `<div class="card-custom-note">${noteImg ? `<img class="card-custom-note-img" src="${state.customNote.image.src}" alt="">` : ''}${noteText ? `<div class="card-custom-note-text">${escapeHtml(state.customNote.text).replace(/\n/g, '<br>')}</div>` : ''}</div>`
+        : '';
       setSection(ptEl, `
         <div class="card-sec-title">PLAY TIME</div>
         <div class="card-sec-heading">よく遊ぶ時間帯</div>
         <div class="card-clock-module">
           ${renderCardClockHtml(theme)}
-          <div class="card-clock-list">${listHtml}${vibeHtml}</div>
+          <div class="card-clock-list">${listHtml}${vibeHtml}${noteHtml}</div>
         </div>`);
-      staggerRows(ptEl, '.card-clock-range');
+      staggerRows(ptEl, '.card-clock-range, .card-custom-note');
     } else { setSection(ptEl, ''); }
 
     // details — 9項目の縦積みリストではなく、折り返すタグのモザイク(card-detail-mosaic)にする。
