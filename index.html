@@ -319,7 +319,15 @@
   .detail-chip .dc-icon{ font-size:14px; flex-shrink:0; line-height:1.3; }
   .detail-chip .dc-body{ min-width:0; display:flex; flex-direction:column; gap:2px; }
   .detail-chip .dc-label{ font-family:"IBM Plex Mono", monospace; font-size:9px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-3); }
-  .detail-chip .dc-value{ font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; font-size:12.5px; color:var(--text); line-height:1.4; word-break:break-word; }
+  /* 複数選択の値を「・」で1本の文字列として繋ぐと、CJKの改行規則で選択肢の途中
+     （例:「毎日」「灰まで」の間）で折り返されてしまう。選択肢ごとにnowrapな単位として
+     並べ、折り返しは選択肢と選択肢の"間"でしか起きないようにする */
+  .detail-chip .dc-value{
+    font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; font-size:12.5px; color:var(--text);
+    line-height:1.4; display:flex; flex-wrap:wrap; column-gap:3px; row-gap:2px;
+  }
+  .detail-chip .dc-value-part{ white-space:nowrap; overflow-wrap:anywhere; }
+  .detail-chip .dc-value-sep{ color:var(--text-3); }
 
   /* 収集状況：フル幅の縦積みではなく、ケープレベル(dark)と並ぶ2〜3列のタイル群にする */
   .card-eco-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(128px, 1fr)); gap:8px; }
@@ -1589,9 +1597,10 @@
     if (state.vis.details) {
       const chips = DETAIL_GROUPS.map(g => {
         const selected = state.detail[g.id] || [];
-        const v = selected.map(x => x === FREE_TEXT ? (state.detailFreeText[g.id] || FREE_TEXT) : x).join('・');
-        if (!v) return '';
-        return `<div class="detail-chip"><span class="dc-icon">${g.icon}</span><div class="dc-body"><span class="dc-label">${g.label}</span><span class="dc-value">${v}</span></div></div>`;
+        const parts = selected.map(x => x === FREE_TEXT ? (state.detailFreeText[g.id] || FREE_TEXT) : x).filter(Boolean);
+        if (!parts.length) return '';
+        const valueHtml = parts.map((p, i) => (i > 0 ? '<span class="dc-value-sep">・</span>' : '') + `<span class="dc-value-part">${p}</span>`).join('');
+        return `<div class="detail-chip"><span class="dc-icon">${g.icon}</span><div class="dc-body"><span class="dc-label">${g.label}</span><span class="dc-value">${valueHtml}</span></div></div>`;
       }).join('');
       if (chips) {
         setSection(dtEl, `
