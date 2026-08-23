@@ -690,6 +690,7 @@
             <div class="sec-title">📝 カスタム欄 <span class="n">文章や画像を自由に追加できます</span></div>
             <label class="switch"><input type="checkbox" id="vis_customNote" checked><span class="track"></span><span class="knob"></span></label>
           </div>
+          <div class="f"><label>見出し</label><input type="text" id="in_customNoteTitle" maxlength="14" placeholder="カスタム欄"></div>
           <div class="f"><textarea id="in_customNoteText" rows="3" maxlength="200" placeholder="自由にどうぞ（一言メッセージ、こだわりポイントなど）"></textarea></div>
           <label class="upload-btn">🖼️ 画像を追加<input type="file" accept="image/*" id="customNoteFileInput"></label>
           <div class="custom-note-preview" id="customNotePreview" style="display:none;">
@@ -1002,7 +1003,7 @@
     friendCode: '',
     friendCodeContact: null,
     titles: { selected: [] },
-    customNote: { text: '', image: null },
+    customNote: { text: '', image: null, title: '' },
     vis: { sns:true, playTime:true, details:true, friendCode:true, ecoStats:true, cape:true, titles:true, customNote:true },
   };
 
@@ -1238,9 +1239,16 @@
     });
   }
 
+  const customNoteTitleEl = document.getElementById('in_customNoteTitle');
   const customNoteTextEl = document.getElementById('in_customNoteText');
   const customNotePreviewEl = document.getElementById('customNotePreview');
   const customNoteImgPreviewEl = document.getElementById('customNoteImgPreview');
+
+  customNoteTitleEl.value = state.customNote.title || '';
+  customNoteTitleEl.addEventListener('input', e => {
+    state.customNote.title = e.target.value;
+    renderCard();
+  });
 
   customNoteTextEl.value = state.customNote.text || '';
   customNoteTextEl.addEventListener('input', e => {
@@ -2029,11 +2037,12 @@
     const noteText = (state.customNote.text || '').trim();
     const noteImgSrc = state.customNote.image && state.customNote.image.src;
     if (state.vis.customNote && (noteText || noteImgSrc)) {
+      const noteTitle = (state.customNote.title || '').trim() || 'カスタム欄';
       const imgHtml = noteImgSrc ? `<img class="card-custom-note-img" src="${noteImgSrc}" alt="">` : '';
       const textHtml = noteText ? `<p class="card-custom-note-text">${escapeHtml(noteText).replace(/\n/g, '<br>')}</p>` : '';
       setSection(noteEl, `
         <div class="card-sec-title">CUSTOM</div>
-        <div class="card-sec-heading">カスタム欄</div>
+        <div class="card-sec-heading">${escapeHtml(noteTitle)}</div>
         <div class="card-custom-note-box">${imgHtml}${textHtml}</div>`);
     } else { setSection(noteEl, ''); }
 
