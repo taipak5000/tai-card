@@ -614,7 +614,7 @@
           </div>
           <div id="ecoStatFields"></div>
           <div class="hint-box">
-            🔧 「実データと連携」を押すと、この端末に保存されている<b>アイテム所持管理・エモート所持率管理・精霊ツリー管理・楽譜作成ツール・創作物管理ツール</b>の実データを自動で読み込みます(該当サイトを一度でも開いたことがある場合のみ反映されます)。<b>再訪精霊データベース</b>は個人の進捗を保存する仕組みを持たないツールのため、連携の対象外です。連携後も手入力で上書きできます。
+            🔧 「実データと連携」を押すと、この端末に保存されている<b>アイテム所持管理・エモート所持率管理・精霊ツリー管理・楽譜作成ツール・創作物管理ツール</b>の実データを自動で読み込みます(該当サイトを一度でも開いたことがある場合のみ反映されます)。連携後も手入力で上書きできます。
           </div>
         </div>
 
@@ -747,11 +747,11 @@
     { id:'playStyle',      icon:'🎮', label:'プレイスタイル', options:['ソロ','サブと','フレンド', FREE_TEXT] },
     { id:'friendRecruit',  icon:'🤝', label:'フレンド募集',   options:['募集中','フレ申大歓迎','していない', FREE_TEXT] },
     { id:'chat',           icon:'💬', label:'チャット解放',   options:['フレコで解放する','ミュートしたい','ミュートされたい','開放しない', FREE_TEXT] },
-    { id:'heartTrade',     icon:'❤️', label:'ハート交換',    options:['募集中','頼まれたらやる','やらない'] },
+    { id:'heartTrade',     icon:'❤️', label:'ハート交換',    options:['募集中','頼まれたらやる','やらない', FREE_TEXT] },
     { id:'warp',           icon:'🌀', label:'ワープ',        options:['したい','されたい', FREE_TEXT] },
-    { id:'candleMarathon', icon:'🕯️', label:'キャンマラ',    options:['毎日灰まで','毎日15本くらい','マイペースに','しない'] },
-    { id:'carry',          icon:'🎒', label:'キャリー',      options:['まかせろ','お願いしたい','どちらでも可能'] },
-    { id:'eden',           icon:'⛰️', label:'原罪',          options:['毎週','月に2、3回','不定期','必要時のみ'] },
+    { id:'candleMarathon', icon:'🕯️', label:'キャンマラ',    options:['毎日灰まで','毎日15本くらい','マイペースに','しない', FREE_TEXT] },
+    { id:'carry',          icon:'🎒', label:'キャリー',      options:['まかせろ','お願いしたい','どちらでも可能', FREE_TEXT] },
+    { id:'eden',           icon:'⛰️', label:'原罪',          options:['毎週','月に2、3回','不定期','必要時のみ', FREE_TEXT] },
   ];
 
   const ECO_STATS = [
@@ -760,7 +760,6 @@
     { id:'spirit',    icon:'✨', label:'精霊ツリー進行度',     source:'精霊ツリー管理',    value:'', placeholder:'例: 47%', visible:true },
     { id:'score',     icon:'🎵', label:'作った曲数',          source:'楽譜作成ツール',    value:'', placeholder:'例: 24曲', visible:true },
     { id:'share',     icon:'📌', label:'シェア中の作品数',     source:'創作物管理ツール',   value:'', placeholder:'例: 6件', visible:true },
-    { id:'revisit',   icon:'🔁', label:'再訪コンプリート数',   source:'再訪精霊データベース', value:'', placeholder:'例: 58/70', visible:true },
   ];
 
   // 入手グラフ：数値の手入力はさせず、プロフィールに反映するかどうかのスイッチのみ。
@@ -1328,8 +1327,7 @@
     return count ? count + '件' : null;
   }
 
-  // 再訪精霊データベースには個人の進捗を保存する仕組みが無い（静的な参照データベースのため）ので、
-  // 連携対象に含めない。ECO_STATSのidに対応する関数が無い項目は、以下のループで自動的にスキップされる。
+  // ECO_STATSのidに対応する関数が無い項目は、以下のループで自動的にスキップされる。
   const ECO_SYNC_FNS = { item: syncItemStat, emote: syncEmoteStat, spirit: syncSpiritStat, score: syncScoreStat, share: syncShareStat };
 
   document.getElementById('ecoSyncBtn').addEventListener('click', () => {
