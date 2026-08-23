@@ -346,22 +346,39 @@
     background:var(--teal-bg); border:1px solid rgba(79,124,110,0.3); padding:2px 9px; border-radius:100px;
   }
 
-  /* 公開ビュー用のミニ時計：編集パネルのダイヤル(188px/固定teal)と同じconic-gradientロジックを
-     renderCardClockHtml()で再利用しつつ、小型化・選択中テーマの --ca 色に染める */
+  /* 公開ビュー用の時計：編集パネルのダイヤルと同じconic-gradientロジック(renderCardClockHtml()で
+     再利用)に加え、時刻目盛り・四半期アイコン・時間帯の始点終点マーカーも縮小移植し、
+     選択中テーマの --ca 色に染めることでどのテーマでも浮かずに馴染むようにしている */
   .card-clock-module{
     display:flex; align-items:center; gap:16px; background:rgba(255,255,255,0.65); border:1px solid var(--border);
     border-radius:16px; padding:14px 16px;
   }
   .card-clock-dial{
-    position:relative; width:88px; height:88px; border-radius:50%; flex-shrink:0;
-    border:2px solid #fff; box-shadow:0 0 0 1px var(--border), 0 4px 12px rgba(60,50,80,0.12);
+    position:relative; width:104px; height:104px; border-radius:50%; flex-shrink:0;
+    border:2px solid #fff; box-shadow:0 0 0 1px var(--border), 0 4px 14px rgba(60,50,80,0.14);
     transition:background .35s var(--ease-snap);
   }
+  .card-clock-q{
+    position:absolute; font-size:11px; width:15px; text-align:center; pointer-events:none;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+  }
+  .card-clock-q.q0{ top:-1px; left:50%; margin-left:-7.5px; }
+  .card-clock-q.q6{ top:50%; right:-4px; margin-top:-7.5px; }
+  .card-clock-q.q12{ bottom:-1px; left:50%; margin-left:-7.5px; }
+  .card-clock-q.q18{ top:50%; left:-4px; margin-top:-7.5px; }
+  .card-clock-ticks{ position:absolute; inset:0; }
+  .card-clock-tick{ position:absolute; width:1.4px; height:4px; background:var(--border); border-radius:1px; }
+  .card-clock-tick.major{ width:1.8px; height:7px; background:var(--gold-ink); border-radius:1px; }
+  .card-clock-caps{ position:absolute; inset:0; }
+  .card-clock-cap{
+    position:absolute; width:6px; height:6px; margin:-3px; border-radius:50%;
+    background:var(--ca, var(--gold)); box-shadow:0 0 0 1.5px #fff, 0 1px 3px rgba(0,0,0,0.25);
+  }
   .card-clock-hole{
-    position:absolute; inset:13px; border-radius:50%; background:radial-gradient(circle at 35% 28%, #fff 0%, var(--surface) 70%);
+    position:absolute; inset:16px; border-radius:50%; background:radial-gradient(circle at 35% 28%, #fff 0%, var(--surface) 70%);
     box-shadow:0 0 0 1px var(--border); display:flex; align-items:center; justify-content:center;
   }
-  .card-clock-center-icon{ font-size:18px; }
+  .card-clock-center-icon{ font-size:20px; }
   .card-clock-list{ flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; }
   .card-clock-range{
     font-family:"Fraunces","Zen Old Mincho",serif; font-size:14px; font-weight:500; color:var(--text);
@@ -1429,16 +1446,42 @@
   // 色だけ選択中テーマの --ca（アクセントカラー）に差し替えることで、どのテーマでも浮かずに馴染む。
   function renderCardClockHtml(theme){
     const neutral = 'rgba(37,53,46,0.08)';
-    let bg, icon;
+    let bg, icon, filled = [];
     if (state.playTimeIrregular) {
       bg = neutral;
       icon = '🌀';
     } else {
-      const filled = state.playTimeRanges.filter(r => r.start != null && r.end != null);
+      filled = state.playTimeRanges.filter(r => r.start != null && r.end != null);
       bg = buildDialBackground(filled, theme.ca, neutral);
       icon = '🕐';
     }
-    return `<div class="card-clock-dial" style="background:${bg};"><div class="card-clock-hole"><span class="card-clock-center-icon">${icon}</span></div></div>`;
+
+    // 24時間分の目盛り（編集パネルのダイヤルを縮小移植。0/6/12/18時だけ長く・金色に）
+    let ticksHtml = '';
+    for (let h = 0; h < 24; h++) {
+      const deg = hourToDeg(h);
+      const p = polarPoint(deg, 45, 52, 52);
+      ticksHtml += `<span class="card-clock-tick${h % 6 === 0 ? ' major' : ''}" style="left:${p.x}px;top:${p.y}px;transform:translate(-50%,-50%) rotate(${deg}deg);"></span>`;
+    }
+
+    // 選んだ時間帯の始点・終点に、テーマカラーのドットで印を付ける
+    let capsHtml = '';
+    filled.forEach(r => {
+      [r.start, r.end].forEach(h => {
+        const p = polarPoint(hourToDeg(h), 50, 52, 52);
+        capsHtml += `<span class="card-clock-cap" style="left:${p.x}px;top:${p.y}px;"></span>`;
+      });
+    });
+
+    return `<div class="card-clock-dial" style="background:${bg};">
+      <span class="card-clock-q q0">🌙</span>
+      <span class="card-clock-q q6">🌅</span>
+      <span class="card-clock-q q12">☀️</span>
+      <span class="card-clock-q q18">🌆</span>
+      <div class="card-clock-ticks">${ticksHtml}</div>
+      <div class="card-clock-caps">${capsHtml}</div>
+      <div class="card-clock-hole"><span class="card-clock-center-icon">${icon}</span></div>
+    </div>`;
   }
 
   function renderCard(){
