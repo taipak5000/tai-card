@@ -261,11 +261,11 @@
      via setSection() when it has no content, so a hidden module never leaves a phantom grid cell. ── */
   .card-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:16px 14px; margin-top:2px; }
   #cardJourney, #cardDetailsWrap, #cardTitlesWrap, #cardTrendWrap, #cardFcWrap{ grid-column:1 / -1; }
-  #cardSnsWrap, #cardPlayTimeWrap{ grid-column:span 3; }
+  #cardSnsWrap, #cardPlayTimeWrap, #cardCustomNoteWrap{ grid-column:span 3; }
   #cardCapeWrap{ grid-column:span 2; }
   #cardEcoWrap{ grid-column:span 4; }
   @media (max-width:640px){
-    #cardSnsWrap, #cardPlayTimeWrap, #cardCapeWrap, #cardEcoWrap{ grid-column:1 / -1; }
+    #cardSnsWrap, #cardPlayTimeWrap, #cardCustomNoteWrap, #cardCapeWrap, #cardEcoWrap{ grid-column:1 / -1; }
   }
 
   /* two-tier section headings: small English eyebrow (with rule) + a larger Japanese serif heading below */
@@ -424,10 +424,14 @@
   }
   .card-clock-vibe span{ font-size:13px; }
 
-  /* カスタム欄：時計横の余白に自由なテキスト・画像を差し込めるようにする */
-  .card-custom-note{ display:flex; flex-direction:column; gap:6px; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); }
-  .card-custom-note-img{ width:100%; max-height:120px; object-fit:cover; border-radius:12px; border:1px solid var(--border); }
-  .card-custom-note-text{ font-family:"Zen Kaku Gothic New",sans-serif; font-size:12.5px; line-height:1.6; color:var(--text-2); white-space:pre-wrap; overflow-wrap:anywhere; }
+  /* カスタム欄：PLAY TIMEと横並びになる独立ウィジェット。card-clock-moduleと同じ背景・枠線・角丸で
+     対のボックスに見せ、行の高さいっぱいに広がるようheight:100%にする */
+  .card-custom-note-box{
+    display:flex; flex-direction:column; gap:10px; height:100%; box-sizing:border-box;
+    background:rgba(255,255,255,0.65); border:1px solid var(--border); border-radius:16px; padding:14px 16px;
+  }
+  .card-custom-note-img{ width:100%; max-height:180px; object-fit:cover; border-radius:12px; border:1px solid var(--border); }
+  .card-custom-note-text{ font-family:"Zen Kaku Gothic New",sans-serif; font-size:13.5px; line-height:1.7; color:var(--text-2); white-space:pre-wrap; overflow-wrap:anywhere; }
 
   /* ── Cape level widget: 羽トラッカーの意匠（ひし形ピップ・二重リング・スパーク）を踏襲しつつ、
      冷たい漆黒ではなく、このカード自身の--text/--teal-inkと同じ暖色系の深緑をベースにした
@@ -682,7 +686,7 @@
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">📝 カスタム欄 <span class="n">時計横の余白に自由な内容を</span></div>
+            <div class="sec-title">📝 カスタム欄 <span class="n">文章や画像を自由に追加できます</span></div>
             <label class="switch"><input type="checkbox" id="vis_customNote" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div class="f"><textarea id="in_customNoteText" rows="3" maxlength="200" placeholder="自由にどうぞ（一言メッセージ、こだわりポイントなど）"></textarea></div>
@@ -780,6 +784,7 @@
               <div id="cardJourney"></div>
               <div id="cardSnsWrap"></div>
               <div id="cardPlayTimeWrap"></div>
+              <div id="cardCustomNoteWrap"></div>
               <div id="cardDetailsWrap"></div>
               <div id="cardTitlesWrap"></div>
               <div id="cardCapeWrap"></div>
@@ -2007,20 +2012,29 @@
           : `<div class="card-clock-range na">未設定</div>`;
       const vibe = !state.playTimeIrregular ? playTimeVibeLabel(filledRanges) : null;
       const vibeHtml = vibe ? `<div class="card-clock-vibe"><span>${vibe.icon}</span>${vibe.text}</div>` : '';
-      const noteImg = state.customNote.image && state.customNote.image.src;
-      const noteText = (state.customNote.text || '').trim();
-      const noteHtml = (state.vis.customNote && (noteImg || noteText))
-        ? `<div class="card-custom-note">${noteImg ? `<img class="card-custom-note-img" src="${state.customNote.image.src}" alt="">` : ''}${noteText ? `<div class="card-custom-note-text">${escapeHtml(state.customNote.text).replace(/\n/g, '<br>')}</div>` : ''}</div>`
-        : '';
       setSection(ptEl, `
         <div class="card-sec-title">PLAY TIME</div>
         <div class="card-sec-heading">よく遊ぶ時間帯</div>
         <div class="card-clock-module">
           ${renderCardClockHtml(theme)}
-          <div class="card-clock-list">${listHtml}${vibeHtml}${noteHtml}</div>
+          <div class="card-clock-list">${listHtml}${vibeHtml}</div>
         </div>`);
-      staggerRows(ptEl, '.card-clock-range, .card-custom-note');
+      staggerRows(ptEl, '.card-clock-range');
     } else { setSection(ptEl, ''); }
+
+    // custom note — PLAY TIMEと横並びになる独立セクション。playTimeの有無に関わらず、
+    // テキストか画像のどちらかがあれば単独で表示できる（play-time列の余白を埋める目的で新設）。
+    const noteEl = document.getElementById('cardCustomNoteWrap');
+    const noteText = (state.customNote.text || '').trim();
+    const noteImgSrc = state.customNote.image && state.customNote.image.src;
+    if (state.vis.customNote && (noteText || noteImgSrc)) {
+      const imgHtml = noteImgSrc ? `<img class="card-custom-note-img" src="${noteImgSrc}" alt="">` : '';
+      const textHtml = noteText ? `<p class="card-custom-note-text">${escapeHtml(noteText).replace(/\n/g, '<br>')}</p>` : '';
+      setSection(noteEl, `
+        <div class="card-sec-title">CUSTOM</div>
+        <div class="card-sec-heading">カスタム欄</div>
+        <div class="card-custom-note-box">${imgHtml}${textHtml}</div>`);
+    } else { setSection(noteEl, ''); }
 
     // details — 9項目の縦積みリストではなく、折り返すタグのモザイク(card-detail-mosaic)にする。
     // 何も選択されていない項目は「ー」で埋めず、タイルごと出さない（未回答を見せない設計）。
