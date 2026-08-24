@@ -39,6 +39,15 @@
       animation: none !important;
     }
   }
+  /* html2canvas(画像保存)は#cardを複製したクローンをレンダリングする際にCSSアニメーションを
+     0%地点（rowInなら opacity:0 の入場前フレーム）からやり直してしまい、完了を待たずに
+     キャプチャするため、入場アニメーション付きの要素だけ画像上で消えて見える不具合があった。
+     保存直前に#cardへ付与する.exportingで、これらのアニメーションだけ止めて確実に写す。 */
+  .card.exporting .soft-row, .card.exporting .list-row, .card.exporting .card-pill-badge,
+  .card.exporting .jr-pill, .card.exporting .detail-chip, .card.exporting .card-clock-range,
+  .card.exporting .cape-widget, .card.exporting .card-fc, .card.exporting .card-emblem{
+    animation: none !important;
+  }
   *{ box-sizing:border-box; }
   body{
     margin:0; min-height:100vh; color:var(--text);
@@ -1043,6 +1052,8 @@
     titles: { selected: [] },
     customNote: { text: '', image: null, title: '' },
     vis: { sns:true, playTime:true, details:true, friendCode:true, ecoStats:true, cape:true, titles:true, customNote:true },
+    ecoStats: {}, // ECO_STATSの{value,visible}をidごとに保存（ECO_STATS自体は固定のconstなので、renderCard()の末尾で毎回ミラーする）
+    trendGraphs: {}, // TREND_GRAPHSのvisibleをidごとに保存（同上）
   };
 
   // ── 複数プロフィール（保存枠）機構：taipak5000.github.io系ツール共通のprofiles.jsを
@@ -1170,6 +1181,23 @@
   const savedState = loadState();
   if (savedState) Object.assign(state, savedState);
   if (savedState && savedState.vis && !('customNote' in savedState.vis)) state.vis.customNote = true;
+  // ECO_STATS・TREND_GRAPHSは固定のconst配列（stateそのものではない）なので、保存されていた
+  // 値をここで配列側へ書き戻す（さもないと収集状況の手入力値・連携結果や入手グラフのON/OFFが
+  // リロードやプロフィール切り替えのたびに消えてしまう）。
+  if (state.ecoStats) {
+    ECO_STATS.forEach(f => {
+      const saved = state.ecoStats[f.id];
+      if (!saved) return;
+      if (typeof saved.value === 'string') f.value = saved.value;
+      if (typeof saved.visible === 'boolean') f.visible = saved.visible;
+    });
+  }
+  if (state.trendGraphs) {
+    TREND_GRAPHS.forEach(g => {
+      const saved = state.trendGraphs[g.id];
+      if (typeof saved === 'boolean') g.visible = saved;
+    });
+  }
 
   function el(tag, cls, html){ const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
 
@@ -1728,7 +1756,7 @@
         <label>${f.icon} ${f.label} <span style="color:var(--teal-ink);font-family:'IBM Plex Mono',monospace;font-size:10px;">→ ${f.source}</span></label>
         <label class="switch eco-vis-switch"><input type="checkbox" ${f.visible ? 'checked' : ''} data-eco-vis="${f.id}" aria-label="${f.label}を公開する"><span class="track"></span><span class="knob"></span></label>
       </div>
-      <input type="text" placeholder="${f.placeholder}" data-eco="${f.id}">`;
+      <input type="text" placeholder="${f.placeholder}" value="${escapeHtml(f.value || '')}" data-eco="${f.id}">`;
     ecoEl.appendChild(row);
     row.querySelector('input[data-eco]').addEventListener('input', e => { f.value = e.target.value; renderCard(); });
     row.querySelector('input[data-eco-vis]').addEventListener('change', e => { f.visible = e.target.checked; renderCard(); });
@@ -2262,6 +2290,12 @@
     } else { setSection(fcEl, ''); }
 
     document.getElementById('cardDate').textContent = '発行日 ' + new Date().toISOString().slice(0,10).replace(/-/g,'.');
+
+    // ECO_STATS・TREND_GRAPHSはstate本体ではなく固定constの配列なので、保存直前にここで
+    // stateへミラーする（これを怠るとリロード・プロフィール切り替えで消えてしまう）。
+    ECO_STATS.forEach(f => { state.ecoStats[f.id] = { value: f.value, visible: f.visible }; });
+    TREND_GRAPHS.forEach(g => { state.trendGraphs[g.id] = g.visible; });
+
     saveState();
   }
 
@@ -2446,6 +2480,9 @@
     shareBtn.disabled = true;
     showToast('画像を生成中…');
     const cardEl = document.getElementById('card');
+    // html2canvasは複製したDOM上でrowIn等の入場アニメーションを最初からやり直してしまい、
+    // 完了前にキャプチャするとその要素が透明なまま写ってしまう。撮影中だけ止めておく。
+    cardEl.classList.add('exporting');
     try {
       await ensureHtml2Canvas();
       const canvas = await html2canvas(cardEl, { backgroundColor: null, scale: 2, useCORS: true });
@@ -2462,6 +2499,7 @@
       console.error(err);
       showToast('画像の生成に失敗しました');
     } finally {
+      cardEl.classList.remove('exporting');
       shareBtn.disabled = false;
     }
   });
