@@ -528,7 +528,7 @@
   /* ── プロフィール切替モーダル（他のtaipak5000.github.io系ツールと同じ複数保存枠の仕組み） ── */
   .profile-row{ padding:9px 4px; border-bottom:1px solid var(--border); }
   .profile-row:last-child{ border-bottom:none; }
-  .profile-row-top{ display:flex; align-items:center; gap:6px; }
+  .profile-row-top{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
   .profile-row-name{
     flex:1; min-width:0; font-family:"Zen Kaku Gothic New",sans-serif; font-size:13.5px; color:var(--text);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
@@ -622,6 +622,8 @@
   }
   .preview-action-btn.primary{ background:var(--gold); color:#fff; }
   .preview-action-btn.twitter{ background:#000; color:#fff; }
+  .preview-action-btn.copy{ background:var(--teal); color:#fff; }
+  .preview-action-btn:disabled{ opacity:0.6; cursor:default; }
 
   @media (max-width:600px){
     .wrap{ padding:26px 14px 92px; }
@@ -736,11 +738,27 @@
         </div>
 
         <div class="sec">
+          <div class="sec-head"><div class="sec-title">⚡ まとめて連携 <span class="n">下の3つを1回で実行</span></div></div>
+          <div class="eco-sync-row">
+            <button type="button" class="eco-sync-btn" id="allSyncBtn"><span>⚡</span>収集状況・称号・光の翼をまとめて連携</button>
+          </div>
+          <div class="hint-box">
+            🔧 「まとめて連携」を押すと、下にある<b>ケープレベル・収集状況・称号</b>それぞれの「実データと連携」ボタンをまとめて1回で実行します。個別に更新したい場合は、各セクションのボタンもそのまま使えます。
+          </div>
+        </div>
+
+        <div class="sec">
           <div class="sec-head">
             <div class="sec-title">✦ ケープレベル <span class="n">→ 羽トラッカー</span></div>
             <label class="switch"><input type="checkbox" id="vis_cape" checked><span class="track"></span><span class="knob"></span></label>
           </div>
+          <div class="eco-sync-row">
+            <button type="button" class="eco-sync-btn" id="wingSyncBtn"><span>🔄</span>羽トラッカーと連携</button>
+          </div>
           <div class="f"><label>光の翼 合計枚数</label><input type="text" inputmode="numeric" id="in_wingTotal" placeholder="例: 77"></div>
+          <div class="hint-box">
+            🔧 「羽トラッカーと連携」を押すと、この端末に保存されている<b>羽トラッカー</b>の実データ（季節精霊の再訪・恒常精霊・光の子の獲得状況）から、光の翼の合計枚数を自動で計算します(羽トラッカーを一度でも開いたことがある場合のみ反映されます)。連携後も手入力で上書きできます。
+          </div>
         </div>
 
         <div class="sec">
@@ -879,6 +897,9 @@
     <img id="previewImg" class="preview-img" src="" alt="保存用のカード画像">
     <div class="preview-action-row">
       <a id="previewDownloadLink" class="preview-action-btn primary" href="" download="">⬇️ ダウンロード</a>
+    </div>
+    <div class="preview-action-row" id="previewCopyRow" style="display:none;">
+      <button type="button" id="previewCopyBtn" class="preview-action-btn copy">📋 クリップボードにコピー</button>
     </div>
     <div class="preview-action-row" id="previewTwitterRow" style="display:none;">
       <a id="previewTwitterLink" class="preview-action-btn twitter" href="" target="_blank" rel="noopener noreferrer">📤 Xの投稿画面を開く</a>
@@ -1117,6 +1138,27 @@
     list.push({ id, name: trimmed });
     saveProfiles(list);
     switchProfile(id);
+  }
+  // プロフィールの「複製」：既存プロフィールのtai-cardデータ（名前・アバター画像・全項目）を
+  // まるごとコピーした新しいプロフィールを作る。複製元のstateオブジェクトを直接参照渡しする
+  // のではなく、localStorageに保存済みのJSON文字列そのものを新しいnsKeyへ書き写すだけなので、
+  // 複製後は完全に独立したデータになる（片方を編集してももう片方には一切影響しない）。
+  function duplicateProfile(sourceId, newName){
+    const trimmed = (newName || '').trim();
+    if (!trimmed) return;
+    const list = ensureProfilesInit();
+    const src = list.find(p => p.id === sourceId);
+    if (!src) return;
+    if (sourceId === getActiveProfileId()) flushSaveState(); // 複製元がアクティブなら、直近の入力内容を確実に保存してからコピーする
+    const rawData = localStorage.getItem(nsKeyFor(STATE_KEY, sourceId));
+    const newId = 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    list.push({ id: newId, name: trimmed });
+    saveProfiles(list);
+    if (rawData !== null) {
+      try { localStorage.setItem(nsKeyFor(STATE_KEY, newId), rawData); }
+      catch (err) { /* 画像が大きい等で保存に失敗しても、プロフィール自体は空の状態で作成済みなので続行する */ }
+    }
+    switchProfile(newId);
   }
   function renameProfile(id, name){
     const trimmed = (name || '').trim();
@@ -1839,7 +1881,9 @@
   // ECO_STATSのidに対応する関数が無い項目は、以下のループで自動的にスキップされる。
   const ECO_SYNC_FNS = { item: syncItemStat, emote: syncEmoteStat, spirit: syncSpiritStat, score: syncScoreStat, share: syncShareStat };
 
-  document.getElementById('ecoSyncBtn').addEventListener('click', () => {
+  // 収集状況の実データ連携本体。「まとめて連携」ボタンからも同じ処理を呼べるよう、
+  // トースト表示を伴わない関数として切り出す（呼び出し側でまとめて1回だけ表示する）。
+  function runEcoStatsSync(){
     let syncedCount = 0;
     ECO_STATS.forEach(f => {
       const fn = ECO_SYNC_FNS[f.id];
@@ -1852,6 +1896,11 @@
         syncedCount++;
       }
     });
+    return syncedCount;
+  }
+
+  document.getElementById('ecoSyncBtn').addEventListener('click', () => {
+    const syncedCount = runEcoStatsSync();
     renderCard();
     showToast(syncedCount > 0
       ? `${syncedCount}件のデータを連携しました`
@@ -1911,14 +1960,21 @@
   syncedTitlesCache = syncEarnedTitles();
   drawTitlePicker();
 
-  document.getElementById('titleSyncBtn').addEventListener('click', () => {
+  // 称号の実データ連携本体。「まとめて連携」ボタンからも同じ処理を呼べるよう、
+  // トースト表示を伴わない関数として切り出す（呼び出し側でまとめて1回だけ表示する）。
+  function runTitleSync(){
     syncedTitlesCache = syncEarnedTitles();
     // 前回選んでいたが今回の同期結果に無くなったキーは、選択からも外して整合を取る
     state.titles.selected = state.titles.selected.filter(k => syncedTitlesCache.some(t => t.key === k));
     drawTitlePicker();
+    return syncedTitlesCache.length;
+  }
+
+  document.getElementById('titleSyncBtn').addEventListener('click', () => {
+    const n = runTitleSync();
     renderCard();
-    showToast(syncedTitlesCache.length > 0
-      ? `${syncedTitlesCache.length}個の称号を読み込みました`
+    showToast(n > 0
+      ? `${n}個の称号を読み込みました`
       : '称号が見つかりませんでした（各サイトで称号を獲得してから、もう一度お試しください）');
   });
 
@@ -1958,6 +2014,92 @@
       return `<div class="cape-pip"></div>`;
     }).join('');
   }
+
+  // ── 光の翼 合計枚数：羽トラッカーの実データ連携（収集状況・称号と同じ「実データと連携」の考え方）。
+  // 羽トラッカー自身のrender()と全く同じ集計式（季節精霊の再訪＋恒常精霊＋光の子＋原罪転生の
+  // 固定ボーナス+1）をミラーする。羽トラッカーは大きな精霊カタログ定義を持つが、tai-card側で
+  // それを丸ごと複製する必要はなく、各トラッカーの中身をそのまま数え上げれば同じ合計値になる
+  // （不正な余分なキーが入り得るのはユーザー自身がDevToolsで書き換えた場合のみで、対象外）。
+  const WING_REBIRTH_BONUS = 1; // 羽トラッカー側の「原罪で転生すると光の翼+1」の固定ボーナスと同じ値
+
+  // wingTracker_v1: { [季節名]: { [精霊名]: {at}|true } } — 季節精霊・再訪で獲得した枚数
+  function countSeasonWingFeathers(tracker){
+    let n = 0;
+    Object.values(tracker || {}).forEach(seasonObj => {
+      if (seasonObj && typeof seasonObj === 'object') {
+        Object.values(seasonObj).forEach(v => { if (v) n++; });
+      }
+    });
+    return n;
+  }
+  // permWingTracker_v1: { [精霊名]: { tier1: {at}|true, tier2: {at}|true } } — 恒常精霊で獲得した枚数
+  function countPermWingFeathers(tracker){
+    let n = 0;
+    Object.values(tracker || {}).forEach(entry => {
+      if (entry && typeof entry === 'object') {
+        if (entry.tier1) n++;
+        if (entry.tier2) n++;
+      }
+    });
+    return n;
+  }
+  // lightChildrenTracker_v1: { [id]: true } — 発見した光の子の数（1体につき光の翼1枚）
+  function countLightChildrenFeathers(tracker){
+    return Object.values(tracker || {}).filter(Boolean).length;
+  }
+
+  // 3つのトラッカーキーが1つも存在しない（＝羽トラッカーを一度も開いたことがない）場合はnullを返す。
+  // 他のsync*Stat()と同じく、データの捏造はしない。
+  function syncWingTotalStat(){
+    let seasonRaw, permRaw, lightRaw;
+    try { seasonRaw = localStorage.getItem(nsKey('wingTracker_v1')); } catch (_) { seasonRaw = null; }
+    try { permRaw = localStorage.getItem(nsKey('permWingTracker_v1')); } catch (_) { permRaw = null; }
+    try { lightRaw = localStorage.getItem(nsKey('lightChildrenTracker_v1')); } catch (_) { lightRaw = null; }
+    if (seasonRaw === null && permRaw === null && lightRaw === null) return null;
+
+    let seasonTracker, permTracker, lightTracker;
+    try { seasonTracker = JSON.parse(seasonRaw); } catch (_) { seasonTracker = null; }
+    try { permTracker = JSON.parse(permRaw); } catch (_) { permTracker = null; }
+    try { lightTracker = JSON.parse(lightRaw); } catch (_) { lightTracker = null; }
+
+    const total = countSeasonWingFeathers(seasonTracker) + countPermWingFeathers(permTracker)
+      + countLightChildrenFeathers(lightTracker) + WING_REBIRTH_BONUS;
+    return String(total);
+  }
+
+  // 光の翼 合計枚数の連携本体。「まとめて連携」ボタンからも同じ処理を呼べるよう、
+  // トースト表示を伴わない関数として切り出す（呼び出し側でまとめて1回だけ表示する）。
+  function runWingSync(){
+    const result = syncWingTotalStat();
+    if (result === null) return false;
+    state.wingTotal = result;
+    const input = document.getElementById('in_wingTotal');
+    if (input) input.value = result;
+    return true;
+  }
+
+  document.getElementById('wingSyncBtn').addEventListener('click', () => {
+    const ok = runWingSync();
+    renderCard();
+    showToast(ok
+      ? `光の翼 合計${state.wingTotal}枚を連携しました`
+      : '連携できるデータが見つかりませんでした（羽トラッカーを一度開いてから、もう一度お試しください）');
+  });
+
+  // ── まとめて連携：収集状況・称号・光の翼の3つの同期処理を1クリックでまとめて実行する ──
+  document.getElementById('allSyncBtn').addEventListener('click', () => {
+    const ecoCount = runEcoStatsSync();
+    const titleCount = runTitleSync();
+    const wingOk = runWingSync();
+    renderCard();
+    const parts = [];
+    if (ecoCount > 0) parts.push(`収集状況${ecoCount}件`);
+    if (titleCount > 0) parts.push(`称号${titleCount}個`);
+    if (wingOk) parts.push('光の翼の合計枚数');
+    showToast(parts.length
+      ? `${parts.join('・')}を連携しました`
+      : '連携できるデータが見つかりませんでした（各サイトを一度開いてから、もう一度お試しください）');
+  });
 
   // 入手推移グラフ：カンマ区切りの数値列から、面グラフ＋折れ線のミニスパークラインを描く
   // （ノマキャン計算機・星のキャンドル計算機に実在するトレンドチャートを模したもの）
@@ -2346,6 +2488,7 @@
         <div class="profile-row-top">
           <span class="profile-row-name">${escapeHtml(pfDisplayName(p))}</span>
           <button type="button" class="profile-row-btn${p.id === activeId ? ' current' : ''}" data-act="switch">${p.id === activeId ? '選択中' : '切替'}</button>
+          <button type="button" class="profile-row-btn" data-act="duplicate">複製</button>
           <button type="button" class="profile-row-btn" data-act="rename">名前変更</button>
           ${list.length > 1 ? '<button type="button" class="profile-row-btn" data-act="delete">削除</button>' : ''}
         </div>
@@ -2358,6 +2501,12 @@
                </div>`).join('')}</div>`
           : `<p class="profile-row-titles-empty">まだ称号を獲得していません</p>`}`;
       if (p.id !== activeId) row.querySelector('[data-act="switch"]').addEventListener('click', () => switchProfile(p.id));
+      row.querySelector('[data-act="duplicate"]').addEventListener('click', () => {
+        const cur = pfDisplayName(p);
+        const suggested = `${cur}のコピー`;
+        const name = prompt(`「${cur}」を複製した新しいプロフィールの名前を入力してください`, suggested);
+        if (name && name.trim()) duplicateProfile(p.id, name.trim());
+      });
       row.querySelector('[data-act="rename"]').addEventListener('click', () => {
         const cur = pfDisplayName(p);
         const name = prompt('新しい名前を入力してください', cur === 'メイン' ? '' : cur);
@@ -2457,7 +2606,15 @@
 
   // Web Share非対応・失敗時のフォールバック：画像プレビューを開き、ダウンロード＋Xの投稿画面導線を提示する
   const imagePreviewOverlay = document.getElementById('imagePreviewOverlay');
-  function openImagePreview(dataUrl, filename, shareText){
+  // クリップボードへの直接コピー：画像を扱えるClipboard API（ClipboardItem）に対応しているブラウザ
+  // でのみボタンを表示する。非対応ブラウザ（Firefox系の一部・古いSafari等）では常時display:noneのまま
+  // にしておくフォールバックとし、コピーできない機能を見せて混乱させないようにする。
+  const clipboardImageSupported = !!(navigator.clipboard && typeof navigator.clipboard.write === 'function' && typeof window.ClipboardItem === 'function');
+  const previewCopyRow = document.getElementById('previewCopyRow');
+  const previewCopyBtn = document.getElementById('previewCopyBtn');
+  let currentPreviewCanvas = null; // コピー・再エンコード用に、プレビュー中の元canvasを保持しておく
+  function openImagePreview(dataUrl, filename, shareText, canvas){
+    currentPreviewCanvas = canvas || null;
     document.getElementById('previewImg').src = dataUrl;
     const link = document.getElementById('previewDownloadLink');
     link.href = dataUrl; link.download = filename;
@@ -2467,6 +2624,7 @@
       '① 下の「ダウンロード」で画像を保存 → ② 「Xの投稿画面を開く」を押して、保存した画像を添付して投稿してください';
     document.getElementById('previewTwitterLink').href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText);
     document.getElementById('previewTwitterRow').style.display = '';
+    previewCopyRow.style.display = (clipboardImageSupported && currentPreviewCanvas) ? '' : 'none';
 
     imagePreviewOverlay.classList.add('show');
   }
@@ -2474,6 +2632,25 @@
   document.getElementById('previewModalCloseBtn').addEventListener('click', closeImagePreview);
   imagePreviewOverlay.addEventListener('click', e => { if (e.target === imagePreviewOverlay) closeImagePreview(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImagePreview(); });
+
+  // ボタンのクリックリスナーはモーダルを開くたびに登録するのではなく、ここで1回だけ登録する
+  // （openImagePreview()内で毎回addEventListenerすると、開くたびにリスナーが積み重なり、
+  // 1回のクリックで複数回コピー処理が走ってしまうため）。対象の画像はcurrentPreviewCanvasを都度参照する。
+  previewCopyBtn.addEventListener('click', async () => {
+    if (!currentPreviewCanvas) return;
+    previewCopyBtn.disabled = true;
+    try {
+      const blob = await new Promise(resolve => currentPreviewCanvas.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('toBlob failed');
+      await navigator.clipboard.write([ new ClipboardItem({ 'image/png': blob }) ]);
+      showToast('画像をクリップボードにコピーしました');
+    } catch (err) {
+      console.error(err);
+      showToast('クリップボードへのコピーに失敗しました');
+    } finally {
+      previewCopyBtn.disabled = false;
+    }
+  });
 
   const shareBtn = document.getElementById('shareImageBtn');
   shareBtn.addEventListener('click', async () => {
@@ -2493,7 +2670,7 @@
       if (shareResult === 'success') {
         showToast('共有しました！');
       } else if (shareResult !== 'cancelled') {
-        openImagePreview(canvas.toDataURL('image/png'), filename, shareText);
+        openImagePreview(canvas.toDataURL('image/png'), filename, shareText, canvas);
       }
     } catch (err) {
       console.error(err);
