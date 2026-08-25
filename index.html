@@ -478,19 +478,19 @@
      ダイヤル左・レンジ一覧右の横並び。一覧側が狭くなる列幅では2行に折り返すことがあるが、
      card-clock-rangeは通常のテキスト折り返し（nowrapなし）なので枠からはみ出すことはない。 */
   .card-clock-module{
-    display:flex; flex-direction:row; align-items:center; gap:10px;
+    display:flex; flex-direction:row; align-items:center; gap:12px;
     background:rgba(255,255,255,0.65); border:1px solid var(--border);
-    border-radius:16px; padding:10px 12px;
+    border-radius:16px; padding:12px 14px;
   }
-  /* dial shrunk 104px→70px. buildDialArcSvg()'s numeric size arg in renderCardClockHtml()
-     changes to match (104→70) — see script block; the SVG wedge-path renderer itself is unchanged. */
+  /* dial size 104px→70px→84px. buildDialArcSvg()'s numeric size arg in renderCardClockHtml()
+     changes to match (currently 84) — see script block; the SVG wedge-path renderer itself is unchanged. */
   .card-clock-dial{
-    position:relative; width:70px; height:70px; border-radius:50%; flex-shrink:0; align-self:center;
+    position:relative; width:84px; height:84px; border-radius:50%; flex-shrink:0; align-self:center;
     border:2px solid #fff; box-shadow:0 0 0 1px var(--border), 0 4px 14px rgba(60,50,80,0.14);
   }
   .card-clock-arc-svg{ position:absolute; inset:0; width:100%; height:100%; display:block; }
   .card-clock-q{
-    position:absolute; font-size:8px; width:11px; text-align:center; pointer-events:none;
+    position:absolute; font-size:9px; width:12px; text-align:center; pointer-events:none;
     filter:drop-shadow(0 1px 1px rgba(0,0,0,0.1));
   }
   .card-clock-q.q0{ top:-1px; left:50%; margin-left:-5.5px; }
@@ -506,13 +506,13 @@
     background:var(--ca, var(--gold)); box-shadow:0 0 0 1.5px #fff, 0 1px 3px rgba(0,0,0,0.25);
   }
   .card-clock-hole{
-    position:absolute; inset:11px; border-radius:50%; background:radial-gradient(circle at 35% 28%, #fff 0%, var(--surface) 70%);
+    position:absolute; inset:13px; border-radius:50%; background:radial-gradient(circle at 35% 28%, #fff 0%, var(--surface) 70%);
     box-shadow:0 0 0 1px var(--border); display:flex; align-items:center; justify-content:center;
   }
-  .card-clock-center-icon{ font-size:14px; }
+  .card-clock-center-icon{ font-size:16px; }
   .card-clock-list{ flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
   .card-clock-range{
-    font-family:"Fraunces","Zen Old Mincho",serif; font-size:12px; font-weight:500; color:var(--text);
+    font-family:"Fraunces","Zen Old Mincho",serif; font-size:13px; font-weight:500; color:var(--text);
     display:flex; align-items:center; gap:6px;
   }
   .card-clock-range::before{ content:"◇"; font-size:9px; color:var(--ca, var(--gold)); }
@@ -523,11 +523,11 @@
      一言タグを添えて余白を意味のある情報で埋める（テーマの--ca色でうっすら染める） */
   .card-clock-vibe{
     display:inline-flex; align-items:center; gap:5px; margin-top:4px; align-self:flex-start;
-    font-family:"Zen Kaku Gothic New",sans-serif; font-size:11.5px; font-weight:700; color:var(--ca, var(--gold-ink));
+    font-family:"Zen Kaku Gothic New",sans-serif; font-size:12.5px; font-weight:700; color:var(--ca, var(--gold-ink));
     background:rgba(var(--ca-rgb, 201,154,74), 0.14);
     border:1px solid var(--border); border-radius:100px; padding:4px 11px 4px 8px;
   }
-  .card-clock-vibe span{ font-size:13px; }
+  .card-clock-vibe span{ font-size:14px; }
 
   /* カスタム欄：PLAY TIMEと横並びになる独立ウィジェット。card-clock-moduleと同じ背景・枠線・角丸で
      対のボックスに見せる。見出し（CUSTOM／カスタム欄）を除いた残り高さぴったりに広げたいので、
@@ -2286,10 +2286,10 @@
   // 公開ビュー用の小さな時計ダイヤル。編集パネルのbuildDialBackground()をそのまま再利用し、
   // 色だけ選択中テーマの --ca（アクセントカラー）に差し替えることで、どのテーマでも浮かずに馴染む。
   function renderCardClockHtml(theme){
-    // ランドスケープ化に伴い.card-clock-dialのCSS寸法を104px→70pxへ縮小したため、ここで組み立てる
-    // SVG(viewBox)・目盛り・始点終点マーカーの座標もすべて同じ70基準に揃える（104のまま残すと
-    // 実際の70px描画エリアからはみ出す）。中心・半径は104用の値(52/45/50)と同じ比率で縮小。
-    const DIAL_SIZE = 70, dc = DIAL_SIZE / 2; // dc = 35
+    // .card-clock-dialのCSS寸法（現在84px）と、ここで組み立てるSVG(viewBox)・目盛り・
+    // 始点終点マーカーの座標は必ず同じ基準に揃える（ずれるとCSS側の描画エリアからはみ出す/
+    // ダイヤル内に収まらなくなる）。CSS側の width/height を変えたら、この値も合わせて変更すること。
+    const DIAL_SIZE = 84, dc = DIAL_SIZE / 2; // dc = 42
     const neutral = 'rgba(37,53,46,0.08)';
     let arcSvg, icon, filled = [];
     if (state.playTimeIrregular) {
