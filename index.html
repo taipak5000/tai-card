@@ -1,5 +1,5 @@
 <title>星紡ぎカード</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Zen+Old+Mincho:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -55,6 +55,7 @@
     font-family:"Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
     font-size:15px; line-height:1.65;
     -webkit-font-smoothing:antialiased;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom)); /* 下部クイックメニュー(.site-dock)分の余白 */
   }
   body::before{
     content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
@@ -64,9 +65,17 @@
       radial-gradient(520px 380px at 90% 92%, rgba(79,124,110,0.08), transparent 60%);
   }
   h1,h2,h3{ font-family:"Fraunces","Zen Old Mincho",serif; margin:0; text-wrap:balance; }
-  .wrap{ position:relative; z-index:1; max-width:1320px; margin:0 auto; padding:36px 20px 108px; }
+  .wrap{ position:relative; z-index:1; max-width:1320px; margin:0 auto; padding:36px 20px 20px; }
 
-  header{ margin-bottom:8px; }
+  /* ── 共通レイアウト規約: ヘッダーはposition:stickyのnav相当要素にする（top:0; z-index:20）。
+     .wrapは左右20pxのpaddingを持つため、margin:-20pxとpadding:20pxを打ち消し合わせることで、
+     中身(h1)の水平位置は変えずに、背景/罫線だけ.wrapの箱いっぱいまで拡張している。 ── */
+  header{
+    position:sticky; top:0; z-index:20; margin:0 -20px 8px; padding:14px 20px 12px;
+    background:rgba(239,243,251,0.86); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+  header h1{ margin-bottom:0; }
   .eyebrow{ font-family:"IBM Plex Mono", monospace; font-size:10.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold-ink); background:var(--gold-bg); border:1px solid rgba(201,154,74,0.28); display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:100px; margin-bottom:16px; }
   h1{ font-size:clamp(26px,4vw,34px); font-weight:600; letter-spacing:0.01em; color:var(--teal-ink); }
   .lede{ color:var(--text-2); font-size:14px; margin:10px 0 0; max-width:70ch; }
@@ -81,10 +90,10 @@
      ratio. 900px keeps the editor column comfortably usable (still ~350-380px on a full-width
      desktop) while giving the 3-column card layout the width its per-module chrome needs. ── */
   .board{ display:grid; grid-template-columns:minmax(0,1fr) minmax(380px,900px); gap:26px; margin-top:30px; align-items:start; }
-  @media (max-width:920px){ .board{ grid-template-columns:1fr; } }
+  @media (max-width:850px){ .board{ grid-template-columns:1fr; } }
 
   .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow); }
-  .panel-head{ padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; position:sticky; top:0; background:var(--surface); border-radius:var(--r) var(--r) 0 0; z-index:2; }
+  .panel-head{ padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; position:sticky; top:84px; background:var(--surface); border-radius:var(--r) var(--r) 0 0; z-index:2; }
   .panel-head h2{ font-size:15px; font-weight:600; color:var(--teal-ink); }
   .panel-body{ padding:6px 20px 22px; }
 
@@ -252,7 +261,7 @@
 
 
   /* ── Preview ── */
-  .preview-col{ position:sticky; top:20px; }
+  .preview-col{ position:sticky; top:104px; }
 
   .card-frame{ padding:22px; max-width:900px; margin:0 auto; }
   /* ── Landscape (1.91:1, X/OG card ratio) share layout: a 3-row grid (head/cols/foot).
@@ -578,7 +587,7 @@
     justify-content:space-around; align-items:stretch; gap:4px;
   }
   .site-dock button, .site-dock a{
-    flex:1 1 0; max-width:130px; border:0; background:none; cursor:pointer;
+    flex:1 1 0; max-width:110px; border:0; background:none; cursor:pointer;
     display:flex; flex-direction:column; align-items:center; gap:2px;
     padding:6px 0; min-height:52px; border-radius:12px; font-family:"Zen Kaku Gothic New",sans-serif;
     text-decoration:none; color:var(--text-2); transition:background .15s var(--ease-snap);
@@ -594,7 +603,7 @@
 
   .tools-modal-overlay{
     display:none; position:fixed; inset:0; background:rgba(37,53,46,0.34); backdrop-filter:blur(2px);
-    z-index:200; align-items:center; justify-content:center; padding:20px;
+    z-index:1000; align-items:center; justify-content:center; padding:20px;
   }
   .tools-modal-overlay.show{ display:flex; }
   .tools-modal{
@@ -679,13 +688,13 @@
     position:fixed; bottom:calc(84px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%) translateY(20px);
     background:rgba(37,53,46,0.92); color:#fff; padding:10px 18px; border-radius:100px;
     font-size:13px; font-weight:500; font-family:"Zen Kaku Gothic New",sans-serif;
-    opacity:0; transition:opacity .2s, transform .2s; z-index:300; pointer-events:none;
+    opacity:0; transition:opacity .2s, transform .2s; z-index:2000; pointer-events:none;
   }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
   .preview-modal-overlay{
     display:none; position:fixed; inset:0; background:rgba(37,53,46,0.4); backdrop-filter:blur(2px);
-    z-index:210; align-items:center; justify-content:center; padding:20px;
+    z-index:1000; align-items:center; justify-content:center; padding:20px;
   }
   .preview-modal-overlay.show{ display:flex; }
   .preview-modal{
@@ -715,7 +724,8 @@
   .preview-action-btn:disabled{ opacity:0.6; cursor:default; }
 
   @media (max-width:600px){
-    .wrap{ padding:26px 14px 92px; }
+    .wrap{ padding:26px 14px 14px; }
+    header{ margin:0 -14px 8px; padding:14px 14px 12px; }
     .panel-body{ padding:4px 14px 18px; }
     .site-dock .dock-icon{ font-size:18px; }
     .site-dock .dock-label{ font-size:9px; }
@@ -725,8 +735,8 @@
 <div class="wrap">
   <header>
     <h1>星紡ぎカード</h1>
-    <p class="lede">Sky 星を紡ぐ子どもたちの自己紹介カードを作れるサイトです。入力した項目はその場でシェア用のカードにまとめられ、<b>項目ごとに公開・非公開を選べます。</b></p>
   </header>
+  <p class="lede">Sky 星を紡ぐ子どもたちの自己紹介カードを作れるサイトです。入力した項目はその場でシェア用のカードにまとめられ、<b>項目ごとに公開・非公開を選べます。</b></p>
 
   <div class="board">
     <section class="panel">
@@ -947,19 +957,16 @@
   </footer>
 </div>
 
+<!-- ── 共通レイアウト規約: site-dockには他ドメインへの直リンクを一切置かない。
+     データ連携(tai-transfer)・設定・情報(tai-info)は他の姉妹サイトと同じ「他のツール」
+     ドロワー(#toolsModalOverlay)内のリストへ統合済み ── -->
 <div class="site-dock" role="navigation" aria-label="クイックメニュー">
   <button type="button" id="profileDockBtn">
     <span class="dock-icon">🗂️</span><span class="dock-label" id="siteDockProfileLabel">メイン</span>
   </button>
-  <a href="https://taipak5000.github.io/tai-transfer/">
-    <span class="dock-icon">🔄</span><span class="dock-label">データ連携</span>
-  </a>
   <button type="button" id="toolsDockBtn">
     <span class="dock-icon">☰</span><span class="dock-label">他のツール</span>
   </button>
-  <a href="https://taipak5000.github.io/tai-info/">
-    <span class="dock-icon">⚙️</span><span class="dock-label">設定・情報</span>
-  </a>
 </div>
 
 <div class="tools-modal-overlay" id="toolsModalOverlay">
@@ -978,6 +985,10 @@
       <a href="https://taipak5000.github.io/companion/">✨ 精霊同行ツール</a>
       <a href="https://taipak5000.github.io/wings/">🪽 羽トラッカー</a>
       <a href="https://taipak5000.github.io/tai-transfer/">🔄 データ引継ぎ</a>
+      <a href="https://taipak5000.github.io/skyzztai-profile/">👤 作者プロフィール</a>
+      <a href="https://taipak5000.github.io/tai-nomacan-pro/">🕯️ ノマキャン計算機プロ</a>
+      <a href="https://taipak5000.github.io/tai-info/">⚙️ 設定・更新情報</a>
+      <a href="https://taipak5000.github.io/tai-revisit/">🕊️ 再訪精霊データベース</a>
     </nav>
   </div>
 </div>
