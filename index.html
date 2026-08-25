@@ -72,7 +72,15 @@
   .lede{ color:var(--text-2); font-size:14px; margin:10px 0 0; max-width:70ch; }
   .lede b{ color:var(--gold-ink); font-weight:700; }
 
-  .board{ display:grid; grid-template-columns:minmax(0,1fr) minmax(380px,620px); gap:26px; margin-top:30px; align-items:start; }
+  /* preview-col upper bound raised 620px→900px for the landscape card redesign: verified live
+     that at the old 620px cap (~161px per card column after padding/gaps), fixed per-module
+     chrome (heading pair + padding + the play-time dial alone) already exceeds the 1.91:1
+     target's height budget for ANY non-empty profile, well before content wrapping is even a
+     factor — so the on-screen card (and thus the html2canvas export, which just captures
+     whatever size #card actually renders at) never had enough room to approach the target
+     ratio. 900px keeps the editor column comfortably usable (still ~350-380px on a full-width
+     desktop) while giving the 3-column card layout the width its per-module chrome needs. ── */
+  .board{ display:grid; grid-template-columns:minmax(0,1fr) minmax(380px,900px); gap:26px; margin-top:30px; align-items:start; }
   @media (max-width:920px){ .board{ grid-template-columns:1fr; } }
 
   .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow); }
@@ -246,51 +254,101 @@
   /* ── Preview ── */
   .preview-col{ position:sticky; top:20px; }
 
-  .card-frame{ padding:22px; max-width:640px; margin:0 auto; }
+  .card-frame{ padding:22px; max-width:900px; margin:0 auto; }
+  /* ── Landscape (1.91:1, X/OG card ratio) share layout: a 3-row grid (head/cols/foot).
+     aspect-ratio is deliberately set WITHOUT an explicit height/max-height: it's a *soft*
+     preferred size (CSS Sizing spec) — for a typically-filled profile the box renders almost
+     exactly at the ratio, but if the 3-column content needs more room (a maxed-out custom
+     note + many titles) the box is allowed to grow taller instead of clipping.
+     IMPORTANT / verified live (not just reasoned about): overflow:hidden here would silently
+     defeat that "grow instead of clip" behavior. Per the CSS box-sizing rules a box's automatic
+     minimum size collapses to 0 whenever its overflow is anything other than visible — so with
+     overflow:hidden, Chromium fixes .card's height at the bare aspect-ratio value (e.g. ~300px)
+     and clips every column's overflow silently, even though nothing here has an explicit height.
+     Confirmed by toggling it live: with overflow:hidden a moderately-filled test profile's real
+     content (726px tall in column 1 alone) was cut off at ~300px with zero warning; switching to
+     overflow:visible let the box grow to its true ~912px content height as intended. So this MUST
+     stay visible — rounded corners still render correctly regardless (border-radius clips an
+     element's own background/border independent of overflow), and no child here is positioned to
+     bleed past the curve: .card-emblem sits 26px inset from each edge, safely clear of the 24px
+     corner radius, and every module lives inside the card's own padding. ── */
   .card{
-    position:relative; overflow:hidden; border-radius:24px; padding:30px 26px 24px;
+    position:relative; overflow:visible; border-radius:24px; padding:22px 24px 18px;
     background: var(--card-grad, linear-gradient(165deg, #FCFBF7 0%, #F5F1E6 100%));
     border:1px solid rgba(255,255,255,0.7);
     box-shadow: 0 1px 2px rgba(60,50,80,0.05), 0 20px 44px rgba(60,50,80,0.13);
     transition: background .35s var(--ease-snap);
+    aspect-ratio: 1.91 / 1; width:100%; max-width:1200px;
+    display:grid; grid-template-rows:auto 1fr auto; grid-template-areas:"head" "cols" "foot"; row-gap:10px;
+    /* コンテナクエリ用: #card自身の実描画幅を基準に.card-gridの3列を折りたたむため。
+       ビューポート基準のメディアクエリではなく#card自身の幅を見るのは、.boardが2カラムの
+       ままでもエディタ側が広く取られてカード側の実幅が狭くなるケース（900px前後のウィンドウ幅）
+       でも正しく反応させるため（実測: 幅330pxまで縮む実機モバイルで列幅が約80pxまで潰れ、
+       詳細プロフィールの2列モザイクが1タイル約40px幅になって著しく読みにくくなることを確認）。 */
+    container-type: inline-size; container-name: cardbox;
   }
-  .card-kicker{ font-family:"IBM Plex Mono", monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--ca, var(--gold-ink)); margin-bottom:14px; }
+  /* .card-kicker and .card-top can't both simply declare grid-area:head — two items sharing one
+     named grid area overlap (same grid line box) rather than stacking, so they're grouped under
+     one real wrapper that owns the "head" area and lays them out in normal flow. .card-emblem
+     stays position:absolute, so it's excluded from grid placement entirely and needs no area. */
+  .card-head{ grid-area:head; min-width:0; }
+  .card-grid{ grid-area:cols; }
+  .card-foot{ grid-area:foot; }
+  .card-kicker{ font-family:"IBM Plex Mono", monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--ca, var(--gold-ink)); margin-bottom:6px; }
   .card-emblem{
     position:absolute; top:26px; right:26px; width:38px; height:38px; border-radius:50%;
     border:1.5px solid var(--ca, var(--gold)); display:flex; align-items:center; justify-content:center;
     font-size:15px; color:var(--ca, var(--gold-ink)); background:rgba(255,255,255,0.55);
   }
-  .card-top{ display:flex; align-items:center; gap:14px; margin-bottom:16px; padding-right:44px; }
+  .card-top{ display:flex; align-items:center; gap:12px; margin-bottom:8px; padding-right:44px; }
   .card-avatar{ width:56px; height:56px; border-radius:50%; background:#fff; border:2px solid #fff; box-shadow:0 0 0 1px var(--border), 0 3px 10px rgba(60,50,80,0.10); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; overflow:hidden; }
   .card-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
   .card-name-row{ display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; }
-  .card-name{ font-family:"Fraunces","Zen Old Mincho",serif; font-size:24px; font-weight:600; color:var(--teal-ink); line-height:1.25; }
+  .card-name{ font-family:"Fraunces","Zen Old Mincho",serif; font-size:19px; font-weight:600; color:var(--teal-ink); line-height:1.25; }
   .card-sns-inline{ display:inline-flex; gap:6px; flex-wrap:wrap; }
   .card-sns-chip{
     font-family:"IBM Plex Mono", monospace; font-size:11px; font-weight:500; color:var(--teal-ink);
     background:var(--teal-bg); border:1px solid rgba(79,124,110,0.25); border-radius:100px; padding:2px 10px;
   }
-  .card-oneliner{ font-size:12.5px; color:var(--text-2); margin-top:3px; }
-
-  /* ── Card composition: a 6-track grid so modules can sit full-width, side-by-side, or paired
-     asymmetrically instead of one uniform stacked column. Each module's wrapper div gets display:none
-     via setSection() when it has no content, so a hidden module never leaves a phantom grid cell. ── */
-  .card-grid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:16px 14px; margin-top:2px; }
-  #cardJourney, #cardDetailsWrap, #cardTitlesWrap, #cardTrendWrap, #cardFcWrap{ grid-column:1 / -1; }
-  #cardPlayTimeWrap, #cardCustomNoteWrap{ grid-column:span 3; }
-  #cardCapeWrap{ grid-column:span 2; }
-  #cardEcoWrap{ grid-column:span 4; }
-  @media (max-width:640px){
-    #cardPlayTimeWrap, #cardCustomNoteWrap, #cardCapeWrap, #cardEcoWrap{ grid-column:1 / -1; }
+  /* the one deliberate prose compaction in the whole redesign (free-form caption text only —
+     never applied to structured/informational fields elsewhere in the card) */
+  .card-oneliner{
+    font-size:12px; color:var(--text-2); margin-top:3px; line-height:1.5;
+    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
   }
 
-  /* two-tier section headings: small English eyebrow (with rule) + a larger Japanese serif heading below */
+  /* ── Card composition: 3 columns side by side (Story / Profile / Achievements), each its
+     own independent flex column — not bare grid-item placement on a shared grid, because CSS
+     Grid tracks are shared across the whole grid: a tall item in one column's "row 3" would
+     force every other column's row-3 track to match that height, creating unwanted gaps.
+     Real per-column flex containers stack independently instead. Each module's wrapper div
+     still gets display:none via setSection() when it has no content, collapsing its own gap
+     in that column without leaving a phantom empty slot. ── */
+  .card-grid{ display:grid; grid-template-columns:repeat(3, 1fr); column-gap:20px; align-items:start; margin-top:2px; }
+  .card-col-1, .card-col-2, .card-col-3{ display:flex; flex-direction:column; gap:10px; min-width:0; }
+  #cardFcWrap{ margin-top:auto; } /* pinned to the bottom of column 2 */
+
+  /* #card自身の実幅が狭いとき（実機モバイルで約330px、または.boardが2カラムのまま
+     ウィンドウ幅だけが絞られて実効幅が縮む中間帯でも）は3列を素直に横に並べると
+     1列あたり数十pxまで潰れて詳細プロフィールの2列モザイクが読めなくなる。
+     このときは3列を縦積みに戻す。各#cardXxxWrapはcard-col内でfull幅になるため、
+     detail-mosaicの2列固定(1fr 1fr)も自動的に約280px÷2の余裕あるタイル幅に戻り、
+     別途auto-fitへ変更する必要はない
+     （元の6トラックグリッドが持っていた@media(max-width:640px)の折りたたみを、
+     3列レイアウトでも同じ意図で復活させたもの）。 */
+  @container cardbox (max-width: 620px){
+    .card-grid{ grid-template-columns:1fr; row-gap:14px; }
+  }
+
+  /* two-tier section headings: small English eyebrow (with rule) + a larger Japanese serif heading below.
+     Top margin dropped to ~0 — each module now already sits in its own flex-column gap (10px,
+     set on .card-col-1/2/3), so the old 24px "next section" breathing room would double up. */
   .card-sec-title{
-    display:flex; align-items:center; gap:10px; margin:24px 0 3px;
+    display:flex; align-items:center; gap:8px; margin:0 0 2px;
     font-family:"IBM Plex Mono", monospace; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-3);
   }
-  .card-sec-title::before{ content:""; width:20px; height:1px; background:var(--text-3); flex-shrink:0; opacity:0.6; }
-  .card-sec-heading{ font-family:"Fraunces","Zen Old Mincho",serif; font-size:16px; font-weight:600; color:var(--text); margin:0 0 12px; }
+  .card-sec-title::before{ content:""; width:14px; height:1px; background:var(--text-3); flex-shrink:0; opacity:0.6; }
+  .card-sec-heading{ font-family:"Fraunces","Zen Old Mincho",serif; font-size:13px; font-weight:600; color:var(--text); margin:0 0 6px; }
 
   /* hero badge for "born" — the one pill kept from the reference's season badge.
      Now sits inline inside .card-journey-strip alongside the favorite pills, rather than
@@ -329,22 +387,23 @@
   .soft-row .progress-bar-fill{ height:100%; background:var(--teal); border-radius:100px; }
 
   /* 詳細プロフィール：一行ずつ積むリストでも、長さがバラバラなピルが並ぶモザイクでもなく、
-     複数選択で値の長さが大きく変わっても揃って見える「均一グリッドのタイル」にする
-     （収集状況のcard-eco-gridと同じ考え方。アイコン＋ラベルの下に値を2行目として折り返す） */
-  .card-detail-mosaic{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:8px; }
+     複数選択で値の長さが大きく変わっても揃って見える「均一グリッドのタイル」にする。
+     3カラム化に伴い列幅が狭くなったため、auto-fit(minmax 150px)だと1列に潰れて縦に伸び
+     すぎてしまう — 常に2列固定にして、代わりに値は必要なら2行まで折り返させる（省略はしない）。 */
+  .card-detail-mosaic{ display:grid; grid-template-columns:1fr 1fr; gap:7px; }
   .detail-chip{
-    display:flex; align-items:flex-start; gap:8px; background:rgba(255,255,255,0.65); border:1px solid var(--border);
-    border-radius:14px; padding:10px 12px; min-width:0;
+    display:flex; align-items:flex-start; gap:6px; background:rgba(255,255,255,0.65); border:1px solid var(--border);
+    border-radius:12px; padding:7px 9px; min-width:0;
   }
-  .detail-chip .dc-icon{ font-size:14px; flex-shrink:0; line-height:1.3; }
+  .detail-chip .dc-icon{ font-size:12px; flex-shrink:0; line-height:1.3; }
   .detail-chip .dc-body{ min-width:0; display:flex; flex-direction:column; gap:2px; }
-  .detail-chip .dc-label{ font-family:"IBM Plex Mono", monospace; font-size:9px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-3); }
+  .detail-chip .dc-label{ font-family:"IBM Plex Mono", monospace; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-3); }
   /* 複数選択の値を「・」で1本の文字列として繋ぐと、CJKの改行規則で選択肢の途中
      （例:「毎日」「灰まで」の間）で折り返されてしまう。選択肢ごとにnowrapな単位として
      並べ、折り返しは選択肢と選択肢の"間"でしか起きないようにする */
   .detail-chip .dc-value{
-    font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; font-size:12.5px; color:var(--text);
-    line-height:1.4; display:flex; flex-wrap:wrap; column-gap:3px; row-gap:2px;
+    font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; font-size:12px; color:var(--text);
+    line-height:1.35; display:flex; flex-wrap:wrap; column-gap:3px; row-gap:2px;
   }
   .detail-chip .dc-value-part{ white-space:nowrap; overflow-wrap:anywhere; }
   .detail-chip .dc-value-sep{ color:var(--text-3); }
@@ -361,23 +420,37 @@
   .card-title-badge .ctb-icon{ font-size:15px; }
   .title-picker-empty{ font-size:12px; color:var(--text-3); margin:0 0 8px; }
 
-  /* 収集状況：フル幅の縦積みではなく、ケープレベル(dark)と並ぶ2〜3列のタイル群にする */
-  .card-eco-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(128px, 1fr)); gap:8px; }
+  /* 収集状況：2〜3列タイルのモザイクではなく、アイコン＋ラベル＋値＋細い進捗バーを
+     1行に収めた5行の縦積みリストにする（各行26〜28px程度、5行合計で約140px）。
+     .soft-row系クラス自体は他で使われていない（この収集状況タイルのみの利用）ため、
+     .card-eco-grid配下だけを上書きすれば他に影響しない。 */
+  .card-eco-grid{ display:flex; flex-direction:column; gap:4px; }
+  .card-eco-grid .soft-row{ gap:8px; padding:4px 8px; border-radius:10px; }
+  .card-eco-grid .soft-row-icon{ width:18px; height:18px; font-size:10px; }
+  .card-eco-grid .soft-row-body{ display:flex; align-items:center; gap:7px; flex-wrap:nowrap; }
+  .card-eco-grid .soft-row-label{ font-size:10px; margin-bottom:0; flex-shrink:0; white-space:nowrap; }
+  .card-eco-grid .soft-row-value{ font-size:11.5px; flex-shrink:0; white-space:nowrap; }
+  .card-eco-grid .soft-row-value.na{ font-size:10.5px; }
+  .card-eco-grid .progress-bar{ flex:1; min-width:20px; height:3px; margin-top:0; }
 
-  /* 入手グラフ：各サイトに実在する推移チャートを模した、面グラフ＋折れ線のミニスパークライン */
-  .trend-block{ margin-bottom:14px; }
-  .trend-block:last-child{ margin-bottom:0; }
+  /* 入手グラフ：各サイトに実在する推移チャートを模した、面グラフ＋折れ線のミニスパークライン。
+     0〜2個を縦積みではなく横並びにする — #cardTrendWrap自体をflex-wrapにし、見出し2つだけを
+     flex-basis:100%で強制的に単独行にすることで、残りの.trend-blockが次の行で横に並ぶ
+     （JS/HTML側の構造は変えず、CSSだけで達成）。 */
+  #cardTrendWrap{ display:flex; flex-wrap:wrap; align-items:flex-start; column-gap:12px; row-gap:4px; }
+  #cardTrendWrap .card-sec-title, #cardTrendWrap .card-sec-heading{ flex:1 1 100%; }
+  .trend-block{ flex:1 1 0; min-width:0; margin-bottom:0; }
   .trend-block-label{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-3); margin-bottom:5px; }
-  .trend-svg{ width:100%; height:64px; display:block; }
+  .trend-svg{ width:100%; height:48px; display:block; }
   .trend-area{ fill:var(--teal); fill-opacity:0.16; }
   .trend-line{ fill:none; stroke:var(--teal); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
   .trend-dot{ fill:var(--gold); }
   .trend-empty{ font-size:12px; color:var(--text-3); }
 
   .card-fc{
-    display:flex; align-items:center; gap:9px; flex-wrap:wrap;
-    font-family:"Fraunces","Zen Old Mincho",serif; font-size:16px; font-weight:500; color:var(--text);
-    background:rgba(255,255,255,0.65); border:1px solid var(--border); border-radius:16px; padding:12px 15px;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    font-family:"Fraunces","Zen Old Mincho",serif; font-size:13px; font-weight:500; color:var(--text);
+    background:rgba(255,255,255,0.65); border:1px solid var(--border); border-radius:16px; padding:9px 12px;
   }
   .fc-contact-tag{
     font-family:"IBM Plex Mono", monospace; font-size:10.5px; font-weight:600; color:var(--teal-ink);
@@ -386,44 +459,52 @@
 
   /* 公開ビュー用の時計：編集パネルのダイヤルと同じconic-gradientロジック(renderCardClockHtml()で
      再利用)に加え、時刻目盛り・四半期アイコン・時間帯の始点終点マーカーも縮小移植し、
-     選択中テーマの --ca 色に染めることでどのテーマでも浮かずに馴染むようにしている */
+     選択中テーマの --ca 色に染めることでどのテーマでも浮かずに馴染むようにしている。
+     当初はProposal A由来の「ダイヤル左・レンジ一覧右」の横並び1行を採用していたが、実測で
+     3カラム化後の1列の実幅が約161px（デザイン仕様が想定していた約360pxの半分以下）しかなく、
+     横並びにすると一覧側が55px程度まで潰れて時間帯の表記が2行に折り返され続けてしまうと判明。
+     実際の列幅で読みやすさ(要件2)を優先し、ダイヤルを上・一覧を下に積む縦並びに変更した
+     （一覧が列の全幅=137px前後を使えるようになり、通常の「20時〜23時」等が1行に収まる）。 */
   .card-clock-module{
-    display:flex; align-items:center; gap:16px; background:rgba(255,255,255,0.65); border:1px solid var(--border);
-    border-radius:16px; padding:14px 16px;
+    display:flex; flex-direction:column; align-items:stretch; gap:8px;
+    background:rgba(255,255,255,0.65); border:1px solid var(--border);
+    border-radius:16px; padding:10px 12px;
   }
+  /* dial shrunk 104px→70px. buildDialArcSvg()'s numeric size arg in renderCardClockHtml()
+     changes to match (104→70) — see script block; the SVG wedge-path renderer itself is unchanged. */
   .card-clock-dial{
-    position:relative; width:104px; height:104px; border-radius:50%; flex-shrink:0;
+    position:relative; width:70px; height:70px; border-radius:50%; flex-shrink:0; align-self:center;
     border:2px solid #fff; box-shadow:0 0 0 1px var(--border), 0 4px 14px rgba(60,50,80,0.14);
   }
   .card-clock-arc-svg{ position:absolute; inset:0; width:100%; height:100%; display:block; }
   .card-clock-q{
-    position:absolute; font-size:11px; width:15px; text-align:center; pointer-events:none;
+    position:absolute; font-size:8px; width:11px; text-align:center; pointer-events:none;
     filter:drop-shadow(0 1px 1px rgba(0,0,0,0.1));
   }
-  .card-clock-q.q0{ top:-1px; left:50%; margin-left:-7.5px; }
-  .card-clock-q.q6{ top:50%; right:-4px; margin-top:-7.5px; }
-  .card-clock-q.q12{ bottom:-1px; left:50%; margin-left:-7.5px; }
-  .card-clock-q.q18{ top:50%; left:-4px; margin-top:-7.5px; }
+  .card-clock-q.q0{ top:-1px; left:50%; margin-left:-5.5px; }
+  .card-clock-q.q6{ top:50%; right:-3px; margin-top:-5.5px; }
+  .card-clock-q.q12{ bottom:-1px; left:50%; margin-left:-5.5px; }
+  .card-clock-q.q18{ top:50%; left:-3px; margin-top:-5.5px; }
   .card-clock-ticks{ position:absolute; inset:0; }
-  .card-clock-tick{ position:absolute; width:1.4px; height:4px; background:var(--border); border-radius:1px; }
-  .card-clock-tick.major{ width:1.8px; height:7px; background:var(--gold-ink); border-radius:1px; }
+  .card-clock-tick{ position:absolute; width:1px; height:3px; background:var(--border); border-radius:1px; }
+  .card-clock-tick.major{ width:1.3px; height:5px; background:var(--gold-ink); border-radius:1px; }
   .card-clock-caps{ position:absolute; inset:0; }
   .card-clock-cap{
-    position:absolute; width:6px; height:6px; margin:-3px; border-radius:50%;
+    position:absolute; width:5px; height:5px; margin:-2.5px; border-radius:50%;
     background:var(--ca, var(--gold)); box-shadow:0 0 0 1.5px #fff, 0 1px 3px rgba(0,0,0,0.25);
   }
   .card-clock-hole{
-    position:absolute; inset:16px; border-radius:50%; background:radial-gradient(circle at 35% 28%, #fff 0%, var(--surface) 70%);
+    position:absolute; inset:11px; border-radius:50%; background:radial-gradient(circle at 35% 28%, #fff 0%, var(--surface) 70%);
     box-shadow:0 0 0 1px var(--border); display:flex; align-items:center; justify-content:center;
   }
-  .card-clock-center-icon{ font-size:20px; }
-  .card-clock-list{ flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; }
+  .card-clock-center-icon{ font-size:14px; }
+  .card-clock-list{ width:100%; min-width:0; display:flex; flex-direction:column; gap:4px; }
   .card-clock-range{
-    font-family:"Fraunces","Zen Old Mincho",serif; font-size:14px; font-weight:500; color:var(--text);
+    font-family:"Fraunces","Zen Old Mincho",serif; font-size:12px; font-weight:500; color:var(--text);
     display:flex; align-items:center; gap:6px;
   }
-  .card-clock-range::before{ content:"◇"; font-size:10px; color:var(--ca, var(--gold)); }
-  .card-clock-range.na{ font-family:"Zen Kaku Gothic New",sans-serif; font-size:12px; font-weight:400; color:var(--text-3); }
+  .card-clock-range::before{ content:"◇"; font-size:9px; color:var(--ca, var(--gold)); }
+  .card-clock-range.na{ font-family:"Zen Kaku Gothic New",sans-serif; font-size:11.5px; font-weight:400; color:var(--text-3); }
   .card-clock-range.na::before{ color:var(--text-3); }
 
   /* 時間帯が1つ・短めだとダイヤル横の余白が目立つため、選んだ時間帯から導いた「夜ふかし型」等の
@@ -442,27 +523,35 @@
      差し引かずに親いっぱいの高さを取ろうとして下にはみ出してしまうため） */
   #cardCustomNoteWrap{ display:flex; flex-direction:column; }
   .card-custom-note-box{
-    display:flex; flex-direction:column; gap:10px; flex:1; box-sizing:border-box;
-    background:rgba(255,255,255,0.65); border:1px solid var(--border); border-radius:16px; padding:14px 16px;
+    display:flex; flex-direction:column; gap:8px; flex:1; box-sizing:border-box;
+    background:rgba(255,255,255,0.65); border:1px solid var(--border); border-radius:16px; padding:10px 12px;
   }
-  .card-custom-note-img{ width:100%; max-height:180px; object-fit:cover; border-radius:12px; border:1px solid var(--border); }
-  .card-custom-note-text{ font-family:"Zen Kaku Gothic New",sans-serif; font-size:13.5px; line-height:1.7; color:var(--text-2); white-space:pre-wrap; overflow-wrap:anywhere; }
+  /* soft-overflow zone #1 (free-form image+text, unbounded volume) — image capped at ~90px
+     (down from 180px) and text line-height tightened, but never hard line-clamped: this box
+     is allowed to make the whole card taller for an outlier-length note rather than truncate. */
+  .card-custom-note-img{ width:100%; max-height:90px; object-fit:cover; border-radius:10px; border:1px solid var(--border); }
+  .card-custom-note-text{ font-family:"Zen Kaku Gothic New",sans-serif; font-size:12px; line-height:1.5; color:var(--text-2); white-space:pre-wrap; overflow-wrap:anywhere; }
 
   /* ── Cape level widget: 羽トラッカーの意匠（ひし形ピップ・二重リング・スパーク）を踏襲しつつ、
      冷たい漆黒ではなく、このカード自身の--text/--teal-inkと同じ暖色系の深緑をベースにした
-     「夜の草原に灯る光」トーンに変更（--goldの明るい版を光の色として使う） ── */
+     「夜の草原に灯る光」トーンに変更（--goldの明るい版を光の色として使う）。
+     縦積み（見出し→説明文→大きなレベル数字→縦のピップ列）だったものを横帯にする：
+     .cape-widgetをflex-wrapにし、タイトル・説明文だけflex-basis:100%で単独行に強制、
+     残りの「Lv数字」と「ピップ行」が最後の行で横並びになる（JS側のフラットな子要素構造は
+     そのまま。ピップ自体はrenderCapePipsHtml()のcap-at-5ロジック含め完全に不変）。 ── */
   .cape-widget{
+    display:flex; flex-wrap:wrap; align-items:center; column-gap:12px; row-gap:3px;
     background: linear-gradient(160deg, #33493E 0%, #1A241D 100%);
-    border-radius: 16px; padding: 16px 16px 14px; margin-top: 6px; color: #F7EFDD;
+    border-radius: 16px; padding: 9px 14px; margin-top: 6px; color: #F7EFDD;
     box-shadow: 0 6px 18px rgba(37,53,46,0.26);
   }
-  .cape-widget-title{ font-size:12.5px; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:5px; color:#EFC98A; }
-  .cape-widget-sub{ font-size:11px; color:rgba(247,239,221,0.68); margin-bottom:10px; }
-  .cape-level-label{ font-size:18px; font-weight:800; text-align:center; margin-bottom:12px; color:#EFC98A; }
-  .cape-pips{ display:flex; flex-direction:column-reverse; gap:8px; align-items:center; }
-  .cape-pip{ position:relative; width:11px; height:11px; transform:rotate(45deg); background:rgba(239,201,138,0.85); border:1.3px solid rgba(239,201,138,0.85); }
-  .cape-pip.tier2, .cape-pip.tier3{ width:19px; height:19px; background:transparent; border:2px solid #EFC98A; box-shadow:0 0 5px rgba(239,201,138,0.55); display:flex; align-items:center; justify-content:center; }
-  .cape-pip-inner{ width:7px; height:7px; background:#EFC98A; box-shadow:0 0 4px rgba(239,201,138,0.9); }
+  .cape-widget-title{ flex:1 1 100%; font-size:10.5px; font-weight:700; display:flex; align-items:center; gap:5px; color:#EFC98A; margin-bottom:0; }
+  .cape-widget-sub{ flex:1 1 100%; font-size:10px; line-height:1.35; color:rgba(247,239,221,0.68); margin-bottom:0; }
+  .cape-level-label{ font-size:18px; font-weight:800; color:#EFC98A; margin-bottom:0; }
+  .cape-pips{ display:flex; flex-direction:row; gap:6px; align-items:center; margin-left:auto; }
+  .cape-pip{ position:relative; width:10px; height:10px; transform:rotate(45deg); background:rgba(239,201,138,0.85); border:1.3px solid rgba(239,201,138,0.85); }
+  .cape-pip.tier2, .cape-pip.tier3{ width:17px; height:17px; background:transparent; border:2px solid #EFC98A; box-shadow:0 0 5px rgba(239,201,138,0.55); display:flex; align-items:center; justify-content:center; }
+  .cape-pip-inner{ width:6px; height:6px; background:#EFC98A; box-shadow:0 0 4px rgba(239,201,138,0.9); }
   .cape-pip.tier3{ box-shadow:0 0 8px rgba(239,201,138,0.85); }
   .cape-pip.tier3 .cape-pip-inner{ box-shadow:0 0 6px #EFC98A, 0 0 12px rgba(239,201,138,0.55); }
   .cape-spark{ position:absolute; width:3px; height:3px; border-radius:50%; background:#EFC98A; box-shadow:0 0 3px #EFC98A; transform:rotate(-45deg); }
@@ -471,7 +560,7 @@
   .cape-spark.l{ left:-6px; top:50%; margin-top:-1.5px; }
   .cape-spark.r{ right:-6px; top:50%; margin-top:-1.5px; }
 
-  .card-foot{ margin-top:18px; padding-top:14px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-size:10.5px; color:var(--text-3); }
+  .card-foot{ padding-top:10px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-size:10.5px; color:var(--text-3); }
   .card-foot .tag{ font-family:"IBM Plex Mono", monospace; }
 
   footer{ margin-top:44px; padding-top:18px; border-top:1px solid var(--border); color:var(--text-3); font-size:12px; text-align:center; line-height:1.7; }
@@ -811,27 +900,35 @@
         <div class="card-frame">
           <div class="card" id="card">
             <div class="card-emblem">✦</div>
-            <div class="card-kicker">PROFILE</div>
-            <div class="card-top">
-              <div class="card-avatar" id="cardAvatar"></div>
-              <div>
-                <div class="card-name-row">
-                  <div class="card-name" id="cardName">–</div>
-                  <span class="card-sns-inline" id="cardSnsInline"></span>
+            <div class="card-head">
+              <div class="card-kicker">PROFILE</div>
+              <div class="card-top">
+                <div class="card-avatar" id="cardAvatar"></div>
+                <div>
+                  <div class="card-name-row">
+                    <div class="card-name" id="cardName">–</div>
+                    <span class="card-sns-inline" id="cardSnsInline"></span>
+                  </div>
+                  <div class="card-oneliner" id="cardOneLiner"></div>
                 </div>
-                <div class="card-oneliner" id="cardOneLiner"></div>
               </div>
             </div>
             <div class="card-grid">
-              <div id="cardJourney"></div>
-              <div id="cardPlayTimeWrap"></div>
-              <div id="cardCustomNoteWrap"></div>
-              <div id="cardDetailsWrap"></div>
-              <div id="cardTitlesWrap"></div>
-              <div id="cardCapeWrap"></div>
-              <div id="cardEcoWrap"></div>
-              <div id="cardTrendWrap"></div>
-              <div id="cardFcWrap"></div>
+              <div class="card-col-1">
+                <div id="cardJourney"></div>
+                <div id="cardPlayTimeWrap"></div>
+                <div id="cardCustomNoteWrap"></div>
+              </div>
+              <div class="card-col-2">
+                <div id="cardDetailsWrap"></div>
+                <div id="cardFcWrap"></div>
+              </div>
+              <div class="card-col-3">
+                <div id="cardTitlesWrap"></div>
+                <div id="cardCapeWrap"></div>
+                <div id="cardEcoWrap"></div>
+                <div id="cardTrendWrap"></div>
+              </div>
             </div>
             <div class="card-foot">
               <span>🕯️ Sky: 星を紡ぐ子どもたち</span>
@@ -2178,14 +2275,18 @@
   // 公開ビュー用の小さな時計ダイヤル。編集パネルのbuildDialBackground()をそのまま再利用し、
   // 色だけ選択中テーマの --ca（アクセントカラー）に差し替えることで、どのテーマでも浮かずに馴染む。
   function renderCardClockHtml(theme){
+    // ランドスケープ化に伴い.card-clock-dialのCSS寸法を104px→70pxへ縮小したため、ここで組み立てる
+    // SVG(viewBox)・目盛り・始点終点マーカーの座標もすべて同じ70基準に揃える（104のまま残すと
+    // 実際の70px描画エリアからはみ出す）。中心・半径は104用の値(52/45/50)と同じ比率で縮小。
+    const DIAL_SIZE = 70, dc = DIAL_SIZE / 2; // dc = 35
     const neutral = 'rgba(37,53,46,0.08)';
     let arcSvg, icon, filled = [];
     if (state.playTimeIrregular) {
-      arcSvg = `<svg class="card-clock-arc-svg" viewBox="0 0 104 104"><circle cx="52" cy="52" r="52" fill="${neutral}"></circle></svg>`;
+      arcSvg = `<svg class="card-clock-arc-svg" viewBox="0 0 ${DIAL_SIZE} ${DIAL_SIZE}"><circle cx="${dc}" cy="${dc}" r="${dc}" fill="${neutral}"></circle></svg>`;
       icon = '🌀';
     } else {
       filled = state.playTimeRanges.filter(r => r.start != null && r.end != null);
-      arcSvg = buildDialArcSvg(filled, theme.ca, neutral, 104);
+      arcSvg = buildDialArcSvg(filled, theme.ca, neutral, DIAL_SIZE);
       icon = '🕐';
     }
 
@@ -2193,7 +2294,7 @@
     let ticksHtml = '';
     for (let h = 0; h < 24; h++) {
       const deg = hourToDeg(h);
-      const p = polarPoint(deg, 45, 52, 52);
+      const p = polarPoint(deg, dc - 5, dc, dc);
       ticksHtml += `<span class="card-clock-tick${h % 6 === 0 ? ' major' : ''}" style="left:${p.x}px;top:${p.y}px;transform:translate(-50%,-50%) rotate(${deg}deg);"></span>`;
     }
 
@@ -2201,7 +2302,7 @@
     let capsHtml = '';
     filled.forEach(r => {
       [r.start, r.end].forEach(h => {
-        const p = polarPoint(hourToDeg(h), 50, 52, 52);
+        const p = polarPoint(hourToDeg(h), dc - 1, dc, dc);
         capsHtml += `<span class="card-clock-cap" style="left:${p.x}px;top:${p.y}px;"></span>`;
       });
     });
@@ -2271,11 +2372,14 @@
     document.getElementById('cardName').textContent = state.name || '（名前未入力）';
     document.getElementById('cardOneLiner').textContent = state.oneLiner || '';
 
-    // journey: 生まれた時期バッジ＋好きな〇〇を、1本の横並びピル帯(card-journey-strip)にまとめる
+    // journey: 生まれた時期バッジ＋好きな〇〇を、1本の横並びピル帯(card-journey-strip)にまとめる。
+    // 「星の子が生まれた時期：」は編集パネルのラベル文言としては残しつつ、カード本体側では
+    // 3カラム化で1列あたりの幅が狭くなった（実測161px前後）ため、そのまま出すとバッジ内で
+    // 折り返されて縦に伸びてしまう。カード上は他の好きな〇〇ピルと同じ短い「うまれ」表記にする。
     const jEl = document.getElementById('cardJourney');
     let jItems = '';
     if (state.journeyYear) {
-      jItems += `<span class="card-pill-badge">星の子が生まれた時期：${escapeHtml(state.journeyYear)}</span>`;
+      jItems += `<span class="card-pill-badge">うまれ：${escapeHtml(state.journeyYear)}</span>`;
     }
     const filledFavs = state.favorites.filter(f => f.label && f.value);
     jItems += filledFavs.map(f => `<span class="jr-pill"><span class="jr-fav-label">好きな${escapeHtml(f.label)}</span><span class="jr-fav-value">${escapeHtml(f.value)}</span></span>`).join('');
