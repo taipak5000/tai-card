@@ -88,8 +88,14 @@
      factor — so the on-screen card (and thus the html2canvas export, which just captures
      whatever size #card actually renders at) never had enough room to approach the target
      ratio. 900px keeps the editor column comfortably usable (still ~350-380px on a full-width
-     desktop) while giving the 3-column card layout the width its per-module chrome needs. ── */
-  .board{ display:grid; grid-template-columns:minmax(0,1fr) minmax(380px,900px); gap:26px; margin-top:30px; align-items:start; }
+     desktop) while giving the 3-column card layout the width its per-module chrome needs. ──
+     編集列(1列目)は必ずminmax(320px,1fr)にする — 姉妹サイト共通の2カラムブレークポイント
+     850pxへの統一で、この.boardの2カラム化しきい値が旧920pxから下がった際、1列目を
+     minmax(0,1fr)のままにしていたため、2列目(minmax(380px,900px))が空きスペースを先取りし、
+     ビューポート850〜966px付近では編集列の実描画幅が0px（完全に見えず操作不能）になる回帰が
+     実機幅851pxで確認された。320pxはこのツールが1カラムに畳まれる（.board 1fr化）実測時の
+     編集パネル内容幅と同程度で、850px直後でも編集欄が確実に読み書きできる最小値。 */
+  .board{ display:grid; grid-template-columns:minmax(320px,1fr) minmax(380px,900px); gap:26px; margin-top:30px; align-items:start; }
   @media (max-width:850px){ .board{ grid-template-columns:1fr; } }
 
   .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow); }
