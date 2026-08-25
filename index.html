@@ -475,13 +475,10 @@
   /* 公開ビュー用の時計：編集パネルのダイヤルと同じconic-gradientロジック(renderCardClockHtml()で
      再利用)に加え、時刻目盛り・四半期アイコン・時間帯の始点終点マーカーも縮小移植し、
      選択中テーマの --ca 色に染めることでどのテーマでも浮かずに馴染むようにしている。
-     当初はProposal A由来の「ダイヤル左・レンジ一覧右」の横並び1行を採用していたが、実測で
-     3カラム化後の1列の実幅が約161px（デザイン仕様が想定していた約360pxの半分以下）しかなく、
-     横並びにすると一覧側が55px程度まで潰れて時間帯の表記が2行に折り返され続けてしまうと判明。
-     実際の列幅で読みやすさ(要件2)を優先し、ダイヤルを上・一覧を下に積む縦並びに変更した
-     （一覧が列の全幅=137px前後を使えるようになり、通常の「20時〜23時」等が1行に収まる）。 */
+     ダイヤル左・レンジ一覧右の横並び。一覧側が狭くなる列幅では2行に折り返すことがあるが、
+     card-clock-rangeは通常のテキスト折り返し（nowrapなし）なので枠からはみ出すことはない。 */
   .card-clock-module{
-    display:flex; flex-direction:column; align-items:stretch; gap:8px;
+    display:flex; flex-direction:row; align-items:center; gap:10px;
     background:rgba(255,255,255,0.65); border:1px solid var(--border);
     border-radius:16px; padding:10px 12px;
   }
@@ -513,7 +510,7 @@
     box-shadow:0 0 0 1px var(--border); display:flex; align-items:center; justify-content:center;
   }
   .card-clock-center-icon{ font-size:14px; }
-  .card-clock-list{ width:100%; min-width:0; display:flex; flex-direction:column; gap:4px; }
+  .card-clock-list{ flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
   .card-clock-range{
     font-family:"Fraunces","Zen Old Mincho",serif; font-size:12px; font-weight:500; color:var(--text);
     display:flex; align-items:center; gap:6px;
