@@ -98,6 +98,23 @@
      編集パネル内容幅と同程度で、850px直後でも編集欄が確実に読み書きできる最小値。 */
   .board{ display:grid; grid-template-columns:minmax(320px,1fr) minmax(380px,900px); gap:26px; margin-top:30px; align-items:start; }
   @media (max-width:850px){ .board{ grid-template-columns:1fr; } }
+  /* 閲覧専用の共有リンクから開いた場合：編集列(.panel#editorPanel)ごと非表示にするため、
+     2カラムのトラック定義のままだと編集列側に空の320px以上の余白が残ってしまう。
+     プレビュー列だけの1カラムに畳み直す。 */
+  .board.view-only{ grid-template-columns:1fr; }
+
+  /* 閲覧専用の共有リンクを開いたときに表示する、編集不可であることを伝えるバナー */
+  .view-only-banner{
+    display:none; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;
+    margin:0 0 4px; padding:12px 18px; background:var(--teal-bg); border:1px solid rgba(79,124,110,0.28);
+    border-radius:var(--r-sm); font-size:12.5px; color:var(--teal-ink); text-align:center;
+  }
+  .view-only-banner.show{ display:flex; }
+  .view-only-banner a{
+    font-weight:700; color:#fff; background:var(--teal); border-radius:100px; padding:7px 16px;
+    text-decoration:none; white-space:nowrap; transition:background .15s var(--ease-snap);
+  }
+  .view-only-banner a:hover{ background:var(--teal-ink); }
 
   .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow); }
   .panel-head{ padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; position:sticky; top:84px; background:var(--surface); border-radius:var(--r) var(--r) 0 0; z-index:2; }
@@ -572,6 +589,18 @@
   .cape-spark.l{ left:-6px; top:50%; margin-top:-1.5px; }
   .cape-spark.r{ right:-6px; top:50%; margin-top:-1.5px; }
 
+  /* 収集状況(.card-eco-grid .progress-bar)と同じ「次のレベルまでの視覚的な進捗バー」を、
+     ケープレベルの暗色パネルにも追加する。.progress-bar/.progress-bar-fill自体は他の
+     場所と同じクラス名を再利用し、親セレクタでこのパネルの配色にだけ合わせて上書きする。 */
+  .cape-widget .progress-bar{
+    flex:1 1 100%; height:5px; border-radius:100px; overflow:hidden;
+    background:rgba(247,239,221,0.2); margin-top:1px;
+  }
+  .cape-widget .progress-bar-fill{
+    height:100%; border-radius:100px; background:linear-gradient(90deg, var(--gold-ink) 0%, #EFC98A 100%);
+    box-shadow:0 0 5px rgba(239,201,138,0.5);
+  }
+
   .card-foot{ padding-top:10px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-size:10.5px; color:var(--text-3); }
   .card-foot .tag{ font-family:"IBM Plex Mono", monospace; }
 
@@ -626,6 +655,12 @@
     color:var(--text-2); font-size:13px; font-family:"Zen Kaku Gothic New",sans-serif; transition:background .15s;
   }
   .tools-modal-links a:hover{ background:var(--gold-bg); color:var(--gold-ink); }
+  .card-link-preview-text{
+    width:100%; min-height:80px; box-sizing:border-box; resize:vertical; outline:none;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-sm);
+    color:var(--text); font-family:"IBM Plex Mono", monospace; font-size:11px; line-height:1.5; padding:8px 10px;
+  }
+  .card-link-preview-text:focus-visible{ border-color:var(--teal); }
 
   /* ── プロフィール切替モーダル（他のtaipak5000.github.io系ツールと同じ複数保存枠の仕組み） ── */
   .profile-row{ padding:9px 4px; border-bottom:1px solid var(--border); }
@@ -674,6 +709,10 @@
     appearance:none; cursor:pointer; background:var(--gold); color:#fff; border:none; border-radius:var(--r-sm);
     padding:8px 14px; font-weight:700; font-size:12.5px; font-family:"Zen Kaku Gothic New",sans-serif; white-space:nowrap;
   }
+
+  /* panel-head内に画像保存・閲覧専用リンクの2ボタンを並べるための行。h2とjustify-content:space-between
+     で両端に振り分けられる側の要素なので、ボタン自体はここでflex-wrapさせて狭い幅でも折り返す。 */
+  .panel-head-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
 
   /* ── カードを画像で保存 / Xへ投稿（アイテム所持管理のhtml2canvasによる書き出しと同じ仕組み）。
      panel-headはsticky指定なので、カードがどれだけ縦に伸びてもスクロールせず常に押せる ── */
@@ -742,8 +781,13 @@
   </header>
   <p class="lede">Sky 星を紡ぐ子どもたちの自己紹介カードを作れるサイトです。入力した項目はその場でシェア用のカードにまとめられ、<b>項目ごとに公開・非公開を選べます。</b></p>
 
-  <div class="board">
-    <section class="panel">
+  <div class="view-only-banner" id="viewOnlyBanner">
+    <span>🔒 これは閲覧専用の共有カードです（編集はできません）</span>
+    <a href="./" id="viewOnlyOwnCardLink">✏️ 自分のカードを作る</a>
+  </div>
+
+  <div class="board" id="cardBoard">
+    <section class="panel" id="editorPanel">
       <div class="panel-head">
         <h2>✏️ 編集</h2>
       </div>
@@ -845,8 +889,13 @@
           <div class="eco-sync-row">
             <button type="button" class="eco-sync-btn" id="allSyncBtn"><span>⚡</span>収集状況・称号・光の翼をまとめて連携</button>
           </div>
+          <div class="eco-field-head" style="margin-top:10px;">
+            <label for="autoSyncToggle">🔁 開くたびに自動で連携する</label>
+            <label class="switch eco-vis-switch"><input type="checkbox" id="autoSyncToggle"><span class="track"></span><span class="knob"></span></label>
+          </div>
           <div class="hint-box">
-            🔧 「まとめて連携」を押すと、下にある<b>ケープレベル・収集状況・称号</b>それぞれの「実データと連携」ボタンをまとめて1回で実行します。個別に更新したい場合は、各セクションのボタンもそのまま使えます。
+            🔧 「まとめて連携」を押すと、下にある<b>ケープレベル・収集状況・称号</b>それぞれの「実データと連携」ボタンをまとめて1回で実行します。個別に更新したい場合は、各セクションのボタンもそのまま使えます。<br><br>
+            🔁 「開くたびに自動で連携する」をONにすると、次回からこのページを開くたびに3つを自動で連携します。毎回ボタンを押す手間がなくなります(手入力での上書きはこれまで通り可能です)。
           </div>
         </div>
 
@@ -907,9 +956,14 @@
       <section class="panel">
         <div class="panel-head">
           <h2>👀 プレビュー</h2>
-          <button type="button" class="share-btn" id="shareImageBtn">
-            <span>🖼️</span>画像を保存してXへ投稿
-          </button>
+          <div class="panel-head-actions">
+            <button type="button" class="eco-sync-btn" id="shareCardLinkBtn">
+              <span>🔗</span>閲覧専用リンク
+            </button>
+            <button type="button" class="share-btn" id="shareImageBtn">
+              <span>🖼️</span>画像を保存してXへ投稿
+            </button>
+          </div>
         </div>
         <div class="card-frame">
           <div class="card" id="card">
@@ -1028,6 +1082,21 @@
       <input type="text" id="profileNewNameInput" placeholder="新しいプロフィール名" maxlength="30">
       <button type="button" id="profileAddBtn">＋追加</button>
     </div>
+  </div>
+</div>
+
+<!-- ── 閲覧専用リンクの共有：現在のカードの内容（公開設定に従う）をURLの#sharedに
+     埋め込んだリンクを表示する。開いた相手には編集できない閲覧専用として表示され、
+     この端末の保存データが書き換わることもない ── -->
+<div class="tools-modal-overlay" id="cardLinkModalOverlay">
+  <div class="tools-modal" style="max-width:380px;">
+    <div class="tools-modal-head">
+      <span>🔗 閲覧専用リンク</span>
+      <button type="button" class="tools-modal-close" id="cardLinkModalCloseBtn" aria-label="閉じる">×</button>
+    </div>
+    <p class="tools-modal-hint">このリンクを開いた人には、今のカードが編集できない閲覧専用として表示されます（開いた相手の端末データが書き換わることはありません）。カスタム欄・プロフィール画像は容量を抑えるため縮小した画像で埋め込まれます。</p>
+    <textarea id="cardLinkPreviewText" class="card-link-preview-text" readonly onclick="this.select()"></textarea>
+    <p class="tools-modal-hint" style="margin:8px 0 0;">上のテキストを長押しまたは選択してコピーしてください。</p>
   </div>
 </div>
 
@@ -1184,7 +1253,22 @@
     vis: { sns:true, playTime:true, details:true, friendCode:true, ecoStats:true, cape:true, titles:true, customNote:true },
     ecoStats: {}, // ECO_STATSの{value,visible}をidごとに保存（ECO_STATS自体は固定のconstなので、renderCard()の末尾で毎回ミラーする）
     trendGraphs: {}, // TREND_GRAPHSのvisibleをidごとに保存（同上）
+    autoSync: false, // ONの場合、ページを開く（＝リロードする）たびに収集状況・称号・光の翼をまとめて自動連携する
   };
+
+  // ── 閲覧専用の共有リンク：#shared=<code> でアクセスされた場合は、コードをデコードして
+  // その内容だけを描画する「閲覧専用モード」に切り替える。この端末に保存済みの本来の
+  // プロフィールは読み込まず(loadState()自体はスキップ)、保存処理(saveState/flushSaveState)も
+  // 一切実行しない — つまりこのモードで開いても、開いた人自身の端末データは絶対に書き換わらない。
+  let sharedCardPayload = null;
+  try {
+    const sharedMatch = location.hash.match(/^#shared=(.+)$/);
+    if (sharedMatch) {
+      const decoded = JSON.parse(cardDecodeBase64Utf8(decodeURIComponent(sharedMatch[1])));
+      if (decoded && typeof decoded === 'object') sharedCardPayload = decoded;
+    }
+  } catch (_) { sharedCardPayload = null; } // 壊れた/古い形式のリンクは無視し、通常モードで表示する
+  const VIEW_ONLY = !!sharedCardPayload;
 
   // ── 複数プロフィール（保存枠）機構：taipak5000.github.io系ツール共通のprofiles.jsを
   // このカード用に移植したもの。プロフィールの一覧・アクティブIDは全ツール共有の
@@ -1301,6 +1385,7 @@
   const STATE_KEY = 'taiCardState_v1';
   let saveStateTimer = null;
   function flushSaveState(){
+    if (VIEW_ONLY) return; // 閲覧専用モードでは、この端末に保存済みの本来のデータを絶対に上書きしない
     clearTimeout(saveStateTimer);
     try {
       localStorage.setItem(nsKey(STATE_KEY), JSON.stringify(state));
@@ -1316,6 +1401,7 @@
     }
   }
   function saveState(){
+    if (VIEW_ONLY) return; // 同上：閲覧専用モードでは保存をスケジュールすらしない
     clearTimeout(saveStateTimer);
     saveStateTimer = setTimeout(flushSaveState, 400);
   }
@@ -1329,8 +1415,11 @@
   }
 
   ensureProfilesInit();
-  const savedState = loadState();
+  // 閲覧専用モードでは、この端末に保存済みの本来のプロフィールは読み込まず(loadState()自体を
+  // スキップ)、代わりに共有リンクからデコードした内容だけをstateへ反映する。
+  const savedState = VIEW_ONLY ? null : loadState();
   if (savedState) Object.assign(state, savedState);
+  if (VIEW_ONLY && sharedCardPayload) Object.assign(state, sharedCardPayload);
   if (savedState && savedState.vis && !('customNote' in savedState.vis)) state.vis.customNote = true;
   // ECO_STATS・TREND_GRAPHSは固定のconst配列（stateそのものではない）なので、保存されていた
   // 値をここで配列側へ書き戻す（さもないと収集状況の手入力値・連携結果や入手グラフのON/OFFが
@@ -2041,6 +2130,19 @@
     return earned;
   }
 
+  // 閲覧専用モード用：この端末の他ツールの実績データではなく、共有側が選んでいた称号キー
+  // （"ツールid:称号id"）を、どの端末にも共通で存在する静的なTITLE_CATALOGだけを使って
+  // 表示用データに解決する（相手の端末には元の獲得データそのものは存在しないため）。
+  function resolveTitlesFromKeys(keys){
+    return (keys || []).map(key => {
+      const [toolId, id] = String(key).split(':');
+      const tool = TITLE_CATALOG[toolId];
+      const def = tool && tool.titles[id];
+      if (!def) return null;
+      return { key, icon: def.icon, name: def.name, desc: def.desc, descEn: def.descEn, source: tool.source };
+    }).filter(Boolean);
+  }
+
   function drawTitlePicker(){
     if (!syncedTitlesCache.length) {
       titlePickerEl.innerHTML = '<p class="title-picker-empty">まだ称号が見つかっていません。「称号を読み込む」を押してください。</p>';
@@ -2066,7 +2168,8 @@
   }
   // 初回表示時にも自動で1回同期しておく。そうしないと、前回選んで保存されていた称号が
   // （syncedTitlesCacheが空のままで）カードから消えて見えてしまう。
-  syncedTitlesCache = syncEarnedTitles();
+  // 閲覧専用モードでは、この端末の実績データではなく共有された称号キーを解決する。
+  syncedTitlesCache = VIEW_ONLY ? resolveTitlesFromKeys(state.titles.selected) : syncEarnedTitles();
   drawTitlePicker();
 
   // 称号の実データ連携本体。「まとめて連携」ボタンからも同じ処理を呼べるよう、
@@ -2105,7 +2208,11 @@
     const reachedLevel = CAPE_LEVELS.filter(need => total >= need).length;
     const nextNeed = CAPE_LEVELS[reachedLevel];
     const isMax = reachedLevel >= CAPE_LEVELS.length;
-    return { reachedLevel, nextNeed, remain: isMax ? 0 : nextNeed - total, isMax };
+    // 収集状況と同じ「次のレベルまでの進捗バー」用: 直前のレベル到達に必要だった枚数を0%、
+    // 次のレベルに必要な枚数を100%とした、現在レベル内での進捗率
+    const prevNeed = reachedLevel > 0 ? CAPE_LEVELS[reachedLevel - 1] : 0;
+    const pct = isMax ? 100 : Math.max(0, Math.min(100, Math.round((total - prevNeed) / (nextNeed - prevNeed) * 100)));
+    return { reachedLevel, nextNeed, remain: isMax ? 0 : nextNeed - total, isMax, pct };
   }
   function renderCapePipsHtml(reachedLevel){
     if (reachedLevel <= 0) return '';
@@ -2195,8 +2302,10 @@
       : '連携できるデータが見つかりませんでした（羽トラッカーを一度開いてから、もう一度お試しください）');
   });
 
-  // ── まとめて連携：収集状況・称号・光の翼の3つの同期処理を1クリックでまとめて実行する ──
-  document.getElementById('allSyncBtn').addEventListener('click', () => {
+  // ── まとめて連携：収集状況・称号・光の翼の3つの同期処理を1回でまとめて実行する。
+  // 「まとめて連携」ボタンからも、自動連携トグルをONにした瞬間からも同じ処理を呼べるよう、
+  // トースト表示まで含めて1つの関数に切り出す。 ──
+  function runAllSyncWithToast(){
     const ecoCount = runEcoStatsSync();
     const titleCount = runTitleSync();
     const wingOk = runWingSync();
@@ -2208,6 +2317,17 @@
     showToast(parts.length
       ? `${parts.join('・')}を連携しました`
       : '連携できるデータが見つかりませんでした（各サイトを一度開いてから、もう一度お試しください）');
+  }
+  document.getElementById('allSyncBtn').addEventListener('click', runAllSyncWithToast);
+
+  // ── 自動連携トグル：ONにすると、次回以降このページを開く（＝リロードする）たびに
+  // 上の3つの同期を自動で実行する。手動で「まとめて連携」を毎回押す手間をトグル1つで解消する。 ──
+  const autoSyncToggleEl = document.getElementById('autoSyncToggle');
+  autoSyncToggleEl.checked = !!state.autoSync;
+  autoSyncToggleEl.addEventListener('change', e => {
+    state.autoSync = e.target.checked;
+    saveState();
+    if (state.autoSync) runAllSyncWithToast(); // ONにした瞬間にも1回実行し、次のリロードを待たせない
   });
 
   // 入手推移グラフ：カンマ区切りの数値列から、面グラフ＋折れ線のミニスパークラインを描く
@@ -2492,6 +2612,7 @@
           <div class="cape-widget-sub">${sub}</div>
           <div class="cape-level-label">Lv${c.reachedLevel}</div>
           <div class="cape-pips">${renderCapePipsHtml(c.reachedLevel)}</div>
+          <div class="progress-bar"><div class="progress-bar-fill" style="width:${c.pct}%"></div></div>
         </div>`);
     } else { setSection(capeEl, ''); }
 
@@ -2559,7 +2680,28 @@
     saveState();
   }
 
+  // 自動連携：ONの場合、このページを開く（＝リロードする）たびに3つの同期をバックグラウンドで
+  // 自動実行してから初回描画する。閲覧専用モードでは、共有された内容を見せるためのモードなので、
+  // この端末側の実データで上書きしてしまわないよう対象外にする。ボタン操作時と違い、リロードの
+  // たびにトーストが出ると煩わしいため、ここでは静かに更新するだけに留める。
+  if (state.autoSync && !VIEW_ONLY) {
+    runEcoStatsSync();
+    runTitleSync();
+    runWingSync();
+  }
+
   renderCard();
+
+  // 閲覧専用モード：編集列・下部クイックメニューを隠し、閲覧専用であることを伝えるバナーを出す。
+  // 「自分のカードを作る」リンクは#sharedを含まない素のURLへ張ることで、押した相手には
+  // 通常モード（その人自身の保存データ）でこのページが開き直る。
+  if (VIEW_ONLY) {
+    document.getElementById('cardBoard').classList.add('view-only');
+    document.getElementById('editorPanel').style.display = 'none';
+    document.querySelector('.site-dock').style.display = 'none';
+    document.getElementById('viewOnlyOwnCardLink').href = location.pathname + location.search;
+    document.getElementById('viewOnlyBanner').classList.add('show');
+  }
 
   // 初回表示のときだけ、カード全体がふわっと回転しながら現れる演出（以降の再描画では発火しない）。
   // タブが非表示状態から始まった場合など、animationendが発火しないケースに備えて
@@ -2796,6 +2938,116 @@
     } finally {
       cardEl.classList.remove('exporting');
       shareBtn.disabled = false;
+    }
+  });
+
+  /* ================================================================
+     🔗 閲覧専用カードリンクの共有
+     現在のカードの内容（公開設定=state.visに従う）をURLの#sharedへ埋め込み、リンクを
+     開いた相手には編集できない閲覧専用として表示する（VIEW_ONLY判定・保存処理の無効化
+     自体は、上のstate初期化まわりで実装済み）。プロフィール画像・カスタム欄画像は
+     URLが際限なく長くなるのを避けるため、共有リンク用にだけ縮小した軽量版を埋め込む
+     （保存済みの本来の画像やカード自体の見た目は変えない）。入手グラフは他ツールの
+     実履歴データに依存し相手の端末では再現できないため、リンクには含めない。
+     ================================================================ */
+  function cardEncodeBase64Utf8(str){
+    const uint8array = new TextEncoder().encode(str);
+    let binString = '';
+    for (let i = 0; i < uint8array.length; i++) binString += String.fromCharCode(uint8array[i]);
+    return btoa(binString);
+  }
+  function cardDecodeBase64Utf8(b64){
+    const binString = atob(b64);
+    const uint8array = new Uint8Array(binString.length);
+    for (let i = 0; i < binString.length; i++) uint8array[i] = binString.charCodeAt(i);
+    return new TextDecoder().decode(uint8array);
+  }
+
+  // 非公開(トグルOFF)にした項目の値は、そもそもペイロードに含めない。#shared=以降は
+  // ただのBase64（暗号化ではない）なので、レンダリング時にvisで隠すだけでは、リンクの
+  // 文字列をatob()等で覗かれると非公開にしたはずの値（フレンドコード等）がそのまま
+  // 読めてしまう。「公開設定に従う値のみ」を名実ともに満たすため、非公開項目は値ごと空にする。
+  async function buildSharedCardPayload(){
+    let avatarImage = { src: null, zoom: 1, offsetX: 0, offsetY: 0 };
+    if (state.avatarImage && state.avatarImage.src) {
+      avatarImage = {
+        src: await resizeImageDataUrl(state.avatarImage.src, 300, 0.82),
+        zoom: state.avatarImage.zoom, offsetX: state.avatarImage.offsetX, offsetY: state.avatarImage.offsetY,
+      };
+    }
+    let customNoteImage = null;
+    if (state.vis.customNote && state.customNote.image && state.customNote.image.src) {
+      customNoteImage = { src: await resizeImageDataUrl(state.customNote.image.src, 480, 0.78) };
+    }
+    return {
+      theme: state.theme,
+      avatarImage,
+      name: state.name,
+      oneLiner: state.oneLiner,
+      journeyYear: state.journeyYear,
+      favorites: state.favorites,
+      wingTotal: state.vis.cape ? state.wingTotal : '',
+      snsList: state.vis.sns ? state.snsList : [],
+      playTimeRanges: state.vis.playTime ? state.playTimeRanges : [],
+      playTimeIrregular: state.vis.playTime ? state.playTimeIrregular : false,
+      detail: state.vis.details ? state.detail : {},
+      detailFreeText: state.vis.details ? state.detailFreeText : {},
+      friendCode: state.vis.friendCode ? state.friendCode : '',
+      friendCodeContact: state.vis.friendCode ? state.friendCodeContact : null,
+      titles: { selected: state.vis.titles ? state.titles.selected.slice() : [] },
+      customNote: state.vis.customNote
+        ? { title: state.customNote.title, text: state.customNote.text, image: customNoteImage }
+        : { title: '', text: '', image: null },
+      vis: Object.assign({}, state.vis),
+      ecoStats: state.vis.ecoStats ? JSON.parse(JSON.stringify(state.ecoStats)) : {},
+    };
+  }
+
+  async function buildCardShareUrl(){
+    const payload = await buildSharedCardPayload();
+    const code = cardEncodeBase64Utf8(JSON.stringify(payload));
+    const base = location.href.split('#')[0];
+    return `${base}#shared=${encodeURIComponent(code)}`;
+  }
+
+  const cardLinkModalOverlay = document.getElementById('cardLinkModalOverlay');
+  function openCardLinkModal(url){
+    document.getElementById('cardLinkPreviewText').value = url;
+    cardLinkModalOverlay.classList.add('show');
+  }
+  function closeCardLinkModal(){ cardLinkModalOverlay.classList.remove('show'); }
+  document.getElementById('cardLinkModalCloseBtn').addEventListener('click', closeCardLinkModal);
+  cardLinkModalOverlay.addEventListener('click', e => { if (e.target === cardLinkModalOverlay) closeCardLinkModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCardLinkModal(); });
+
+  // Web Share APIが使えるスマホではネイティブ共有シートへ、それ以外はクリップボードへ
+  // コピー（アイテム所持管理のコーデ共有リンクと同じ導線）。どちらも使えない環境だけ、
+  // リンクをテキストで表示するモーダルにフォールバックする。
+  async function presentCardShareUrl(url){
+    const shareText = `✨「${state.name || '星紡ぎカード'}」の閲覧専用カードです。よかったら見てください！`;
+    if (isMobileDevice() && navigator.share) {
+      try { await navigator.share({ title: '星紡ぎカード', text: shareText, url }); return; }
+      catch (e) { if (e && e.name === 'AbortError') return; /* 失敗時はコピーへフォールバック */ }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast('閲覧専用リンクをコピーしました！好きな場所に貼り付けて共有できます');
+    } catch (e) {
+      openCardLinkModal(url);
+    }
+  }
+
+  const shareCardLinkBtn = document.getElementById('shareCardLinkBtn');
+  shareCardLinkBtn.addEventListener('click', async () => {
+    shareCardLinkBtn.disabled = true;
+    try {
+      const url = await buildCardShareUrl();
+      await presentCardShareUrl(url);
+    } catch (err) {
+      console.error(err);
+      showToast('リンクの作成に失敗しました');
+    } finally {
+      shareCardLinkBtn.disabled = false;
     }
   });
 })();
