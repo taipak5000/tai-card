@@ -1,3 +1,4 @@
+<meta charset="UTF-8">
 <title>星紡ぎカード</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -117,7 +118,6 @@
   .switch input:checked + .track + .knob{ transform:translateX(17px); background:var(--teal); }
   .switch input:focus-visible + .track{ box-shadow:0 0 0 3px rgba(79,124,110,0.22); }
 
-  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .f{ margin-bottom:10px; }
   .f label{ display:block; font-size:11.5px; color:var(--text-2); margin-bottom:5px; font-weight:600; }
   .eco-field-row{ margin-bottom:14px; }
@@ -580,8 +580,9 @@
   footer a{ color:var(--teal-ink); text-decoration:underline; text-underline-offset:2px; }
 
   /* ── 画面下部クイックメニュー（他のtaipak5000.github.io系ツールと同じ「固定ドック」の
-     慣習に合わせたスタイル。ただしこのツールはまだプロフィール切替やダッシュボードを
-     持たないため、実際に使える3項目（他のツール／データ連携／設定・情報）だけに絞っている） ── */
+     慣習に合わせたスタイル。このツールはダッシュボードを持たないため、実際に使える
+     2項目（プロフィール切替／他のツール。データ連携・設定情報は「他のツール」内のリストへ統合）
+     だけに絞っている） ── */
   .site-dock{
     display:flex; position:fixed; left:0; right:0; bottom:0; z-index:90;
     padding:6px 10px calc(8px + env(safe-area-inset-bottom));
@@ -2505,7 +2506,9 @@
         <div class="card-eco-grid">`;
       ECO_STATS.forEach(f => {
         if (!f.value || !f.visible) return;
-        const pctMatch = /^(\d{1,3})%$/.exec((f.value || '').trim());
+        // エモート所持率・精霊ツリー進行度の連携値は「47.3%」のような小数を含むため、
+        // 整数percentしか拾えない正規表現だとこの2項目だけ進捗バーが出ない不具合があった。
+        const pctMatch = /^(\d{1,3}(?:\.\d+)?)%$/.exec((f.value || '').trim());
         const pct = pctMatch ? Math.max(0, Math.min(100, Number(pctMatch[1]))) : null;
         const bar = pct !== null ? `<div class="progress-bar"><div class="progress-bar-fill" style="width:${pct}%"></div></div>` : '';
         const valueHtml = `<div class="soft-row-value ${f.value ? '' : 'na'}">${f.value ? escapeHtml(f.value) : '未入力'}</div>${bar}`;
