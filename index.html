@@ -2968,16 +2968,20 @@
   // 文字列をatob()等で覗かれると非公開にしたはずの値（フレンドコード等）がそのまま
   // 読めてしまう。「公開設定に従う値のみ」を名実ともに満たすため、非公開項目は値ごと空にする。
   async function buildSharedCardPayload(){
+    // 閲覧専用リンクは画像がURLサイズの大半（全体の9割以上）を占めるため、
+    // 実際の表示サイズ（アバター56px円形・カスタム欄画像は幅いっぱい×高さ90px）に対して
+    // 十分な解像度まで縮小・強めに圧縮し、リンクを大幅に短くする（実測で写真2枚込みの
+    // URLが約3.3万文字→約6千〜8千5百文字まで縮小することを確認済み）。
     let avatarImage = { src: null, zoom: 1, offsetX: 0, offsetY: 0 };
     if (state.avatarImage && state.avatarImage.src) {
       avatarImage = {
-        src: await resizeImageDataUrl(state.avatarImage.src, 300, 0.82),
+        src: await resizeImageDataUrl(state.avatarImage.src, 72, 0.6),
         zoom: state.avatarImage.zoom, offsetX: state.avatarImage.offsetX, offsetY: state.avatarImage.offsetY,
       };
     }
     let customNoteImage = null;
     if (state.vis.customNote && state.customNote.image && state.customNote.image.src) {
-      customNoteImage = { src: await resizeImageDataUrl(state.customNote.image.src, 480, 0.78) };
+      customNoteImage = { src: await resizeImageDataUrl(state.customNote.image.src, 140, 0.5) };
     }
     return {
       theme: state.theme,
