@@ -179,8 +179,12 @@
   .crop-box img{ width:100%; height:100%; object-fit:cover; display:block; user-select:none; -webkit-user-drag:none; pointer-events:none; }
   .crop-controls{ flex:1; min-width:160px; }
   .crop-controls label{ display:block; font-size:11px; color:var(--text-2); margin-bottom:4px; font-weight:600; }
+  .crop-controls label:not(:first-child){ margin-top:10px; }
   .crop-controls input[type="range"]{ width:100%; accent-color:var(--teal); }
   .crop-hint{ font-size:11px; color:var(--text-3); margin-top:6px; }
+  /* 背景画像用のクロップ枠：アバター(円形)と違いカード本体(aspect-ratio 1.91/1)と同じ
+     横長比率にすることで、プレビュー段階から実際のカードに近い構図で位置調整できるようにする */
+  .crop-box-wide{ width:100%; max-width:240px; height:auto; aspect-ratio:1.91/1; border-radius:12px; }
   .remove-img-btn{ margin-top:10px; font-size:11.5px; color:var(--danger); background:none; border:none; cursor:pointer; padding:0; font-family:inherit; text-decoration:underline; }
   .custom-note-preview{ display:flex; align-items:center; gap:10px; margin-top:10px; }
   .custom-note-preview img{ width:56px; height:56px; object-fit:cover; border-radius:var(--r-sm); border:1px solid var(--border); flex-shrink:0; }
@@ -319,6 +323,15 @@
        詳細プロフィールの2列モザイクが1タイル約40px幅になって著しく読みにくくなることを確認）。 */
     container-type: inline-size; container-name: cardbox;
   }
+  /* 背景画像レイヤー：#card直下の最初の子要素として置き、z-index:-1で
+     「.cardのグラデ背景より上・実コンテンツより下」に固定する（overflow:visibleな.card自身には
+     一切手を加えず、この専用ラッパーだけにoverflow:hiddenと角丸を持たせて画像だけを切り抜く）。
+     絶対配置＋z-index:-1はaspect-ratio/auto-min-sizeの計算に関与しないため、.cardの可変高さ
+     ("grow instead of clip"）の挙動には影響しない。 */
+  .card-bg-wrap{
+    position:absolute; inset:0; z-index:-1; overflow:hidden; border-radius:24px; pointer-events:none;
+  }
+  .card-bg-wrap img{ width:100%; height:100%; object-fit:cover; display:block; }
   /* .card-kicker and .card-top can't both simply declare grid-area:head — two items sharing one
      named grid area overlap (same grid line box) rather than stacking, so they're grouped under
      one real wrapper that owns the "head" area and lays them out in normal flow. .card-emblem
@@ -813,6 +826,22 @@
         </div>
 
         <div class="sec">
+          <div class="sec-head"><div class="sec-title">🌄 背景画像</div></div>
+          <label class="upload-btn">🖼️ 画像をアップロード<input type="file" accept="image/*" id="bgFileInput"></label>
+          <div class="crop-tool" id="bgCropTool" style="display:none;">
+            <div class="crop-box crop-box-wide" id="bgCropBox"><img id="bgCropImg" src="" alt=""></div>
+            <div class="crop-controls">
+              <label>ズーム</label>
+              <input type="range" id="bgZoomSlider" min="100" max="300" value="100">
+              <label>不透明度</label>
+              <input type="range" id="bgOpacitySlider" min="0" max="100" value="35">
+              <div class="crop-hint">ドラッグで位置調整・スライダーで拡大縮小・不透明度を調整</div>
+              <button type="button" class="remove-img-btn" id="removeBgImgBtn">画像を削除する</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
           <div class="sec-head"><div class="sec-title">🌟 基本情報</div></div>
           <div class="f"><label>名前</label><input type="text" id="in_name" placeholder="例: たい"></div>
           <div class="f"><label>ひとこと</label><input type="text" id="in_oneLiner" placeholder="例: ものづくりが好きです"></div>
@@ -967,6 +996,7 @@
         </div>
         <div class="card-frame">
           <div class="card" id="card">
+            <div class="card-bg-wrap" id="cardBgWrap" style="display:none;"><img id="cardBgImg" src="" alt=""></div>
             <div class="card-emblem">✦</div>
             <div class="card-head">
               <div class="card-kicker">PROFILE</div>
@@ -1236,6 +1266,7 @@
   const state = {
     theme: 'night',
     avatarImage: { src: null, zoom: 1, offsetX: 0, offsetY: 0 },
+    cardBgImage: { src: null, zoom: 1, offsetX: 0, offsetY: 0, opacity: 35 },
     name: 'たい',
     oneLiner: 'ものづくりが好きです',
     journeyYear: '',
@@ -1394,6 +1425,7 @@
         const light = Object.assign({}, state, {
           avatarImage: Object.assign({}, state.avatarImage, { src: null }),
           customNote: Object.assign({}, state.customNote, { image: null }),
+          cardBgImage: Object.assign({}, state.cardBgImage, { src: null }),
         });
         localStorage.setItem(nsKey(STATE_KEY), JSON.stringify(light));
         showToast('画像サイズが大きいため、一部の画像は保存されませんでした');
@@ -1522,6 +1554,89 @@
     cropTool.style.display = 'none';
     renderCard();
   });
+
+  // ── カード背景: 画像アップロード + トリミング(位置・ズーム) + 不透明度 ──
+  // アバターのクロップ機構と同じ「object-fit:coverしたimgをtransformでpan/zoom」方式を
+  // そのまま横長(1.91:1)のプレビュー枠に流用し、実カード側もCSSではなくJS側で同じ
+  // transform値を反映することで、引き伸ばし無しのトリミングをどのサイズでも一貫させている。
+  const bgCropTool = document.getElementById('bgCropTool');
+  const bgCropBox = document.getElementById('bgCropBox');
+  const bgCropImg = document.getElementById('bgCropImg');
+  const bgZoomSlider = document.getElementById('bgZoomSlider');
+  const bgOpacitySlider = document.getElementById('bgOpacitySlider');
+
+  function applyBgCropTransform(){
+    const { zoom, offsetX, offsetY } = state.cardBgImage;
+    bgCropImg.style.transform = `scale(${zoom}) translate(${offsetX}%, ${offsetY}%)`;
+  }
+
+  // 画像アップロードはアバターと違いカード全面を覆う大きな写真になりやすいため、
+  // カスタム欄画像と同様にcanvasで縮小・再圧縮してからlocalStorageに載せる（容量対策）。
+  document.getElementById('bgFileInput').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      resizeImageDataUrl(ev.target.result, 1600, 0.85).then(resized => {
+        state.cardBgImage = { src: resized, zoom: 1, offsetX: 0, offsetY: 0, opacity: state.cardBgImage.opacity || 35 };
+        bgCropImg.src = resized;
+        bgZoomSlider.value = 100;
+        bgOpacitySlider.value = state.cardBgImage.opacity;
+        applyBgCropTransform();
+        bgCropTool.style.display = 'flex';
+        renderCard();
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+
+  bgZoomSlider.addEventListener('input', e => {
+    state.cardBgImage.zoom = Number(e.target.value) / 100;
+    applyBgCropTransform();
+    renderCard();
+  });
+
+  bgOpacitySlider.addEventListener('input', e => {
+    state.cardBgImage.opacity = Number(e.target.value);
+    renderCard();
+  });
+
+  let bgDragging = false, bgDragStart = {x:0,y:0}, bgDragOrigin = {x:0,y:0};
+  bgCropBox.addEventListener('pointerdown', e => {
+    bgDragging = true;
+    bgCropBox.setPointerCapture(e.pointerId);
+    bgDragStart = { x: e.clientX, y: e.clientY };
+    bgDragOrigin = { x: state.cardBgImage.offsetX, y: state.cardBgImage.offsetY };
+  });
+  bgCropBox.addEventListener('pointermove', e => {
+    if (!bgDragging) return;
+    const rect = bgCropBox.getBoundingClientRect();
+    const dxPct = ((e.clientX - bgDragStart.x) / rect.width) * 100;
+    const dyPct = ((e.clientY - bgDragStart.y) / rect.height) * 100;
+    state.cardBgImage.offsetX = Math.max(-45, Math.min(45, bgDragOrigin.x + dxPct));
+    state.cardBgImage.offsetY = Math.max(-45, Math.min(45, bgDragOrigin.y + dyPct));
+    applyBgCropTransform();
+  });
+  function endBgDrag(){ if (bgDragging) { bgDragging = false; renderCard(); } }
+  bgCropBox.addEventListener('pointerup', endBgDrag);
+  bgCropBox.addEventListener('pointercancel', endBgDrag);
+
+  document.getElementById('removeBgImgBtn').addEventListener('click', () => {
+    state.cardBgImage = { src: null, zoom: 1, offsetX: 0, offsetY: 0, opacity: 35 };
+    bgCropTool.style.display = 'none';
+    renderCard();
+  });
+
+  // 保存済みの背景画像があれば、リロード後も編集用のトリミング枠を復元しておく
+  // （アバター側には無い挙動だが、位置・ズームを再調整する際に毎回再アップロードが
+  // 必要になるのを避けるため、新設のこちらだけ明示的に復元する）
+  if (state.cardBgImage.src) {
+    bgCropImg.src = state.cardBgImage.src;
+    bgZoomSlider.value = Math.round(state.cardBgImage.zoom * 100);
+    bgOpacitySlider.value = state.cardBgImage.opacity;
+    applyBgCropTransform();
+    bgCropTool.style.display = 'flex';
+  }
 
   // ── カスタム欄：時計横の余白に自由なテキスト・画像を差し込める欄。
   // アバターと違い1プロフィールに2枚目の画像を持たせることになるため、容量対策として
@@ -2501,6 +2616,17 @@
       avatarEl.innerHTML = '';
     }
 
+    const cardBgWrap = document.getElementById('cardBgWrap');
+    const cardBgImg = document.getElementById('cardBgImg');
+    if (state.cardBgImage.src) {
+      cardBgWrap.style.display = 'block';
+      cardBgWrap.style.opacity = state.cardBgImage.opacity / 100;
+      cardBgImg.src = state.cardBgImage.src;
+      cardBgImg.style.transform = `scale(${state.cardBgImage.zoom}) translate(${state.cardBgImage.offsetX}%, ${state.cardBgImage.offsetY}%)`;
+    } else {
+      cardBgWrap.style.display = 'none';
+    }
+
     document.getElementById('cardName').textContent = state.name || '（名前未入力）';
     document.getElementById('cardOneLiner').textContent = state.oneLiner || '';
 
@@ -2983,9 +3109,18 @@
     if (state.vis.customNote && state.customNote.image && state.customNote.image.src) {
       customNoteImage = { src: await resizeImageDataUrl(state.customNote.image.src, 140, 0.5) };
     }
+    let cardBgImage = { src: null, zoom: 1, offsetX: 0, offsetY: 0, opacity: 35 };
+    if (state.cardBgImage && state.cardBgImage.src) {
+      cardBgImage = {
+        src: await resizeImageDataUrl(state.cardBgImage.src, 500, 0.6),
+        zoom: state.cardBgImage.zoom, offsetX: state.cardBgImage.offsetX, offsetY: state.cardBgImage.offsetY,
+        opacity: state.cardBgImage.opacity,
+      };
+    }
     return {
       theme: state.theme,
       avatarImage,
+      cardBgImage,
       name: state.name,
       oneLiner: state.oneLiner,
       journeyYear: state.journeyYear,
