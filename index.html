@@ -4,6 +4,23 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Zen+Old+Mincho:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script>
+  // 🌓 描画前にテーマを確定させ、ダークモード時に一瞬でも明るい背景が表示される「ちらつき」を防止する
+  // （'sky_app_theme' は taipak5000.github.io 系ツール共通のキー。sky_app_langと同様、
+  //   プロフィールに依存しない端末単位の設定のため nsKey() は使わない）
+  // sky_app_theme は 'light' / 'dark' / 'system'（キー未設定時も'system'として扱う）のいずれか。
+  (function () {
+    try {
+      var saved = localStorage.getItem('sky_app_theme');
+      var isDark = (saved === 'light' || saved === 'dark')
+        ? (saved === 'dark')
+        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
 <style>
   :root{
     --bg-a:#EFF3FB; --bg-b:#E7ECF8; --bg-c:#ECE7F5;
@@ -17,6 +34,21 @@
     --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
     color-scheme: light;
+  }
+
+  /* 🌙 ダークモード用のカラー上書き（:root の値は変更せず、[data-theme="dark"] 時だけ上書きする。
+     姉妹サイト共通のダークパレット公式：背景→ほぼ黒、カード面→#1C1C1E系、罫線→白14%、
+     文字→#F2F2F7/#98989D/#636366(主/副/三次)。ゴールド/ティールの色相自体はtai-card独自の
+     ものを維持しつつ、暗い背景の上でも読めるよう明度だけ持ち上げている） */
+  [data-theme="dark"]{
+    color-scheme: dark;
+    --bg-a:#08090B; --bg-b:#0B0C10; --bg-c:#0A0910;
+    --surface:#1C1C1E; --surface-2:#232326; --surface-3:#2C2C2E; --border:rgba(255,255,255,0.14);
+    --text:#F2F2F7; --text-2:#98989D; --text-3:#636366;
+    --gold:#D9AD5E; --gold-ink:#E8C179; --gold-bg:rgba(217,173,94,0.18);
+    --teal:#5FA28F; --teal-ink:#8FCBB8; --teal-bg:rgba(95,162,143,0.18);
+    --danger:#E5897A; --ok:#82C99B;
+    --shadow: 0 2px 6px rgba(0,0,0,0.28), 0 16px 36px rgba(0,0,0,0.4);
   }
 
   /* ── 遊び心のあるモーション（yui540さんのCSSアニメーション作品を参考に、
@@ -675,6 +707,8 @@
     color:var(--text-2); font-size:13px; font-family:"Zen Kaku Gothic New",sans-serif; transition:background .15s;
   }
   .tools-modal-links a:hover{ background:var(--gold-bg); color:var(--gold-ink); }
+  /* 精度に不安がある新機能であることを示す小さな注記（例: 楽譜づくり） */
+  .tool-badge-test{ font-size:9px; font-weight:700; color:var(--text-3); text-transform:uppercase; letter-spacing:0.3px; }
   .card-link-preview-text{
     width:100%; min-height:80px; box-sizing:border-box; resize:vertical; outline:none;
     background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-sm);
@@ -1079,6 +1113,7 @@
       <a href="https://taipak5000.github.io/star-candle/">🕯️ 星のキャンドル計算機</a>
       <a href="https://taipak5000.github.io/companion/">✨ 精霊同行ツール</a>
       <a href="https://taipak5000.github.io/wings/">🪽 羽トラッカー</a>
+      <a href="https://taipak5000.github.io/tai-score/"><span class="tool-badge-test">test</span>🎵 楽譜づくり</a>
       <a href="https://taipak5000.github.io/tai-transfer/">🔄 データ引継ぎ</a>
       <a href="https://taipak5000.github.io/tai-info/">⚙️ 設定・更新情報</a>
     </nav>
@@ -1169,7 +1204,7 @@
     { id:'item',      icon:'🗂️', label:'アイテム所持率',       source:'アイテム所持管理',   value:'', placeholder:'例: 82%', visible:true },
     { id:'emote',     icon:'🎭', label:'エモート所持率',       source:'エモート所持率管理',  value:'', placeholder:'例: 65%', visible:true },
     { id:'spirit',    icon:'✨', label:'精霊ツリー進行度',     source:'姉妹サイト',    value:'', placeholder:'例: 47%', visible:true },
-    { id:'score',     icon:'🎵', label:'作った曲数',          source:'姉妹サイト',    value:'', placeholder:'例: 24曲', visible:true },
+    { id:'score',     icon:'🎵', label:'作った曲数',          source:'楽譜づくり',    value:'', placeholder:'例: 24曲', visible:true },
     { id:'share',     icon:'📌', label:'シェア中の作品数',     source:'創作物管理ツール',   value:'', placeholder:'例: 6件', visible:true },
   ];
 
@@ -2619,7 +2654,7 @@
 
   function renderCard(){
     const card = document.getElementById('card');
-    const theme = THEMES.find(t => t.id === state.theme);
+    const theme = THEMES.find(t => t.id === state.theme) || THEMES[0];
     card.style.setProperty('--card-grad', theme.grad);
     card.style.setProperty('--ca', theme.ca);
     card.style.setProperty('--ca2', theme.ca2);
@@ -2627,7 +2662,7 @@
 
     const avatarEl = document.getElementById('cardAvatar');
     if (state.avatarImage.src) {
-      avatarEl.innerHTML = `<img src="${state.avatarImage.src}" style="transform: scale(${state.avatarImage.zoom}) translate(${state.avatarImage.offsetX}%, ${state.avatarImage.offsetY}%);">`;
+      avatarEl.innerHTML = `<img src="${escapeHtml(state.avatarImage.src)}" style="transform: scale(${state.avatarImage.zoom}) translate(${state.avatarImage.offsetX}%, ${state.avatarImage.offsetY}%);">`;
     } else {
       avatarEl.innerHTML = '';
     }
@@ -2696,7 +2731,7 @@
     const noteImgSrc = state.customNote.image && state.customNote.image.src;
     if (state.vis.customNote && (noteText || noteImgSrc)) {
       const noteTitle = (state.customNote.title || '').trim() || 'カスタム欄';
-      const imgHtml = noteImgSrc ? `<img class="card-custom-note-img" src="${noteImgSrc}" alt="">` : '';
+      const imgHtml = noteImgSrc ? `<img class="card-custom-note-img" src="${escapeHtml(noteImgSrc)}" alt="">` : '';
       const textHtml = noteText ? `<p class="card-custom-note-text">${escapeHtml(noteText).replace(/\n/g, '<br>')}</p>` : '';
       setSection(noteEl, `
         <div class="card-sec-title">CUSTOM</div>
@@ -3204,6 +3239,17 @@
     } finally {
       shareCardLinkBtn.disabled = false;
     }
+  });
+
+  // 🌓 sky_app_theme が未設定/'system'のときだけ、OS側のダーク/ライト切り替え（サンセット等での
+  // 自動切替）にライブ追従させる。'light'/'dark'を明示保存済みの場合はOS変更を無視する
+  // （tai-cardには表示設定モーダルが無いため、トグルUIではなくこの読み取り追従のみ用意する）。
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    try {
+      const saved = localStorage.getItem('sky_app_theme');
+      if (saved === 'light' || saved === 'dark') return;
+      document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+    } catch (_) { /* localStorageが使えない環境では何もしない */ }
   });
 })();
 </script>
