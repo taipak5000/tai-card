@@ -1616,6 +1616,10 @@
     state.cardBgImage.offsetX = Math.max(-45, Math.min(45, bgDragOrigin.x + dxPct));
     state.cardBgImage.offsetY = Math.max(-45, Math.min(45, bgDragOrigin.y + dyPct));
     applyBgCropTransform();
+    // ドラッグ中も実カード側のプレビューをリアルタイムに追従させる（クロップ枠だけでなく
+    // 実際に書き出される見た目をその場で確認できるようにする。ズーム・不透明度の
+    // スライダーは元からinputイベントのたびにrenderCard()している = ドラッグ操作もそれに揃える）
+    renderCard();
   });
   function endBgDrag(){ if (bgDragging) { bgDragging = false; renderCard(); } }
   bgCropBox.addEventListener('pointerup', endBgDrag);
