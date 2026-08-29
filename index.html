@@ -1415,22 +1415,27 @@
   // （QuotaExceededError）になった場合は、画像だけ諦めて残りのデータだけ保存し直す。 ──
   const STATE_KEY = 'taiCardState_v1';
   let saveStateTimer = null;
+  // 容量超過(QuotaExceededError)時は、全画像を一律で諦めるのではなく「背景画像→カスタム欄画像→
+  // アバター画像」の順に1枚ずつ諦めながら再試行する。背景画像はカード全面を覆う写真になりやすく
+  // 3枚の中で最もサイズが大きくなりがちなため、最初に諦めることで他の2枚が生き残る可能性を上げる。
   function flushSaveState(){
     if (VIEW_ONLY) return; // 閲覧専用モードでは、この端末に保存済みの本来のデータを絶対に上書きしない
     clearTimeout(saveStateTimer);
-    try {
-      localStorage.setItem(nsKey(STATE_KEY), JSON.stringify(state));
-    } catch (err) {
+    const dropSteps = [
+      { patch: {}, msg: null }, // まずは無加工でそのまま保存を試みる
+      { patch: { cardBgImage: Object.assign({}, state.cardBgImage, { src: null }) }, msg: '背景画像のサイズが大きいため保存されませんでした' },
+      { patch: { cardBgImage: Object.assign({}, state.cardBgImage, { src: null }), customNote: Object.assign({}, state.customNote, { image: null }) }, msg: '画像サイズが大きいため、背景画像とカスタム欄の画像は保存されませんでした' },
+      { patch: { cardBgImage: Object.assign({}, state.cardBgImage, { src: null }), customNote: Object.assign({}, state.customNote, { image: null }), avatarImage: Object.assign({}, state.avatarImage, { src: null }) }, msg: '画像サイズが大きいため、一部の画像は保存されませんでした' },
+    ];
+    for (let i = 0; i < dropSteps.length; i++) {
       try {
-        const light = Object.assign({}, state, {
-          avatarImage: Object.assign({}, state.avatarImage, { src: null }),
-          customNote: Object.assign({}, state.customNote, { image: null }),
-          cardBgImage: Object.assign({}, state.cardBgImage, { src: null }),
-        });
-        localStorage.setItem(nsKey(STATE_KEY), JSON.stringify(light));
-        showToast('画像サイズが大きいため、一部の画像は保存されませんでした');
-      } catch (err2) { /* それでも失敗する場合は諦める（入力操作自体は止めない） */ }
+        const toSave = i === 0 ? state : Object.assign({}, state, dropSteps[i].patch);
+        localStorage.setItem(nsKey(STATE_KEY), JSON.stringify(toSave));
+        if (dropSteps[i].msg) showToast(dropSteps[i].msg);
+        return;
+      } catch (err) { /* 次の段階（より多くの画像を諦める）を試す */ }
     }
+    // それでも失敗する場合は諦める（入力操作自体は止めない）
   }
   function saveState(){
     if (VIEW_ONLY) return; // 同上：閲覧専用モードでは保存をスケジュールすらしない
@@ -1577,7 +1582,7 @@
     if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => {
-      resizeImageDataUrl(ev.target.result, 1600, 0.85).then(resized => {
+      resizeImageDataUrl(ev.target.result, 1280, 0.75).then(resized => {
         state.cardBgImage = { src: resized, zoom: 1, offsetX: 0, offsetY: 0, opacity: state.cardBgImage.opacity || 35 };
         bgCropImg.src = resized;
         bgZoomSlider.value = 100;
