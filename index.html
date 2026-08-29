@@ -323,22 +323,29 @@
        詳細プロフィールの2列モザイクが1タイル約40px幅になって著しく読みにくくなることを確認）。 */
     container-type: inline-size; container-name: cardbox;
   }
-  /* 背景画像レイヤー：#card直下の最初の子要素として置き、z-index:-1で
-     「.cardのグラデ背景より上・実コンテンツより下」に固定する（overflow:visibleな.card自身には
-     一切手を加えず、この専用ラッパーだけにoverflow:hiddenと角丸を持たせて画像だけを切り抜く）。
-     絶対配置＋z-index:-1はaspect-ratio/auto-min-sizeの計算に関与しないため、.cardの可変高さ
-     ("grow instead of clip"）の挙動には影響しない。 */
+  /* 背景画像レイヤー：#card直下の最初の子要素として置く。
+     負のz-index（かつてはz-index:-1）は使わない — .cardには初回表示時にcardEntrance
+     アニメーション（transform/opacityアニメ）が一時的にかかり、その間だけ.cardが独自の
+     合成レイヤーを持つ。負のz-indexの子はこの「アニメ中は専用レイヤー・終了後は通常合成」の
+     切り替わりでブラウザ側の再描画が正しく行われず、アニメ終了後に消えたままになる
+     （実機で確認済みの不具合）。そのため代わりにz-index:0とし、実コンテンツ側
+     （.card-head/.card-grid/.card-foot）にz-index:1を与えることで、負の値を使わずに
+     「背景画像はコンテンツより下」という重なり順だけを実現している（DOM順で最初の子に
+     している点、およびoverflow:visibleな.card自身には一切手を加えていない点は従来通り）。 */
   .card-bg-wrap{
-    position:absolute; inset:0; z-index:-1; overflow:hidden; border-radius:24px; pointer-events:none;
+    position:absolute; inset:0; z-index:0; overflow:hidden; border-radius:24px; pointer-events:none;
   }
   .card-bg-wrap img{ width:100%; height:100%; object-fit:cover; display:block; }
   /* .card-kicker and .card-top can't both simply declare grid-area:head — two items sharing one
      named grid area overlap (same grid line box) rather than stacking, so they're grouped under
      one real wrapper that owns the "head" area and lays them out in normal flow. .card-emblem
-     stays position:absolute, so it's excluded from grid placement entirely and needs no area. */
-  .card-head{ grid-area:head; min-width:0; }
-  .card-grid{ grid-area:cols; }
-  .card-foot{ grid-area:foot; }
+     stays position:absolute, so it's excluded from grid placement entirely and needs no area.
+     すべてz-index:1を明示し、z-index:0の.card-bg-wrapより確実に上に重なるようにしている
+     （CSS Grid/Flexboxの仕様上、grid-area指定のあるグリッドアイテムはposition:staticのままでも
+     z-indexが効くため、position:relative等の追加は不要）。 */
+  .card-head{ grid-area:head; min-width:0; z-index:1; }
+  .card-grid{ grid-area:cols; z-index:1; }
+  .card-foot{ grid-area:foot; z-index:1; }
   .card-kicker{ font-family:"IBM Plex Mono", monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--ca, var(--gold-ink)); margin-bottom:6px; }
   .card-emblem{
     position:absolute; top:26px; right:26px; width:38px; height:38px; border-radius:50%;
