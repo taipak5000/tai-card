@@ -837,24 +837,24 @@
 
   <div class="view-only-banner" id="viewOnlyBanner">
     <span>🔒 これは閲覧専用の共有カードです（編集はできません）</span>
-    <a href="./" id="viewOnlyOwnCardLink">✏️ 自分のカードを作る</a>
+    <a href="./" id="viewOnlyOwnCardLink">自分のカードを作る</a>
   </div>
 
   <div class="board" id="cardBoard">
     <section class="panel" id="editorPanel">
       <div class="panel-head">
-        <h2>✏️ 編集</h2>
+        <h2>編集</h2>
       </div>
       <div class="panel-body">
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">◇ 背景テーマ</div></div>
+          <div class="sec-head"><div class="sec-title">背景テーマ</div></div>
           <div class="theme-row" id="themeRow"></div>
         </div>
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">🖼️ プロフィール画像</div></div>
-          <label class="upload-btn">🖼️ 画像をアップロード<input type="file" accept="image/*" id="avatarFileInput"></label>
+          <div class="sec-head"><div class="sec-title">プロフィール画像</div></div>
+          <label class="upload-btn">画像をアップロード<input type="file" accept="image/*" id="avatarFileInput"></label>
           <div class="crop-tool" id="cropTool" style="display:none;">
             <div class="crop-box" id="cropBox"><img id="cropImg" src="" alt=""></div>
             <div class="crop-controls">
@@ -867,8 +867,8 @@
         </div>
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">🌄 背景画像</div></div>
-          <label class="upload-btn">🖼️ 画像をアップロード<input type="file" accept="image/*" id="bgFileInput"></label>
+          <div class="sec-head"><div class="sec-title">背景画像</div></div>
+          <label class="upload-btn">画像をアップロード<input type="file" accept="image/*" id="bgFileInput"></label>
           <div class="crop-tool" id="bgCropTool" style="display:none;">
             <div class="crop-box crop-box-wide" id="bgCropBox"><img id="bgCropImg" src="" alt=""></div>
             <div class="crop-controls">
@@ -883,13 +883,13 @@
         </div>
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">🌟 基本情報</div></div>
+          <div class="sec-head"><div class="sec-title">基本情報</div></div>
           <div class="f"><label>名前</label><input type="text" id="in_name" placeholder="例: たい"></div>
           <div class="f"><label>ひとこと</label><input type="text" id="in_oneLiner" placeholder="例: ものづくりが好きです"></div>
         </div>
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">📖 旅の記録</div></div>
+          <div class="sec-head"><div class="sec-title">旅の記録</div></div>
           <div class="f"><label>星の子が生まれた時期</label><input type="text" id="in_journeyYear" placeholder="例: 2023"></div>
           <div id="favRows"></div>
           <button type="button" class="fav-add-btn" id="favAddBtn">＋好きな○○を追加</button>
@@ -897,7 +897,7 @@
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">📱 SNS <span class="n">空欄の行は非表示</span></div>
+            <div class="sec-title">SNS <span class="n">空欄の行は非表示</span></div>
             <label class="switch"><input type="checkbox" id="vis_sns" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div id="snsRows"></div>
@@ -906,7 +906,7 @@
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">🕐 よく遊ぶ時間帯</div>
+            <div class="sec-title">よく遊ぶ時間帯</div>
             <label class="switch"><input type="checkbox" id="vis_playTime" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div class="clock-dial-wrap">
@@ -925,12 +925,12 @@
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">📝 カスタム欄 <span class="n">文章や画像を自由に追加できます</span></div>
+            <div class="sec-title">カスタム欄 <span class="n">文章や画像を自由に追加できます</span></div>
             <label class="switch"><input type="checkbox" id="vis_customNote" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div class="f"><label>見出し</label><input type="text" id="in_customNoteTitle" maxlength="14" placeholder="カスタム欄"></div>
           <div class="f"><textarea id="in_customNoteText" rows="3" maxlength="200" placeholder="自由にどうぞ（一言メッセージ、こだわりポイントなど）"></textarea></div>
-          <label class="upload-btn">🖼️ 画像を追加<input type="file" accept="image/*" id="customNoteFileInput"></label>
+          <label class="upload-btn">画像を追加<input type="file" accept="image/*" id="customNoteFileInput"></label>
           <div class="custom-note-preview" id="customNotePreview" style="display:none;">
             <img id="customNoteImgPreview" src="" alt="">
             <button type="button" class="remove-img-btn" id="removeCustomNoteImgBtn">画像を削除する</button>
@@ -939,7 +939,7 @@
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">💫 詳細プロフィール <span class="n">タップで選択・もう一度で解除</span></div>
+            <div class="sec-title">詳細プロフィール <span class="n">タップで選択・もう一度で解除</span></div>
             <label class="switch"><input type="checkbox" id="vis_details" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div id="detailGroups"></div>
@@ -947,7 +947,7 @@
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">🔑 フレンドコード <span class="n">空欄で非表示</span></div>
+            <div class="sec-title">フレンドコード <span class="n">空欄で非表示</span></div>
             <label class="switch"><input type="checkbox" id="vis_friendCode" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div class="f"><input type="text" id="in_friendCode" placeholder="任意"></div>
@@ -955,67 +955,67 @@
         </div>
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">⚡ まとめて連携 <span class="n">下の3つを1回で実行</span></div></div>
+          <div class="sec-head"><div class="sec-title">まとめて連携 <span class="n">下の3つを1回で実行</span></div></div>
           <div class="eco-sync-row">
-            <button type="button" class="eco-sync-btn" id="allSyncBtn"><span>⚡</span>収集状況・称号・光の翼をまとめて連携</button>
+            <button type="button" class="eco-sync-btn" id="allSyncBtn">収集状況・称号・光の翼をまとめて連携</button>
           </div>
           <div class="eco-field-head" style="margin-top:10px;">
-            <label for="autoSyncToggle">🔁 開くたびに自動で連携する</label>
+            <label for="autoSyncToggle">開くたびに自動で連携する</label>
             <label class="switch eco-vis-switch"><input type="checkbox" id="autoSyncToggle"><span class="track"></span><span class="knob"></span></label>
           </div>
           <div class="hint-box">
-            🔧 「まとめて連携」を押すと、下にある<b>ケープレベル・収集状況・称号</b>それぞれの「実データと連携」ボタンをまとめて1回で実行します。個別に更新したい場合は、各セクションのボタンもそのまま使えます。<br><br>
-            🔁 「開くたびに自動で連携する」をONにすると、次回からこのページを開くたびに3つを自動で連携します。毎回ボタンを押す手間がなくなります(手入力での上書きはこれまで通り可能です)。
+            「まとめて連携」を押すと、下にある<b>ケープレベル・収集状況・称号</b>それぞれの「実データと連携」ボタンをまとめて1回で実行します。個別に更新したい場合は、各セクションのボタンもそのまま使えます。<br><br>
+            「開くたびに自動で連携する」をONにすると、次回からこのページを開くたびに3つを自動で連携します。毎回ボタンを押す手間がなくなります(手入力での上書きはこれまで通り可能です)。
           </div>
         </div>
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">✦ ケープレベル <span class="n">→ 羽トラッカー</span></div>
+            <div class="sec-title">ケープレベル <span class="n">→ 羽トラッカー</span></div>
             <label class="switch"><input type="checkbox" id="vis_cape" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div class="eco-sync-row">
-            <button type="button" class="eco-sync-btn" id="wingSyncBtn"><span>🔄</span>羽トラッカーと連携</button>
+            <button type="button" class="eco-sync-btn" id="wingSyncBtn">羽トラッカーと連携</button>
           </div>
           <div class="f"><label>光の翼 合計枚数</label><input type="text" inputmode="numeric" id="in_wingTotal" placeholder="例: 77"></div>
           <div class="hint-box">
-            🔧 「羽トラッカーと連携」を押すと、この端末に保存されている<b>羽トラッカー</b>の実データ（季節精霊の再訪・恒常精霊・光の子の獲得状況）から、光の翼の合計枚数を自動で計算します(羽トラッカーを一度でも開いたことがある場合のみ反映されます)。連携後も手入力で上書きできます。
+            「羽トラッカーと連携」を押すと、この端末に保存されている<b>羽トラッカー</b>の実データ（季節精霊の再訪・恒常精霊・光の子の獲得状況）から、光の翼の合計枚数を自動で計算します(羽トラッカーを一度でも開いたことがある場合のみ反映されます)。連携後も手入力で上書きできます。
           </div>
         </div>
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">📊 収集状況 <span class="n">自分の他サイトのデータと連携可能</span></div>
+            <div class="sec-title">収集状況 <span class="n">自分の他サイトのデータと連携可能</span></div>
             <label class="switch"><input type="checkbox" id="vis_ecoStats" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div class="eco-sync-row">
-            <button type="button" class="eco-sync-btn" id="ecoSyncBtn"><span>🔄</span>実データと連携</button>
+            <button type="button" class="eco-sync-btn" id="ecoSyncBtn">実データと連携</button>
           </div>
           <div id="ecoStatFields"></div>
           <div class="hint-box">
-            🔧 「実データと連携」を押すと、この端末に保存されている<b>アイテム所持管理・エモート所持率管理・姉妹サイト・創作物管理ツール</b>の実データを自動で読み込みます(該当サイトを一度でも開いたことがある場合のみ反映されます)。連携後も手入力で上書きできます。
+            「実データと連携」を押すと、この端末に保存されている<b>アイテム所持管理・エモート所持率管理・姉妹サイト・創作物管理ツール</b>の実データを自動で読み込みます(該当サイトを一度でも開いたことがある場合のみ反映されます)。連携後も手入力で上書きできます。
           </div>
         </div>
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">🏆 称号 <span class="n">獲得した称号をカードに飾れる</span></div>
+            <div class="sec-title">称号 <span class="n">獲得した称号をカードに飾れる</span></div>
             <label class="switch"><input type="checkbox" id="vis_titles" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div class="eco-sync-row">
-            <button type="button" class="eco-sync-btn" id="titleSyncBtn"><span>🔄</span>称号を読み込む</button>
+            <button type="button" class="eco-sync-btn" id="titleSyncBtn">称号を読み込む</button>
           </div>
           <div id="titlePickerArea"></div>
           <div class="hint-box">
-            🔧 「称号を読み込む」を押すと、この端末に保存されている他ツールで獲得済みの称号を読み込みます。飾りたいものだけタップして選んでください(複数選択可)。
+            「称号を読み込む」を押すと、この端末に保存されている他ツールで獲得済みの称号を読み込みます。飾りたいものだけタップして選んでください(複数選択可)。
           </div>
         </div>
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">📈 入手グラフ <span class="n">任意・各サイトの推移チャート</span></div></div>
+          <div class="sec-head"><div class="sec-title">入手グラフ <span class="n">任意・各サイトの推移チャート</span></div></div>
           <div id="trendGraphFields"></div>
           <div class="hint-box">
-            🔧 数値の手入力はできません。ONにすると、この端末の同じプロフィールでノマキャン計算機・星のキャンドル計算機に実際に記録された入手履歴からグラフを表示します（該当サイトを使って2件以上の履歴が記録されている場合のみ表示されます）。
+            数値の手入力はできません。ONにすると、この端末の同じプロフィールでノマキャン計算機・星のキャンドル計算機に実際に記録された入手履歴からグラフを表示します（該当サイトを使って2件以上の履歴が記録されている場合のみ表示されます）。
           </div>
         </div>
 
@@ -1025,13 +1025,13 @@
     <div class="preview-col">
       <section class="panel">
         <div class="panel-head">
-          <h2>👀 プレビュー</h2>
+          <h2>プレビュー</h2>
           <div class="panel-head-actions">
             <button type="button" class="eco-sync-btn" id="shareCardLinkBtn">
-              <span>🔗</span>閲覧専用リンク
+              閲覧専用リンク
             </button>
             <button type="button" class="share-btn" id="shareImageBtn">
-              <span>🖼️</span>画像を保存してXへ投稿
+              画像を保存してXへ投稿
             </button>
           </div>
         </div>
@@ -1082,7 +1082,7 @@
   <footer>
     <p>このサイトはSky 星を紡ぐ子どもたちの非公式ファンサイトです。thatgamecompanyは一切関与していません。</p>
     <p style="margin-top:10px;">作成・ご意見: <a href="https://x.com/Skyzztai" target="_blank" rel="noopener noreferrer" style="font-weight:bold;">@Skyzztai</a>　／　<a href="https://odaibako.net/u/Skyzztai" target="_blank" rel="noopener noreferrer" style="font-weight:bold;">リクエストフォーム</a></p>
-    <p style="margin-top:10px;"><a href="https://taipak5000.github.io/tai-info/">⚙️ 設定・更新情報・クレジット・プライバシーポリシー</a></p>
+    <p style="margin-top:10px;"><a href="https://taipak5000.github.io/tai-info/">設定・更新情報・クレジット・プライバシーポリシー</a></p>
   </footer>
 </div>
 
@@ -1101,7 +1101,7 @@
 <div class="tools-modal-overlay" id="toolsModalOverlay">
   <div class="tools-modal">
     <div class="tools-modal-head">
-      <span>🔗 関連ツール</span>
+      <span>関連ツール</span>
       <button type="button" class="tools-modal-close" id="toolsModalCloseBtn" aria-label="閉じる">×</button>
     </div>
     <p class="tools-modal-hint">同じ作者によるSky: 星を紡ぐ子どもたち向けの他のツールです（同一オリジンなので、遷移してもこの端末のデータは共有されます）。</p>
@@ -1123,21 +1123,21 @@
 <div class="preview-modal-overlay" id="imagePreviewOverlay">
   <div class="preview-modal">
     <div class="preview-modal-head">
-      <span id="previewModalTitle">🖼️ 画像を保存</span>
+      <span id="previewModalTitle">画像を保存</span>
       <button type="button" class="preview-modal-close" id="previewModalCloseBtn" aria-label="閉じる">×</button>
     </div>
     <div class="preview-modal-hint">
-      <span>👆</span><span id="previewHintText"></span>
+      <span id="previewHintText"></span>
     </div>
     <img id="previewImg" class="preview-img" src="" alt="保存用のカード画像">
     <div class="preview-action-row">
-      <a id="previewDownloadLink" class="preview-action-btn primary" href="" download="">⬇️ ダウンロード</a>
+      <a id="previewDownloadLink" class="preview-action-btn primary" href="" download="">ダウンロード</a>
     </div>
     <div class="preview-action-row" id="previewCopyRow" style="display:none;">
-      <button type="button" id="previewCopyBtn" class="preview-action-btn copy">📋 クリップボードにコピー</button>
+      <button type="button" id="previewCopyBtn" class="preview-action-btn copy">クリップボードにコピー</button>
     </div>
     <div class="preview-action-row" id="previewTwitterRow" style="display:none;">
-      <a id="previewTwitterLink" class="preview-action-btn twitter" href="" target="_blank" rel="noopener noreferrer">📤 Xの投稿画面を開く</a>
+      <a id="previewTwitterLink" class="preview-action-btn twitter" href="" target="_blank" rel="noopener noreferrer">Xの投稿画面を開く</a>
     </div>
   </div>
 </div>
@@ -1145,7 +1145,7 @@
 <div class="tools-modal-overlay" id="profileModalOverlay">
   <div class="tools-modal" style="max-width:340px;">
     <div class="tools-modal-head">
-      <span>🗂️ プロフィール切替</span>
+      <span>プロフィール切替</span>
       <button type="button" class="tools-modal-close" id="profileModalCloseBtn" aria-label="閉じる">×</button>
     </div>
     <p class="tools-modal-hint">プロフィールを切り替えると、この端末の他のツール(アイテム所持管理など)のアクティブな保存枠も一緒に切り替わります。称号もプロフィールごとに獲得できます。</p>
@@ -1163,7 +1163,7 @@
 <div class="tools-modal-overlay" id="cardLinkModalOverlay">
   <div class="tools-modal" style="max-width:380px;">
     <div class="tools-modal-head">
-      <span>🔗 閲覧専用リンク</span>
+      <span>閲覧専用リンク</span>
       <button type="button" class="tools-modal-close" id="cardLinkModalCloseBtn" aria-label="閉じる">×</button>
     </div>
     <p class="tools-modal-hint">このリンクを開いた人には、今のカードが編集できない閲覧専用として表示されます（開いた相手の端末データが書き換わることはありません）。カスタム欄・プロフィール画像は容量を抑えるため縮小した画像で埋め込まれます。</p>
@@ -3004,7 +3004,7 @@
   const SITE_URL = 'https://taipak5000.github.io/tai-card/';
   const SHARE_HASHTAG = '#Sky星紡ぎカード';
   function buildShareText(){
-    return `✨ 星紡ぎカードで自己紹介カードを作りました！\n\nあなたもプロフィールを作ってみてね！\n\n${SITE_URL}\n${SHARE_HASHTAG}`;
+    return `星紡ぎカードで自己紹介カードを作りました！\n\nあなたもプロフィールを作ってみてね！\n\n${SITE_URL}\n${SHARE_HASHTAG}`;
   }
 
   function showToast(msg){
@@ -3078,7 +3078,7 @@
     const link = document.getElementById('previewDownloadLink');
     link.href = dataUrl; link.download = filename;
 
-    document.getElementById('previewModalTitle').textContent = '🖼️ 画像を保存してXへ投稿';
+    document.getElementById('previewModalTitle').textContent = '画像を保存してXへ投稿';
     document.getElementById('previewHintText').textContent =
       '① 下の「ダウンロード」で画像を保存 → ② 「Xの投稿画面を開く」を押して、保存した画像を添付して投稿してください';
     document.getElementById('previewTwitterLink').href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText);
@@ -3236,7 +3236,7 @@
   // コピー（アイテム所持管理のコーデ共有リンクと同じ導線）。どちらも使えない環境だけ、
   // リンクをテキストで表示するモーダルにフォールバックする。
   async function presentCardShareUrl(url){
-    const shareText = `✨「${state.name || '星紡ぎカード'}」の閲覧専用カードです。よかったら見てください！`;
+    const shareText = `「${state.name || '星紡ぎカード'}」の閲覧専用カードです。よかったら見てください！`;
     if (isMobileDevice() && navigator.share) {
       try { await navigator.share({ title: '星紡ぎカード', text: shareText, url }); return; }
       catch (e) { if (e && e.name === 'AbortError') return; /* 失敗時はコピーへフォールバック */ }
