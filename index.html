@@ -1603,6 +1603,14 @@
     renderCard();
   });
 
+  // 保存済みのアバター画像があれば、リロード後も編集用のトリミング枠を復元しておく
+  if (state.avatarImage.src) {
+    cropImg.src = state.avatarImage.src;
+    zoomSlider.value = Math.round(state.avatarImage.zoom * 100);
+    applyCropTransform();
+    cropTool.style.display = 'flex';
+  }
+
   // ── カード背景: 画像アップロード + トリミング(位置・ズーム) + 不透明度 ──
   // アバターのクロップ機構と同じ「object-fit:coverしたimgをtransformでpan/zoom」方式を
   // そのまま横長(1.91:1)のプレビュー枠に流用し、実カード側もCSSではなくJS側で同じ
@@ -1680,8 +1688,8 @@
   });
 
   // 保存済みの背景画像があれば、リロード後も編集用のトリミング枠を復元しておく
-  // （アバター側には無い挙動だが、位置・ズームを再調整する際に毎回再アップロードが
-  // 必要になるのを避けるため、新設のこちらだけ明示的に復元する）
+  // （アバター側と同様、位置・ズームを再調整する際に毎回再アップロードが
+  // 必要になるのを避けるため、明示的に復元する）
   if (state.cardBgImage.src) {
     bgCropImg.src = state.cardBgImage.src;
     bgZoomSlider.value = Math.round(state.cardBgImage.zoom * 100);
@@ -2126,6 +2134,7 @@
     freeTextWrap.style.display = 'none';
     freeTextWrap.innerHTML = `<input type="text" placeholder="自由に入力" data-group="${g.id}">`;
     wrap.appendChild(freeTextWrap);
+    freeTextWrap.querySelector('input').value = state.detailFreeText[g.id] || '';
 
     freeTextWrap.querySelector('input').addEventListener('input', e => {
       state.detailFreeText[g.id] = e.target.value;
@@ -2650,15 +2659,16 @@
       { icon:'🌆', text:'夕方型' },    // 18-24時
     ];
     const hoursByQuarter = [0, 0, 0, 0];
-    let totalHours = 0;
+    const coveredHours = new Set(); // 複数レンジの重なりを二重カウントしないよう、実時刻の集合で管理する
     ranges.forEach(r => {
       let e = r.end;
       if (e <= r.start) e += 24; // 日をまたぐ範囲を展開する
       for (let h = r.start; h < e; h++) {
-        hoursByQuarter[Math.floor((h % 24) / 6)]++;
-        totalHours++;
+        coveredHours.add(h % 24);
       }
     });
+    coveredHours.forEach(h => { hoursByQuarter[Math.floor(h / 6)]++; });
+    const totalHours = coveredHours.size;
     if (totalHours >= 16) return { icon:'🌈', text:'いつでも歓迎' };
     let bestIdx = 0;
     hoursByQuarter.forEach((v, i) => { if (v > hoursByQuarter[bestIdx]) bestIdx = i; });
