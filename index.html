@@ -59,16 +59,16 @@
   @keyframes pop{ 0%{ transform:scale(1); } 45%{ transform:scale(1.12); } 100%{ transform:scale(1); } }
   @keyframes handSnap{ from{ transform:scale(0.7); opacity:0.4; } to{ transform:scale(1); opacity:1; } }
 
-  .soft-row, .list-row, .card-pill-badge, .jr-pill, .detail-chip, .card-clock-range, .cape-widget, .card-fc{
+  .soft-row, .card-pill-badge, .jr-pill, .detail-chip, .card-clock-range, .cape-widget, .card-fc{
     animation: rowIn 0.24s var(--ease-snap) both;
   }
   .card.entrance{ animation: cardEntrance 0.6s var(--ease-snap) both; }
   .card-emblem{ animation: sway 4.5s ease-in-out infinite; transform-origin:50% 85%; }
-  .chip-opt.selected, .clock-opt.selected, .theme-swatch.active{ animation: pop 0.32s var(--ease-pop) both; }
+  .chip-opt.selected, .theme-swatch.active{ animation: pop 0.32s var(--ease-pop) both; }
 
   @media (prefers-reduced-motion: reduce){
-    .soft-row, .list-row, .card-pill-badge, .jr-pill, .detail-chip, .card-clock-range, .cape-widget, .card-fc,
-    .card.entrance, .card-emblem, .chip-opt.selected, .clock-opt.selected, .theme-swatch.active{
+    .soft-row, .card-pill-badge, .jr-pill, .detail-chip, .card-clock-range, .cape-widget, .card-fc,
+    .card.entrance, .card-emblem, .chip-opt.selected, .theme-swatch.active{
       animation: none !important;
     }
   }
@@ -76,7 +76,7 @@
      0%地点（rowInなら opacity:0 の入場前フレーム）からやり直してしまい、完了を待たずに
      キャプチャするため、入場アニメーション付きの要素だけ画像上で消えて見える不具合があった。
      保存直前に#cardへ付与する.exportingで、これらのアニメーションだけ止めて確実に写す。 */
-  .card.exporting .soft-row, .card.exporting .list-row, .card.exporting .card-pill-badge,
+  .card.exporting .soft-row, .card.exporting .card-pill-badge,
   .card.exporting .jr-pill, .card.exporting .detail-chip, .card.exporting .card-clock-range,
   .card.exporting .cape-widget, .card.exporting .card-fc, .card.exporting .card-emblem{
     animation: none !important;
@@ -109,7 +109,6 @@
     border-bottom:1px solid var(--border);
   }
   header h1{ margin-bottom:0; }
-  .eyebrow{ font-family:"IBM Plex Mono", monospace; font-size:10.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold-ink); background:var(--gold-bg); border:1px solid rgba(201,154,74,0.28); display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:100px; margin-bottom:16px; }
   h1{ font-size:clamp(26px,4vw,34px); font-weight:600; letter-spacing:0.01em; color:var(--teal-ink); }
   .lede{ color:var(--text-2); font-size:14px; margin:10px 0 0; max-width:70ch; }
   .lede b{ color:var(--gold-ink); font-weight:700; }
@@ -1113,6 +1112,7 @@
       <a href="https://taipak5000.github.io/star-candle/">🕯️ 星のキャンドル計算機</a>
       <a href="https://taipak5000.github.io/companion/">✨ 精霊同行ツール</a>
       <a href="https://taipak5000.github.io/wings/">🪽 羽トラッカー</a>
+      <a href="https://taipak5000.github.io/tai-revisit/">🕊️ 再訪精霊データベース</a>
       <a href="https://taipak5000.github.io/tai-score/"><span class="tool-badge-test">test</span>🎵 楽譜づくり</a>
       <a href="https://taipak5000.github.io/tai-transfer/">🔄 データ引継ぎ</a>
       <a href="https://taipak5000.github.io/tai-info/">⚙️ 設定・更新情報</a>
