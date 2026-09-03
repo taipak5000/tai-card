@@ -841,7 +841,7 @@
     align-items: flex-end; justify-content: center; padding: 0;
     transition: background-color 0.32s cubic-bezier(0.25, 1, 0.5, 1);
   }
-  .tools-modal-overlay.show, .preview-modal-overlay.show { animation: none; }
+  .tools-modal-overlay.show, .preview-modal-overlay.show { animation: iosFade 0.32s cubic-bezier(0.25, 1, 0.5, 1); }
   .tools-modal-overlay.show { background: rgba(37, 53, 46, calc(0.34 * var(--sheet-progress, 1))); }
   .preview-modal-overlay.show { background: rgba(37, 53, 46, calc(0.4 * var(--sheet-progress, 1))); }
   .tools-modal-overlay.is-closing, .preview-modal-overlay.is-closing { display: flex; pointer-events: none; }
@@ -854,8 +854,13 @@
     animation: none;
     transition: transform 0.32s cubic-bezier(0.25, 1, 0.5, 1);
   }
+  @media (max-width: 849.98px) {
+    .tools-modal-overlay.show .tools-modal, .preview-modal-overlay.show .preview-modal {
+      animation: sheetSlideUp 0.32s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+  }
   .tools-modal.is-dragging, .tools-modal.js-anim,
-  .preview-modal.is-dragging, .preview-modal.js-anim { transition: none; cursor: grabbing; user-select: none; }
+  .preview-modal.is-dragging, .preview-modal.js-anim { transition: none; animation: none; cursor: grabbing; user-select: none; }
   .tools-modal::before, .preview-modal::before {
     content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
     width: 36px; height: 5px; border-radius: 3px; background: rgba(60, 60, 67, 0.3);
@@ -880,6 +885,7 @@
   }
   @keyframes iosSheetIn { from { opacity: 0; transform: scale(0.94) translateY(8px); filter: blur(6px); } to { opacity: 1; transform: none; filter: blur(0); } }
   @keyframes iosFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes sheetSlideUp { from { transform: translate3d(0, 100%, 0); } to { transform: translate3d(0, 0, 0); } }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
