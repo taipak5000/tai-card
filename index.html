@@ -869,6 +869,9 @@
     animation: none;
     transition: transform 0.32s cubic-bezier(0.25, 1, 0.5, 1);
   }
+  @media (min-width: 560px) {
+    .tools-modal, .preview-modal { max-width: 480px; }
+  }
   .tools-modal-overlay.show .tools-modal, .preview-modal-overlay.show .preview-modal {
     animation: sheetSlideUp 0.32s cubic-bezier(0.25, 1, 0.5, 1);
   }
