@@ -56,6 +56,16 @@
   .inline-icon.ok { stroke: var(--ok); color: var(--ok); }
   .inline-icon.match { stroke: currentColor; color: currentColor; }
 
+  .icon-chip {
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    background: var(--gold-bg);
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0) 60%);
+    border-radius: 26%;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35), inset 0 1px 1px rgba(255,255,255,0.5), 0 1px 2px rgba(0,0,0,0.10);
+    color: var(--gold-ink);
+  }
+  .icon-chip svg { display: block; stroke: var(--gold-ink); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
   /* ── 遊び心のあるモーション（yui540さんのCSSアニメーション作品を参考に、
      独自イージング・段階的なstagger・複合transformの入場演出を実用UIに合う強さで採用） ── */
   @keyframes rowIn{ from{ opacity:0; transform:translateY(9px); } to{ opacity:1; transform:translateY(0); } }
@@ -1158,10 +1168,10 @@
      ドロワー(#toolsModalOverlay)内のリストへ統合済み ── -->
 <div class="site-dock" role="navigation" aria-label="クイックメニュー">
   <button type="button" id="profileDockBtn">
-    <span class="dock-icon"><svg class="inline-icon" width="19" height="19"><use href="#i-folder"/></svg></span><span class="dock-label" id="siteDockProfileLabel">メイン</span>
+    <span class="dock-icon"><span class="icon-chip" style="width:28px; height:28px;"><svg width="22" height="22"><use href="#i-folder"/></svg></span></span><span class="dock-label" id="siteDockProfileLabel">メイン</span>
   </button>
   <button type="button" id="toolsDockBtn">
-    <span class="dock-icon"><svg class="inline-icon" width="19" height="19"><use href="#i-menu"/></svg></span><span class="dock-label">他のツール</span>
+    <span class="dock-icon"><span class="icon-chip" style="width:28px; height:28px;"><svg width="22" height="22"><use href="#i-menu"/></svg></span></span><span class="dock-label">他のツール</span>
   </button>
 </div>
 
@@ -1169,7 +1179,7 @@
   <div class="tools-modal">
     <div class="tools-modal-head">
       <span>関連ツール</span>
-      <button type="button" class="tools-modal-close" id="toolsModalCloseBtn" aria-label="閉じる"><svg class="inline-icon" width="14" height="14"><use href="#i-close"/></svg></button>
+      <button type="button" class="tools-modal-close" id="toolsModalCloseBtn" aria-label="閉じる"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
     </div>
     <p class="tools-modal-hint">同じ作者によるSky: 星を紡ぐ子どもたち向けの他のツールです（同一オリジンなので、遷移してもこの端末のデータは共有されます）。</p>
     <nav class="tools-modal-links">
@@ -1192,7 +1202,7 @@
   <div class="preview-modal">
     <div class="preview-modal-head">
       <span id="previewModalTitle">画像を保存</span>
-      <button type="button" class="preview-modal-close" id="previewModalCloseBtn" aria-label="閉じる">×</button>
+      <button type="button" class="preview-modal-close" id="previewModalCloseBtn" aria-label="閉じる"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
     </div>
     <div class="preview-modal-hint">
       <span id="previewHintText"></span>
@@ -1214,7 +1224,7 @@
   <div class="tools-modal profile-modal-card">
     <div class="tools-modal-head">
       <span>プロフィール切替</span>
-      <button type="button" class="tools-modal-close" id="profileModalCloseBtn" aria-label="閉じる">×</button>
+      <button type="button" class="tools-modal-close" id="profileModalCloseBtn" aria-label="閉じる"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
     </div>
     <p class="tools-modal-hint">プロフィールを切り替えると、この端末の他のツール(アイテム所持管理など)のアクティブな保存枠も一緒に切り替わります。称号もプロフィールごとに獲得できます。</p>
     <div id="profileListArea"></div>
@@ -1232,7 +1242,7 @@
   <div class="tools-modal card-link-modal-card">
     <div class="tools-modal-head">
       <span>閲覧専用リンク</span>
-      <button type="button" class="tools-modal-close" id="cardLinkModalCloseBtn" aria-label="閉じる">×</button>
+      <button type="button" class="tools-modal-close" id="cardLinkModalCloseBtn" aria-label="閉じる"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
     </div>
     <p class="tools-modal-hint">このリンクを開いた人には、今のカードが編集できない閲覧専用として表示されます（開いた相手の端末データが書き換わることはありません）。カスタム欄・プロフィール画像は容量を抑えるため縮小した画像で埋め込まれます。</p>
     <textarea id="cardLinkPreviewText" class="card-link-preview-text" readonly onclick="this.select()"></textarea>
