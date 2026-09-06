@@ -2210,10 +2210,16 @@
     drawClockSelection();
   });
 
+  let playTimeRangesBackup = null; // 不定期ON中に退避しておいた、OFFに戻したとき復元するための元の時間帯
   irregularBtn.addEventListener('click', () => {
     state.playTimeIrregular = !state.playTimeIrregular;
     if (state.playTimeIrregular) {
+      playTimeRangesBackup = state.playTimeRanges;
       state.playTimeRanges = [ { start: null, end: null } ];
+      drawPlayTimeRanges();
+    } else if (playTimeRangesBackup) {
+      state.playTimeRanges = playTimeRangesBackup;
+      playTimeRangesBackup = null;
       drawPlayTimeRanges();
     }
     drawClockSelection();
