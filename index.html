@@ -2127,7 +2127,13 @@
           dragging = true;
           try { handle.setPointerCapture(ev.pointerId); } catch (err) {}
           handle.classList.add('dragging');
-          applyHour(degToHour(angleFromPointer(ev.clientX, ev.clientY)));
+          // 24時は0時と同じ位置に描画されるため、24時のつまみを掴んだだけ（まだ動かしていない）
+          // 時点でdegToHourが0時と読み違え、24→0に化けてしまうのを防ぐ。実際にドラッグして
+          // 動かした場合はpointermoveで通常通り反映される。
+          const startHour = degToHour(angleFromPointer(ev.clientX, ev.clientY));
+          if (!(field === 'end' && r.end === 24 && startHour === 0)) {
+            applyHour(startHour);
+          }
         });
         handle.addEventListener('pointermove', ev => {
           if (!dragging) return;
