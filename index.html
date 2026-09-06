@@ -1597,6 +1597,17 @@
     if (!Array.isArray(state.favorites)) state.favorites = [];
     if (!Array.isArray(state.snsList)) state.snsList = [];
     if (!Array.isArray(state.playTimeRanges)) state.playTimeRanges = [];
+    // オブジェクト型フィールドも同じ理由で検証する（renderCard()等が.src/.text等へ
+    // 直接プロパティアクセスするため、null/配列/文字列などに差し替えられていると例外になる）。
+    if (!state.avatarImage || typeof state.avatarImage !== 'object' || Array.isArray(state.avatarImage)) {
+      state.avatarImage = { src: null, zoom: 1, offsetX: 0, offsetY: 0 };
+    }
+    if (!state.cardBgImage || typeof state.cardBgImage !== 'object' || Array.isArray(state.cardBgImage)) {
+      state.cardBgImage = { src: null, zoom: 1, offsetX: 0, offsetY: 0, opacity: 35 };
+    }
+    if (!state.customNote || typeof state.customNote !== 'object' || Array.isArray(state.customNote)) {
+      state.customNote = { text: '', image: null, title: '' };
+    }
   }
   if (savedState && savedState.vis && !('customNote' in savedState.vis)) state.vis.customNote = true;
   // ECO_STATS・TREND_GRAPHSは固定のconst配列（stateそのものではない）なので、保存されていた
