@@ -501,7 +501,7 @@
      並べ、折り返しは選択肢と選択肢の"間"でしか起きないようにする */
   .detail-chip .dc-value{
     font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; font-size:12px; color:var(--text);
-    line-height:1.35; display:flex; flex-wrap:wrap; column-gap:3px; row-gap:2px;
+    line-height:1.5; display:flex; flex-wrap:wrap; column-gap:3px; row-gap:2px;
   }
   .detail-chip .dc-value-part{ white-space:normal; word-break:keep-all; overflow-wrap:anywhere; }
   .detail-chip .dc-value-sep{ color:var(--text-3); }
@@ -529,6 +529,10 @@
   .card-eco-grid .soft-row-label{ font-size:10px; margin-bottom:0; flex-shrink:0; white-space:nowrap; }
   .card-eco-grid .soft-row-value{ font-size:11.5px; flex-shrink:0; white-space:nowrap; }
   .card-eco-grid .soft-row-value.na{ font-size:10.5px; }
+  /* 数字と単位に強弱：値の先頭の数字だけ大きく太くし、続く単位・記号（%・曲・件など）は
+     小さく淡い色にすることで、まず数字が目に入るようにする（splitNumUnit()参照）。 */
+  .card-eco-grid .soft-row-value .eco-val-num{ font-size:13px; font-weight:700; }
+  .card-eco-grid .soft-row-value .eco-val-unit{ font-size:9.5px; font-weight:400; color:var(--text-3); margin-left:1px; }
   .card-eco-grid .progress-bar{ flex:1; min-width:20px; height:3px; margin-top:0; }
 
   /* 入手グラフ：各サイトに実在する推移チャートを模した、面グラフ＋折れ線のミニスパークライン。
@@ -601,6 +605,9 @@
   .card-clock-range::before{ content:"◇"; font-size:9px; color:var(--ca, var(--gold)); }
   .card-clock-range.na{ font-family:"Zen Kaku Gothic New",sans-serif; font-size:11.5px; font-weight:400; color:var(--text-3); }
   .card-clock-range.na::before{ color:var(--text-3); }
+  /* 数字と単位に強弱：時刻の数字だけ少し大きく太くし、「時」は控えめにする */
+  .card-clock-range .pt-num{ font-size:14px; font-weight:700; }
+  .card-clock-range .pt-unit{ font-size:10.5px; font-weight:500; color:var(--text-2); margin-right:1px; }
 
   /* 時間帯が1つ・短めだとダイヤル横の余白が目立つため、選んだ時間帯から導いた「夜ふかし型」等の
      一言タグを添えて余白を意味のある情報で埋める（テーマの--ca色でうっすら染める） */
@@ -641,7 +648,7 @@
     box-shadow: 0 6px 18px rgba(37,53,46,0.26);
   }
   .cape-widget-title{ flex:1 1 100%; font-size:10.5px; font-weight:700; display:flex; align-items:center; gap:5px; color:#EFC98A; margin-bottom:0; }
-  .cape-widget-sub{ flex:1 1 100%; font-size:10px; line-height:1.35; color:rgba(247,239,221,0.68); margin-bottom:0; }
+  .cape-widget-sub{ flex:1 1 100%; font-size:10px; line-height:1.5; color:rgba(247,239,221,0.68); margin-bottom:0; }
   .cape-level-label{ font-size:18px; font-weight:800; color:#EFC98A; margin-bottom:0; }
   .cape-pips{ display:flex; flex-direction:row; gap:6px; align-items:center; margin-left:auto; }
   .cape-pip{ position:relative; width:10px; height:10px; transform:rotate(45deg); background:rgba(239,201,138,0.85); border:1.3px solid rgba(239,201,138,0.85); }
@@ -670,7 +677,7 @@
   .card-foot{ padding-top:10px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-size:10.5px; color:var(--text-3); }
   .card-foot .tag{ font-family:"IBM Plex Mono", monospace; }
 
-  footer{ margin-top:44px; padding-top:18px; border-top:1px solid var(--border); color:var(--text-3); font-size:12px; text-align:center; line-height:1.7; }
+  footer{ margin-top:44px; padding-top:18px; border-top:1px solid var(--border); color:var(--text-3); font-size:12px; text-align:left; line-height:1.7; }
   footer p{ margin:0; }
   footer a{ color:var(--teal-ink); text-decoration:underline; text-underline-offset:2px; }
 
@@ -1617,6 +1624,17 @@
   // ストアド型XSSが自分自身のブラウザ内で実行されてしまう）。
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+
+  // 数字と単位に強弱：文字列先頭の数値部分だけ太字・大きめのクラスで包み、続く単位・記号
+  // （%・曲・件・/4など）は控えめなクラスで包む。数字で始まらない自由入力（未入力時の
+  // 代替文言や、単位のない手入力値など）はそのまま1本のテキストとして返す安全なフォールバック。
+  function splitNumUnit(str, numCls, unitCls){
+    const s = String(str);
+    const m = /^(\d+(?:\.\d+)?)(.*)$/.exec(s);
+    if (!m) return escapeHtml(s);
+    const unit = m[2] ? `<span class="${unitCls}">${escapeHtml(m[2])}</span>` : '';
+    return `<span class="${numCls}">${escapeHtml(m[1])}</span>${unit}`;
   }
 
   // ── Theme swatches（ホバーで名前を出さない。aria-labelのみでスクリーンリーダーに対応） ──
@@ -2852,7 +2870,7 @@
       const listHtml = state.playTimeIrregular
         ? `<div class="card-clock-range">${PLAY_TIME_IRREGULAR}</div>`
         : filledRanges.length
-          ? filledRanges.map(r => `<div class="card-clock-range">${r.start}時〜${r.end}時</div>`).join('')
+          ? filledRanges.map(r => `<div class="card-clock-range"><span class="pt-num">${r.start}</span><span class="pt-unit">時</span>〜<span class="pt-num">${r.end}</span><span class="pt-unit">時</span></div>`).join('')
           : `<div class="card-clock-range na">未設定</div>`;
       const vibe = !state.playTimeIrregular ? playTimeVibeLabel(filledRanges) : null;
       const vibeHtml = vibe ? `<div class="card-clock-vibe"><span>${vibe.icon}</span>${vibe.text}</div>` : '';
@@ -2955,7 +2973,7 @@
         const pctMatch = /^(\d{1,3}(?:\.\d+)?)%$/.exec((f.value || '').trim());
         const pct = pctMatch ? Math.max(0, Math.min(100, Number(pctMatch[1]))) : null;
         const bar = pct !== null ? `<div class="progress-bar"><div class="progress-bar-fill" style="width:${pct}%"></div></div>` : '';
-        const valueHtml = `<div class="soft-row-value ${f.value ? '' : 'na'}">${f.value ? escapeHtml(f.value) : '未入力'}</div>${bar}`;
+        const valueHtml = `<div class="soft-row-value ${f.value ? '' : 'na'}">${f.value ? splitNumUnit(f.value, 'eco-val-num', 'eco-val-unit') : '未入力'}</div>${bar}`;
         html += `<div class="eco-tile soft-row"><div class="soft-row-icon">${f.icon}</div><div class="soft-row-body"><div class="soft-row-label">${f.label}</div>${valueHtml}</div></div>`;
       });
       html += '</div>';
