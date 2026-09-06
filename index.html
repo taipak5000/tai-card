@@ -2965,7 +2965,7 @@
     // friend code
     const fcEl = document.getElementById('cardFcWrap');
     if (state.friendCode && state.vis.friendCode) {
-      const contactTag = state.friendCodeContact ? `<span class="fc-contact-tag">${state.friendCodeContact}</span>` : '';
+      const contactTag = state.friendCodeContact ? `<span class="fc-contact-tag">${escapeHtml(state.friendCodeContact)}</span>` : '';
       setSection(fcEl, `
         <div class="card-sec-title">FRIEND CODE</div>
         <div class="card-sec-heading">フレンドコード</div>
