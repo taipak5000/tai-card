@@ -2954,8 +2954,8 @@
     if (state.vis.cape && !isNaN(wingTotalNum) && wingTotalNum >= 0) {
       const c = computeCape(wingTotalNum);
       const sub = c.isMax
-        ? `現在 光の翼 ${wingTotalNum}枚 — 最大ケープレベル ${CAPE_LEVELS.length} に到達済み！`
-        : `現在 光の翼 ${wingTotalNum}枚（レベル${c.reachedLevel + 1}まであと ${c.remain}枚）`;
+        ? `現在 光の翼 ${wingTotalNum.toLocaleString('ja-JP')}枚 — 最大ケープレベル ${CAPE_LEVELS.length} に到達済み！`
+        : `現在 光の翼 ${wingTotalNum.toLocaleString('ja-JP')}枚（レベル${c.reachedLevel + 1}まであと ${c.remain}枚）`;
       setSection(capeEl, `
         <div class="card-sec-title">CAPE LEVEL</div>
         <div class="card-sec-heading">ケープレベル</div>
