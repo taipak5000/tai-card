@@ -1581,7 +1581,16 @@
   // スキップ)、代わりに共有リンクからデコードした内容だけをstateへ反映する。
   const savedState = VIEW_ONLY ? null : loadState();
   if (savedState) Object.assign(state, savedState);
-  if (VIEW_ONLY && sharedCardPayload) Object.assign(state, sharedCardPayload);
+  if (VIEW_ONLY && sharedCardPayload) {
+    Object.assign(state, sharedCardPayload);
+    // 壊れた/クラフトされた共有リンクで配列型フィールドが配列以外に差し替えられていた場合、
+    // 直後のresolveTitlesFromKeys()やrenderCard()内の.filter()呼び出しが例外を投げて
+    // ページ全体が止まってしまうため、ここで安全な既定値に戻しておく。
+    if (!state.titles || typeof state.titles !== 'object' || !Array.isArray(state.titles.selected)) state.titles = { selected: [] };
+    if (!Array.isArray(state.favorites)) state.favorites = [];
+    if (!Array.isArray(state.snsList)) state.snsList = [];
+    if (!Array.isArray(state.playTimeRanges)) state.playTimeRanges = [];
+  }
   if (savedState && savedState.vis && !('customNote' in savedState.vis)) state.vis.customNote = true;
   // ECO_STATS・TREND_GRAPHSは固定のconst配列（stateそのものではない）なので、保存されていた
   // 値をここで配列側へ書き戻す（さもないと収集状況の手入力値・連携結果や入手グラフのON/OFFが
@@ -2972,7 +2981,9 @@
         <div class="card-fc"><span>${escapeHtml(state.friendCode)}</span>${contactTag}</div>`);
     } else { setSection(fcEl, ''); }
 
-    document.getElementById('cardDate').textContent = '発行日 ' + new Date().toISOString().slice(0,10).replace(/-/g,'.');
+    const cardDateNow = new Date();
+    const cardDateStr = cardDateNow.getFullYear() + '.' + String(cardDateNow.getMonth() + 1).padStart(2, '0') + '.' + String(cardDateNow.getDate()).padStart(2, '0');
+    document.getElementById('cardDate').textContent = '発行日 ' + cardDateStr;
 
     // ECO_STATS・TREND_GRAPHSはstate本体ではなく固定constの配列なので、保存直前にここで
     // stateへミラーする（これを怠るとリロード・プロフィール切り替えで消えてしまう）。
