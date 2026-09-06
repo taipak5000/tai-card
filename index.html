@@ -1986,8 +1986,12 @@
   function mergeRangeIntervals(ranges){
     let intervals = [];
     ranges.forEach(r => {
+      // 0時〜24時（＝丸1日）だけを「終日」として扱う。開始と終了が同じ時刻というだけの
+      // ゼロ時間レンジ（例: 5時〜5時）まで終日扱いにしてしまうと、隣の数値一覧が
+      // 「5時〜5時」と表示するのにダイヤルは全周点灯という矛盾が起きるため区別する。
+      if (r.start === 0 && r.end === 24) { intervals.push({ start: 0, end: 360 }); return; }
       const s = hourToDeg(r.start), e = hourToDeg(r.end);
-      if (s === e) { intervals.push({ start: 0, end: 360 }); return; }
+      if (s === e) return; // ゼロ時間レンジは描画しない
       if (s < e) { intervals.push({ start: s, end: e }); }
       else {
         intervals.push({ start: s, end: 360 });
@@ -2744,13 +2748,16 @@
     const coveredHours = new Set(); // 複数レンジの重なりを二重カウントしないよう、実時刻の集合で管理する
     ranges.forEach(r => {
       let e = r.end;
-      if (e <= r.start) e += 24; // 日をまたぐ範囲を展開する
+      // 日をまたぐ範囲だけを展開する。開始と終了が同じ時刻（例: 5時〜5時）は
+      // ゼロ時間レンジであり終日ではないので、+24せずループ0回のまま何も加算しない。
+      if (e < r.start) e += 24;
       for (let h = r.start; h < e; h++) {
         coveredHours.add(h % 24);
       }
     });
     coveredHours.forEach(h => { hoursByQuarter[Math.floor(h / 6)]++; });
     const totalHours = coveredHours.size;
+    if (!totalHours) return null; // 実際は0時間（ゼロ時間レンジのみ等）なら雰囲気タグ自体を出さない
     if (totalHours >= 16) return { icon:'🌈', text:'いつでも歓迎' };
     let bestIdx = 0;
     hoursByQuarter.forEach((v, i) => { if (v > hoursByQuarter[bestIdx]) bestIdx = i; });
@@ -2889,7 +2896,11 @@
 
     // cape level — kept as its own dark inset panel (faithful callback to 羽トラッカー's own branding)
     const capeEl = document.getElementById('cardCapeWrap');
-    const wingTotalNum = parseInt(String(state.wingTotal).replace(/[^0-9]/g, ''), 10);
+    // 自由入力欄なので「77枚」のような余分な文字は数字だけ抜き出して許容するが、
+    // マイナスや小数点は数字だけ残すと消えてしまい下のwingTotalNum>=0チェックが
+    // 効かなくなるため、ストリップする前に弾いてNaN（＝非表示）にする。
+    const wingTotalRaw = String(state.wingTotal).trim();
+    const wingTotalNum = /[-.]/.test(wingTotalRaw) ? NaN : parseInt(wingTotalRaw.replace(/[^0-9]/g, ''), 10);
     if (state.vis.cape && !isNaN(wingTotalNum) && wingTotalNum >= 0) {
       const c = computeCape(wingTotalNum);
       const sub = c.isMax
