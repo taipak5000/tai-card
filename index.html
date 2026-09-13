@@ -113,7 +113,12 @@
       radial-gradient(520px 380px at 90% 92%, rgba(79,124,110,0.08), transparent 60%);
   }
   h1,h2,h3{ font-family:"Fraunces","Zen Old Mincho",serif; margin:0; text-wrap:balance; }
-  .wrap{ position:relative; z-index:1; max-width:1320px; margin:0 auto; padding:36px 20px 20px; }
+  /* 🖥️ 姉妹サイト共通のページ幅規約（アイテム所持管理の.wrapと同じ値・同じブレークポイント）。
+     以前は本ツール独自の1320px固定だったが、全サイト間で見た目の幅を揃えるため統一する。
+     .boardの2カラム化しきい値(850px、下記参照)と揃えてあるので、編集列とカード列の
+     レイアウトはこれまで通りminmax()で自動調整される。 */
+  .wrap{ position:relative; z-index:1; max-width:720px; margin:0 auto; padding:36px 20px 20px; }
+  @media (min-width: 850px) { .wrap{ max-width:960px; } }
 
   /* ── 共通レイアウト規約: ヘッダーはposition:stickyのnav相当要素にする（top:0; z-index:20）。
      .wrapは左右20pxのpaddingを持つため、margin:-20pxとpadding:20pxを打ち消し合わせることで、
@@ -719,6 +724,18 @@
   /* 精度に不安がある新機能であることを示す小さな注記（例: 楽譜づくり） */
   .tool-badge-test{ font-size:9px; font-weight:700; color:var(--text-3); text-transform:uppercase; letter-spacing:0.3px; }
 
+  /* ── 表示設定モーダル（ダーク/ライト切替のみを扱う最小限のモーダル。他の姉妹サイトと違い
+     多言語対応やショートカット無効化設定は持たないtai-card固有の事情のため、この1行だけ） ── */
+  .settings-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 4px; }
+  .settings-row-label{ font-size:13px; color:var(--text); font-weight:600; }
+  .settings-theme-btn{
+    appearance:none; cursor:pointer; font-family:"Zen Kaku Gothic New",sans-serif; font-size:12.5px; font-weight:700;
+    color:var(--teal-ink); background:var(--teal-bg); border:1px solid rgba(79,124,110,0.3); border-radius:100px; padding:7px 16px;
+    transition:background .15s var(--ease-snap), color .15s;
+  }
+  .settings-theme-btn:hover{ background:var(--teal); color:#fff; }
+  .settings-theme-btn:active{ transform:scale(0.97); }
+
   /* ── プロフィール切替モーダル（他のtaipak5000.github.io系ツールと同じ複数保存枠の仕組み） ── */
   .profile-row{ padding:9px 4px; border-bottom:1px solid var(--border); }
   .profile-row:last-child{ border-bottom:none; }
@@ -859,7 +876,16 @@
     transition: transform 0.32s cubic-bezier(0.25, 1, 0.5, 1);
   }
   @media (min-width: 560px) {
-    .tools-modal, .preview-modal { max-width: 600px; }
+    /* 姉妹サイト共通のモーダル幅規約（アイテム所持管理の.wrapと同じ720px/960px）。
+       以前はアイテム所持管理の旧基準(600px)にだけ合わせていたが、そのアイテム所持管理側の
+       基準が720px/960pxに更新されたため追従する。 */
+    .tools-modal, .preview-modal { max-width: 720px; }
+    /* 表示設定モーダルだけは他の姉妹サイトと同じく意図的に狭いまま（360px固定）にする
+       （DIMENSION 2は対象外・現状維持の方針のため、新規追加のここだけ最初から狭くする）。 */
+    #settingsModalOverlay .tools-modal { max-width: 360px; }
+  }
+  @media (min-width: 850px) {
+    .tools-modal, .preview-modal { max-width: 960px; }
   }
   .tools-modal-overlay.show .tools-modal, .preview-modal-overlay.show .preview-modal {
     animation: sheetSlideUp 0.32s cubic-bezier(0.25, 1, 0.5, 1);
@@ -1149,14 +1175,18 @@
 </div>
 
 <!-- ── 共通レイアウト規約: site-dockには他ドメインへの直リンクを一切置かない。
-     データ連携(tai-transfer)・設定・情報(tai-info)は他の姉妹サイトと同じ「他のツール」
-     ドロワー(#toolsModalOverlay)内のリストへ統合済み ── -->
+     データ連携(tai-transfer)・設定・更新情報(tai-info)は他の姉妹サイトと同じ「他のツール」
+     ドロワー(#toolsModalOverlay)内のリストへ統合済み。ここでの「表示設定」はそれとは別物で、
+     本ページ内でダーク/ライト表示を切り替えるだけの機能（姉妹サイト共通の"?"キーショートカットにも対応） ── -->
 <div class="site-dock" role="navigation" aria-label="クイックメニュー">
   <button type="button" id="profileDockBtn">
     <span class="dock-icon"><span class="icon-chip" style="width:28px; height:28px;"><svg width="22" height="22"><use href="#i-folder"/></svg></span></span><span class="dock-label" id="siteDockProfileLabel">メイン</span>
   </button>
   <button type="button" id="toolsDockBtn">
     <span class="dock-icon"><span class="icon-chip" style="width:28px; height:28px;"><svg width="22" height="22"><use href="#i-menu"/></svg></span></span><span class="dock-label">他のツール</span>
+  </button>
+  <button type="button" id="settingsDockBtn">
+    <span class="dock-icon"><span class="icon-chip" style="width:28px; height:28px;"><svg width="22" height="22"><use href="#i-settings"/></svg></span></span><span class="dock-label">表示設定</span>
   </button>
 </div>
 
@@ -1217,6 +1247,20 @@
       <input type="text" id="profileNewNameInput" placeholder="新しいプロフィール名" maxlength="30">
       <button type="button" id="profileAddBtn">＋追加</button>
     </div>
+  </div>
+</div>
+
+<div class="tools-modal-overlay" id="settingsModalOverlay">
+  <div class="tools-modal">
+    <div class="tools-modal-head">
+      <span>表示設定</span>
+      <button type="button" class="tools-modal-close" id="settingsModalCloseBtn" aria-label="閉じる"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-row-label">テーマ</span>
+      <button type="button" class="settings-theme-btn" id="settingsThemeBtn"></button>
+    </div>
+    <p class="tools-modal-hint" style="margin-top:10px;">ショートカット: <b>?</b>で開く／<b>D</b>でテーマ切替／<b>Esc</b>で閉じる</p>
   </div>
 </div>
 
@@ -2971,14 +3015,85 @@
   });
   setTimeout(clearEntrance, 800);
 
-  // ── 画面下部クイックメニュー：「他のツール」だけこの場でオーバーレイを開閉する（設定・情報は外部リンクなので不要） ──
+  /* ================================================================
+     ♿ モーダル共通のキーボードフォーカストラップ（wingsのtrapPush/trapPop方式を移植）。
+     開いた順で積むスタック（trapStack）にすることで、①開く前にフォーカスされていた
+     要素をトリガーとして覚える、②モーダル内の最初の操作可能要素へフォーカスを移す、
+     ③capture phaseのkeydownでTab/Shift+Tabをモーダルの先頭/末尾要素で折り返す、
+     ④閉じるときはトリガーへフォーカスを戻す、をモーダルごとに書かず共通化している。
+     Tabトラップの対象は常にスタック最上段（＝一番手前に開いているモーダル）だけでよいので、
+     開閉のたびにpush/popするだけでネストにも自動的に対応できる。
+     ================================================================ */
+  const trapStack = [];
+  let trapListenerAttached = false;
+  function trapFocusableEls(container) {
+    const all = container.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    return Array.prototype.filter.call(all, el => el.offsetParent !== null);
+  }
+  function trapKeydown(e) {
+    if (e.key !== 'Tab' || !trapStack.length) return;
+    const card = trapStack[trapStack.length - 1].card;
+    const focusable = trapFocusableEls(card);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first || !card.contains(document.activeElement)) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last || !card.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+    }
+  }
+  function trapPush(overlayId, card) {
+    if (!card || trapStack.some(s => s.overlayId === overlayId)) return;
+    trapStack.push({ overlayId, card, prevFocusEl: document.activeElement });
+    if (!trapListenerAttached) { document.addEventListener('keydown', trapKeydown, true); trapListenerAttached = true; }
+    const focusable = trapFocusableEls(card);
+    (focusable[0] || card).focus();
+  }
+  function trapPop(overlayId) {
+    const idx = trapStack.findIndex(s => s.overlayId === overlayId);
+    if (idx === -1) return;
+    const [entry] = trapStack.splice(idx, 1);
+    if (!trapStack.length && trapListenerAttached) { document.removeEventListener('keydown', trapKeydown, true); trapListenerAttached = false; }
+    if (entry.prevFocusEl && typeof entry.prevFocusEl.focus === 'function' && document.contains(entry.prevFocusEl)) entry.prevFocusEl.focus();
+  }
+  // 表示設定／関連ツール／プロフィール切替／画像プレビューの4つは下部ドックや"?"ショートカット
+  // などからいつでも独立して開けるトップレベルのオーバーレイで、tai-cardにはこれらの内部から
+  // さらに入れ子で開く二次モーダルが無いため、互いに完全に排他（どれか1つを開く前に他を
+  // 全部閉じる）にしている。開く前に、開こうとしているもの以外を閉じておく
+  // （各close関数は未オープン時は何もしない安全な関数）。
+  function closeOtherTopLevelOverlays(exceptId) {
+    if (exceptId !== 'toolsModalOverlay' && toolsModalOverlay.classList.contains('show')) closeToolsModal();
+    if (exceptId !== 'profileModalOverlay' && profileModalOverlay.classList.contains('show')) closeProfileModal();
+    if (exceptId !== 'settingsModalOverlay' && settingsModalOverlay.classList.contains('show')) closeSettingsModal();
+    if (exceptId !== 'imagePreviewOverlay' && imagePreviewOverlay.classList.contains('show')) closeImagePreview();
+  }
+  // スタック最上段（＝一番手前に開いているモーダル）を1つだけ閉じる。Escはテキスト入力中でも
+  // 常に有効（ダイアログを閉じるのはユーザーの期待に沿うため）。
+  function closeTopmostOpenModal() {
+    if (!trapStack.length) return;
+    const topId = trapStack[trapStack.length - 1].overlayId;
+    const closers = { toolsModalOverlay: closeToolsModal, profileModalOverlay: closeProfileModal, settingsModalOverlay: closeSettingsModal, imagePreviewOverlay: closeImagePreview };
+    const fn = closers[topId];
+    if (fn) fn();
+  }
+
+  // ── 画面下部クイックメニュー：「他のツール」だけこの場でオーバーレイを開閉する（データ連携・
+  //    設定・更新情報(tai-info)は外部リンクなので不要。表示設定は別途#settingsModalOverlay参照） ──
   const toolsModalOverlay = document.getElementById('toolsModalOverlay');
-  function openToolsModal(){ toolsModalOverlay.classList.add('show'); }
-  function closeToolsModal(){ toolsModalOverlay.classList.remove('show'); }
+  function openToolsModal(){
+    if (toolsModalOverlay.classList.contains('show')) return;
+    closeOtherTopLevelOverlays('toolsModalOverlay');
+    toolsModalOverlay.classList.add('show');
+    trapPush('toolsModalOverlay', toolsModalOverlay.querySelector('.tools-modal'));
+  }
+  function closeToolsModal(){ toolsModalOverlay.classList.remove('show'); trapPop('toolsModalOverlay'); }
+  window.closeToolsModal = closeToolsModal; // 下のフルイドボトムシートJSがCLOSE_FN経由で参照する
   document.getElementById('toolsDockBtn').addEventListener('click', openToolsModal);
   document.getElementById('toolsModalCloseBtn').addEventListener('click', closeToolsModal);
   toolsModalOverlay.addEventListener('click', e => { if (e.target === toolsModalOverlay) closeToolsModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeToolsModal(); });
 
   // ── プロフィール切替モーダル ──
   const profileModalOverlay = document.getElementById('profileModalOverlay');
@@ -3037,18 +3152,79 @@
       area.appendChild(row);
     });
   }
-  function openProfileModal(){ drawProfileModalList(); profileModalOverlay.classList.add('show'); }
-  function closeProfileModal(){ profileModalOverlay.classList.remove('show'); }
+  function openProfileModal(){
+    if (profileModalOverlay.classList.contains('show')) return;
+    closeOtherTopLevelOverlays('profileModalOverlay');
+    drawProfileModalList();
+    profileModalOverlay.classList.add('show');
+    trapPush('profileModalOverlay', profileModalOverlay.querySelector('.tools-modal'));
+  }
+  function closeProfileModal(){ profileModalOverlay.classList.remove('show'); trapPop('profileModalOverlay'); }
+  window.closeProfileModal = closeProfileModal; // 下のフルイドボトムシートJSがCLOSE_FN経由で参照する
   document.getElementById('profileDockBtn').addEventListener('click', openProfileModal);
   document.getElementById('profileModalCloseBtn').addEventListener('click', closeProfileModal);
   profileModalOverlay.addEventListener('click', e => { if (e.target === profileModalOverlay) closeProfileModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfileModal(); });
   document.getElementById('profileAddBtn').addEventListener('click', () => {
     const input = document.getElementById('profileNewNameInput');
     if (!input.value.trim()) return;
     createProfile(input.value.trim());
   });
   renderProfileDockLabel();
+
+  // ── 表示設定（ダーク/ライト切替のみを扱う最小限のモーダル）── 'sky_app_theme'は<head>内の
+  // 先読みスクリプトと同じ、taipak5000.github.io系ツール共通のキー（sky_app_langと同様、
+  // プロフィールに依存しない端末単位の設定のため nsKey() は使わない。ロジックを変更する際は
+  // <head>内の先読みスクリプトとも同期させること）。tai-cardは他の姉妹サイトと違い多言語対応や
+  // ショートカット無効化設定を持たないため、テーマ切替1つに絞っている。
+  const THEME_KEY = 'sky_app_theme';
+  function getStoredThemeMode(){
+    try {
+      const v = localStorage.getItem(THEME_KEY);
+      return (v === 'light' || v === 'dark' || v === 'system') ? v : 'system';
+    } catch (e) { return 'system'; }
+  }
+  function resolveEffectiveTheme(mode){
+    if (mode === 'light' || mode === 'dark') return mode;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function applyThemeToDOM(isDark){ document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light'); }
+  function themeModeLabel(mode){
+    if (mode === 'dark') return 'ダーク';
+    if (mode === 'light') return 'ライト';
+    return 'システムに合わせる';
+  }
+  function syncSettingsModalUI(){
+    const btn = document.getElementById('settingsThemeBtn');
+    if (!btn) return;
+    const order = ['light', 'dark', 'system'];
+    const mode = getStoredThemeMode();
+    const next = order[(order.indexOf(mode) + 1) % order.length];
+    btn.textContent = themeModeLabel(mode);
+    btn.setAttribute('aria-label', `テーマ: ${themeModeLabel(mode)}（押すと${themeModeLabel(next)}に切り替え）`);
+  }
+  // '?'キー・表示設定モーダル内のボタンから呼ばれる。ライト→ダーク→システム追従→ライト…の順に巡回する
+  function toggleTheme(){
+    const order = ['light', 'dark', 'system'];
+    const next = order[(order.indexOf(getStoredThemeMode()) + 1) % order.length];
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* プライベートブラウジング等でlocalStorageが使えない場合も表示は継続する */ }
+    applyThemeToDOM(resolveEffectiveTheme(next) === 'dark');
+    syncSettingsModalUI();
+  }
+
+  const settingsModalOverlay = document.getElementById('settingsModalOverlay');
+  function openSettingsModal(){
+    if (settingsModalOverlay.classList.contains('show')) return;
+    closeOtherTopLevelOverlays('settingsModalOverlay');
+    syncSettingsModalUI();
+    settingsModalOverlay.classList.add('show');
+    trapPush('settingsModalOverlay', settingsModalOverlay.querySelector('.tools-modal'));
+  }
+  function closeSettingsModal(){ settingsModalOverlay.classList.remove('show'); trapPop('settingsModalOverlay'); }
+  window.closeSettingsModal = closeSettingsModal; // 下のフルイドボトムシートJSがCLOSE_FN経由で参照する
+  document.getElementById('settingsDockBtn').addEventListener('click', openSettingsModal);
+  document.getElementById('settingsModalCloseBtn').addEventListener('click', closeSettingsModal);
+  document.getElementById('settingsThemeBtn').addEventListener('click', toggleTheme);
+  settingsModalOverlay.addEventListener('click', e => { if (e.target === settingsModalOverlay) closeSettingsModal(); });
 
   // ── カードを画像で保存 / Xへ投稿（アイテム所持管理のhtml2canvas書き出しと同じ仕組みを移植） ──
   const SITE_URL = 'https://taipak5000.github.io/tai-card/';
@@ -3135,12 +3311,14 @@
     document.getElementById('previewTwitterRow').style.display = '';
     previewCopyRow.style.display = (clipboardImageSupported && currentPreviewCanvas) ? '' : 'none';
 
+    closeOtherTopLevelOverlays('imagePreviewOverlay');
     imagePreviewOverlay.classList.add('show');
+    trapPush('imagePreviewOverlay', imagePreviewOverlay.querySelector('.preview-modal'));
   }
-  function closeImagePreview(){ imagePreviewOverlay.classList.remove('show'); }
+  function closeImagePreview(){ imagePreviewOverlay.classList.remove('show'); trapPop('imagePreviewOverlay'); }
+  window.closeImagePreview = closeImagePreview; // 下のフルイドボトムシートJSがCLOSE_FN経由で参照する
   document.getElementById('previewModalCloseBtn').addEventListener('click', closeImagePreview);
   imagePreviewOverlay.addEventListener('click', e => { if (e.target === imagePreviewOverlay) closeImagePreview(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImagePreview(); });
 
   // ボタンのクリックリスナーはモーダルを開くたびに登録するのではなく、ここで1回だけ登録する
   // （openImagePreview()内で毎回addEventListenerすると、開くたびにリスナーが積み重なり、
@@ -3191,14 +3369,29 @@
   });
 
   // 🌓 sky_app_theme が未設定/'system'のときだけ、OS側のダーク/ライト切り替え（サンセット等での
-  // 自動切替）にライブ追従させる。'light'/'dark'を明示保存済みの場合はOS変更を無視する
-  // （tai-cardには表示設定モーダルが無いため、トグルUIではなくこの読み取り追従のみ用意する）。
+  // 自動切替）にライブ追従させる。'light'/'dark'を明示保存済みの場合はOS変更を無視する。
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
     try {
       const saved = localStorage.getItem('sky_app_theme');
       if (saved === 'light' || saved === 'dark') return;
       document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+      syncSettingsModalUI();
     } catch (_) { /* localStorageが使えない環境では何もしない */ }
+  });
+
+  // ⌨️ 全ツール共通のキーボードショートカット（?＝表示設定を開く／d,D＝テーマ切替
+  // （ライト→ダーク→システム）／Esc＝開いているモーダルを閉じる）。Escはテキスト入力中でも
+  // 常に有効（ダイアログを閉じるのはユーザーの期待に沿うため）。?とdは、テキスト入力中は
+  // 通常の文字入力として使えるようガードする（例: 自由記述欄で"?"や"d"を打てなくなるのを防ぐ）。
+  document.addEventListener('keydown', function (e) {
+    if (e.repeat) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'Escape') { closeTopmostOpenModal(); return; }
+    const tgt = e.target;
+    const isTyping = tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.tagName === 'SELECT' || tgt.isContentEditable);
+    if (isTyping) return;
+    if (e.key === '?') { e.preventDefault(); openSettingsModal(); return; }
+    if (e.key === 'd' || e.key === 'D') { e.preventDefault(); toggleTheme(); return; }
   });
 })();
 </script>
@@ -3278,14 +3471,16 @@
     s.raf = requestAnimationFrame(step);
   }
 
-  // tai-cardのモーダルid → 閉じる関数名の対応表（各オーバーレイの
-  // onclick="if(event.target===this) XXX()" 相当の背景クリックで閉じるハンドラ）。
-  // いずれも同じIIFE内のローカル関数でwindowには生えていないため、実際には
-  // 下のフォールバック(classList.remove)が使われる。3関数ともclassList.remove('show')
-  // 以外の副作用を持たないことをソースで確認済みのため、フォールバックで問題ない。
+  // tai-cardのモーダルid → 閉じる関数名の対応表。ドラッグ/フリックでシートを閉じたときも
+  // （背景クリックや×ボタンと同じく）必ずこの対応表経由の関数を呼ぶ必要がある——各close関数は
+  // classList.remove('show')だけでなくtrapPop()（フォーカストラップのスタックからの除去・
+  // トリガーへのフォーカス復帰）も行うため、フォールバックのclassList.remove直呼びだけでは
+  // トラップの状態がズレてしまう。呼び出す各関数は本来のIIFEの外へwindow.XXX = XXXとして
+  // 明示的に公開されている（wingsのCLOSE_FNと同じ方式）。
   var CLOSE_FN = {
     'toolsModalOverlay': 'closeToolsModal',
     'profileModalOverlay': 'closeProfileModal',
+    'settingsModalOverlay': 'closeSettingsModal',
     'imagePreviewOverlay': 'closeImagePreview'
   };
   function closeOverlay(overlay) {
