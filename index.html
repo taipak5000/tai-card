@@ -128,6 +128,10 @@
     background:rgba(239,243,251,0.86); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
     border-bottom:1px solid var(--border);
   }
+  /* headerのすりガラス背景は--bg-aの直接コピー(rgba値)であり、[data-theme="dark"]の:root変数
+     上書きだけでは自動的に追従しない — 姉妹サイトwingsのnav要素と同じ既知パターンなので、
+     同じ考え方でダーク時だけ個別に上書きする（bg-aのダーク値#08090Bベース）。 */
+  [data-theme="dark"] header{ background:rgba(8,9,11,0.82); }
   header h1{ margin-bottom:0; }
   h1{ font-size:clamp(26px,4vw,34px); font-weight:600; letter-spacing:0.01em; color:var(--teal-ink); }
   .lede{ color:var(--text-2); font-size:14px; margin:10px 0 0; max-width:70ch; }
@@ -149,6 +153,14 @@
      編集パネル内容幅と同程度で、850px直後でも編集欄が確実に読み書きできる最小値。 */
   .board{ display:grid; grid-template-columns:minmax(320px,1fr) minmax(380px,900px); gap:26px; margin-top:30px; align-items:start; }
   @media (max-width:850px){ .board{ grid-template-columns:1fr; } }
+  /* .boardの直下2アイテム(#editorPanel/.preview-col)はグリッドアイテムのデフォルト
+     min-width:auto（＝自身のmin-content幅が下限）のままだと、内部の<input>（旅の記録の
+     好きな〇〇欄など、.fav-row内でflex:1;min-width:0を持つ入力でも、フォームコントロール
+     自体の実装上の既定サイズがflexの縮小可否とは別にコンテナ自身のmin-content算出へ
+     そのまま伝播する）のぶんだけトラックが実際の空き幅を超えて膨張する「グリッドの
+     blowout」が発生する。実機375px幅で検証済み: 修正前はdocumentElement.scrollWidthが
+     389px（横スクロール14px分）になり、修正後は375pxちょうどに戻る。 */
+  #editorPanel, .preview-col{ min-width:0; }
 
   .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow); }
   .panel-head{ padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; position:sticky; top:84px; background:var(--surface); border-radius:var(--r) var(--r) 0 0; z-index:2; }
@@ -685,6 +697,10 @@
     border-top:0.5px solid var(--border); box-shadow:0 -6px 18px rgba(60,50,80,0.06);
     justify-content:space-around; align-items:stretch; gap:4px;
   }
+  /* headerと同じく、すりガラス背景がrgba直値でハードコードされておりダークモードに
+     追従しないため、同じダーク背景値で個別に上書きする（回帰確認中に発見・header修正と
+     セットで対応） */
+  [data-theme="dark"] .site-dock{ background:rgba(8,9,11,0.82); }
   .site-dock button, .site-dock a{
     flex:1 1 0; max-width:110px; border:0; background:none; cursor:pointer;
     display:flex; flex-direction:column; align-items:center; gap:2px;
@@ -3045,9 +3061,15 @@
       if (document.activeElement === last || !card.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
     }
   }
-  function trapPush(overlayId, card) {
+  function trapPush(overlayId, card, focusEl) {
     if (!card || trapStack.some(s => s.overlayId === overlayId)) return;
-    trapStack.push({ overlayId, card, prevFocusEl: document.activeElement });
+    // focusElを明示的に渡された場合はdocument.activeElementの代わりにそちらを使う。
+    // 画像プレビュー(#shareImageBtn)は、非同期のhtml2canvas処理に入る前にトリガーボタン自身を
+    // disabled=trueにするため、trapPush()が呼ばれる頃にはブラウザが既にフォーカスを
+    // document.bodyへ強制的に外してしまっている(disabled要素はフォーカスを保持できない)。
+    // その場合document.activeElementを当てにすると復帰先を見失うので、disableする前に
+    // 確保しておいた参照を呼び出し側から渡してもらう。
+    trapStack.push({ overlayId, card, prevFocusEl: focusEl || document.activeElement });
     if (!trapListenerAttached) { document.addEventListener('keydown', trapKeydown, true); trapListenerAttached = true; }
     const focusable = trapFocusableEls(card);
     (focusable[0] || card).focus();
@@ -3298,7 +3320,7 @@
   const previewCopyRow = document.getElementById('previewCopyRow');
   const previewCopyBtn = document.getElementById('previewCopyBtn');
   let currentPreviewCanvas = null; // コピー・再エンコード用に、プレビュー中の元canvasを保持しておく
-  function openImagePreview(dataUrl, filename, shareText, canvas){
+  function openImagePreview(dataUrl, filename, shareText, canvas, triggerEl){
     currentPreviewCanvas = canvas || null;
     document.getElementById('previewImg').src = dataUrl;
     const link = document.getElementById('previewDownloadLink');
@@ -3313,7 +3335,7 @@
 
     closeOtherTopLevelOverlays('imagePreviewOverlay');
     imagePreviewOverlay.classList.add('show');
-    trapPush('imagePreviewOverlay', imagePreviewOverlay.querySelector('.preview-modal'));
+    trapPush('imagePreviewOverlay', imagePreviewOverlay.querySelector('.preview-modal'), triggerEl);
   }
   function closeImagePreview(){ imagePreviewOverlay.classList.remove('show'); trapPop('imagePreviewOverlay'); }
   window.closeImagePreview = closeImagePreview; // 下のフルイドボトムシートJSがCLOSE_FN経由で参照する
@@ -3341,6 +3363,10 @@
 
   const shareBtn = document.getElementById('shareImageBtn');
   shareBtn.addEventListener('click', async () => {
+    // shareBtnをdisabledにする前に、フォーカストラップの復帰先として自分自身への参照を
+    // 確保しておく（disabled中はdocument.activeElementから外れてしまうため、trapPush()の
+    // document.activeElement頼みだと復帰先を見失う。詳細はtrapPush()側のコメント参照）。
+    const triggerEl = shareBtn;
     shareBtn.disabled = true;
     showToast('画像を生成中…');
     const cardEl = document.getElementById('card');
@@ -3357,7 +3383,7 @@
       if (shareResult === 'success') {
         showToast('共有しました！');
       } else if (shareResult !== 'cancelled') {
-        openImagePreview(canvas.toDataURL('image/png'), filename, shareText, canvas);
+        openImagePreview(canvas.toDataURL('image/png'), filename, shareText, canvas, triggerEl);
       }
     } catch (err) {
       console.error(err);
