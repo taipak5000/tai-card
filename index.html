@@ -3082,6 +3082,17 @@
     const focusable = trapFocusableEls(card);
     (focusable[0] || card).focus();
   }
+  // 要素がDOM上に存在し、かつ実際に今すぐフォーカスして操作できる状態かどうかを判定する。
+  // offsetParentだけでは、下部シートの退場アニメーション中（`.tools-modal-overlay.is-closing`
+  // 等、~340ms、display:flexのままpointer-events:noneになる）の要素を「まだ使える」と誤判定して
+  // しまう——連鎖オーバーレイ（Aを開いた状態でBを"?"などのキーボードショートカットで開くと、
+  // Aは自動的にこの退場アニメーションへ入る）でこのウィンドウ中にBが閉じてフォーカスを戻すと、
+  // 二度と操作できないA内部の要素にフォーカスが取り残されたまま数百ms後にdisplay:noneになり
+  // 無言でbodyへ落ちてしまう。getComputedStyle()のpointer-eventsも併せて確認する。
+  function pfIsFocusRestorable(el) {
+    if (!el || typeof el.focus !== 'function' || !document.contains(el) || el.offsetParent === null) return false;
+    return getComputedStyle(el).pointerEvents !== 'none';
+  }
   function trapPop(overlayId) {
     const idx = trapStack.findIndex(s => s.overlayId === overlayId);
     if (idx === -1) return;
@@ -3089,17 +3100,17 @@
     if (!trapStack.length && trapListenerAttached) { document.removeEventListener('keydown', trapKeydown, true); trapListenerAttached = false; }
     // 🩹 document.contains()だけでは不十分：連鎖オーバーレイ（Aを開いた状態でBを"?"などの
     // キーボードショートカットで開くと、Bのトリガーとして捕まるのはAの内部要素になり得る）
-    // では、prevFocusElはDOM上に残ったまま非表示(display:none)になっていることがある。
-    // 非表示要素へのfocus()は何もせず失敗するだけでなく、そこにフォーカスが残ったまま
-    // 迷子になる（キーボード操作者がTabしても何も反応しないように見える）。trapFocusableEls()
-    // と同じoffsetParentチェックで「実際に見えている」ことも確認してから復帰させる。
-    // それも使えない場合は、フォーカスを迷子にするよりはドックの対応ボタンへ着地させる。
-    const isUsable = el => el && typeof el.focus === 'function' && document.contains(el) && el.offsetParent !== null;
-    if (isUsable(entry.prevFocusEl)) {
+    // では、prevFocusElはDOM上に残ったまま非表示(display:none)になっている、あるいは退場
+    // アニメーション中でdisplay:flexのままpointer-events:noneになっていることがある。
+    // そこへフォーカスすると、キーボード操作者がTabしても何も反応しないように見えたり、
+    // 数百ms後に無言でbodyへ落ちたりする。pfIsFocusRestorable()で「実際に今すぐ操作できる」
+    // ことまで確認してから復帰させる。それも使えない場合は、フォーカスを迷子にするよりは
+    // ドックの対応ボタンへ着地させる。
+    if (pfIsFocusRestorable(entry.prevFocusEl)) {
       entry.prevFocusEl.focus();
     } else {
       const fallback = document.getElementById(OVERLAY_FALLBACK_TRIGGER_ID[overlayId] || '');
-      if (isUsable(fallback)) fallback.focus();
+      if (pfIsFocusRestorable(fallback)) fallback.focus();
     }
   }
   // 表示設定／関連ツール／プロフィール切替／画像プレビューの4つは下部ドックや"?"ショートカット
