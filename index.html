@@ -3045,6 +3045,11 @@
      ================================================================ */
   const trapStack = [];
   let trapListenerAttached = false;
+  // 連鎖オーバーレイでprevFocusElが非表示化し復帰先を見失った場合の最終フォールバック。
+  // 下部ドックの3ボタンは常に表示され続ける（隠れたり無効化されたりしない）ため、
+  // 対応するオーバーレイが閉じたときの安全な着地点として使える。画像プレビューは
+  // 呼び出し側が必ずtriggerElを明示的に渡す設計なのでここには含めない。
+  const OVERLAY_FALLBACK_TRIGGER_ID = { toolsModalOverlay: 'toolsDockBtn', profileModalOverlay: 'profileDockBtn', settingsModalOverlay: 'settingsDockBtn' };
   function trapFocusableEls(container) {
     const all = container.querySelectorAll(
       'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -3082,7 +3087,20 @@
     if (idx === -1) return;
     const [entry] = trapStack.splice(idx, 1);
     if (!trapStack.length && trapListenerAttached) { document.removeEventListener('keydown', trapKeydown, true); trapListenerAttached = false; }
-    if (entry.prevFocusEl && typeof entry.prevFocusEl.focus === 'function' && document.contains(entry.prevFocusEl)) entry.prevFocusEl.focus();
+    // 🩹 document.contains()だけでは不十分：連鎖オーバーレイ（Aを開いた状態でBを"?"などの
+    // キーボードショートカットで開くと、Bのトリガーとして捕まるのはAの内部要素になり得る）
+    // では、prevFocusElはDOM上に残ったまま非表示(display:none)になっていることがある。
+    // 非表示要素へのfocus()は何もせず失敗するだけでなく、そこにフォーカスが残ったまま
+    // 迷子になる（キーボード操作者がTabしても何も反応しないように見える）。trapFocusableEls()
+    // と同じoffsetParentチェックで「実際に見えている」ことも確認してから復帰させる。
+    // それも使えない場合は、フォーカスを迷子にするよりはドックの対応ボタンへ着地させる。
+    const isUsable = el => el && typeof el.focus === 'function' && document.contains(el) && el.offsetParent !== null;
+    if (isUsable(entry.prevFocusEl)) {
+      entry.prevFocusEl.focus();
+    } else {
+      const fallback = document.getElementById(OVERLAY_FALLBACK_TRIGGER_ID[overlayId] || '');
+      if (isUsable(fallback)) fallback.focus();
+    }
   }
   // 表示設定／関連ツール／プロフィール切替／画像プレビューの4つは下部ドックや"?"ショートカット
   // などからいつでも独立して開けるトップレベルのオーバーレイで、tai-cardにはこれらの内部から
@@ -3110,9 +3128,14 @@
   const toolsModalOverlay = document.getElementById('toolsModalOverlay');
   function openToolsModal(){
     if (toolsModalOverlay.classList.contains('show')) return;
+    // 🩹 closeOtherTopLevelOverlays()が他のオーバーレイを閉じると、そのtrapPop()が
+    // document.activeElementを（そのオーバーレイの）元のトリガーへ同期的に戻してしまう。
+    // なので閉じる前に「今このモーダルを開こうとしている本当のトリガー」を確保しておき、
+    // trapPush()にはdocument.activeElement任せにせず明示的に渡す（openImagePreview()と同じ手当て）。
+    const focusEl = document.activeElement;
     closeOtherTopLevelOverlays('toolsModalOverlay');
     toolsModalOverlay.classList.add('show');
-    trapPush('toolsModalOverlay', toolsModalOverlay.querySelector('.tools-modal'));
+    trapPush('toolsModalOverlay', toolsModalOverlay.querySelector('.tools-modal'), focusEl);
   }
   function closeToolsModal(){ toolsModalOverlay.classList.remove('show'); trapPop('toolsModalOverlay'); }
   window.closeToolsModal = closeToolsModal; // 下のフルイドボトムシートJSがCLOSE_FN経由で参照する
@@ -3179,10 +3202,13 @@
   }
   function openProfileModal(){
     if (profileModalOverlay.classList.contains('show')) return;
+    // 🩹 理由はopenToolsModal()のコメント参照：他オーバーレイを閉じるとそのtrapPop()が
+    // フォーカスを移動させてしまうため、閉じる前に本当のトリガーを確保して明示的に渡す。
+    const focusEl = document.activeElement;
     closeOtherTopLevelOverlays('profileModalOverlay');
     drawProfileModalList();
     profileModalOverlay.classList.add('show');
-    trapPush('profileModalOverlay', profileModalOverlay.querySelector('.tools-modal'));
+    trapPush('profileModalOverlay', profileModalOverlay.querySelector('.tools-modal'), focusEl);
   }
   function closeProfileModal(){ profileModalOverlay.classList.remove('show'); trapPop('profileModalOverlay'); }
   window.closeProfileModal = closeProfileModal; // 下のフルイドボトムシートJSがCLOSE_FN経由で参照する
@@ -3239,10 +3265,13 @@
   const settingsModalOverlay = document.getElementById('settingsModalOverlay');
   function openSettingsModal(){
     if (settingsModalOverlay.classList.contains('show')) return;
+    // 🩹 理由はopenToolsModal()のコメント参照：他オーバーレイを閉じるとそのtrapPop()が
+    // フォーカスを移動させてしまうため、閉じる前に本当のトリガーを確保して明示的に渡す。
+    const focusEl = document.activeElement;
     closeOtherTopLevelOverlays('settingsModalOverlay');
     syncSettingsModalUI();
     settingsModalOverlay.classList.add('show');
-    trapPush('settingsModalOverlay', settingsModalOverlay.querySelector('.tools-modal'));
+    trapPush('settingsModalOverlay', settingsModalOverlay.querySelector('.tools-modal'), focusEl);
   }
   function closeSettingsModal(){ settingsModalOverlay.classList.remove('show'); trapPop('settingsModalOverlay'); }
   window.closeSettingsModal = closeSettingsModal; // 下のフルイドボトムシートJSがCLOSE_FN経由で参照する
