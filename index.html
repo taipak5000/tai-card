@@ -727,6 +727,9 @@
   .tools-modal{
     background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
     box-shadow:var(--shadow); width:100%; max-width:340px; max-height:80vh; overflow-y:auto; padding:18px;
+    /* 🩹 .site-dock（画面下部固定、z-index:1001でこのシートより常に手前）に最後の項目が
+       隠れないよう下端だけ底上げ。body{padding-bottom}と同じ「下部クイックメニュー分の余白」(76px)を流用。 */
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
   }
   .tools-modal-head{
     display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
@@ -836,6 +839,9 @@
   .preview-modal{
     background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
     box-shadow:var(--shadow); width:100%; max-width:380px; max-height:88vh; overflow-y:auto; padding:18px;
+    /* 🩹 .site-dock（画面下部固定、z-index:1001でこのシートより常に手前）に最後の項目が
+       隠れないよう下端だけ底上げ。body{padding-bottom}と同じ「下部クイックメニュー分の余白」(76px)を流用。 */
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
   }
   .preview-modal-head{
     display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
