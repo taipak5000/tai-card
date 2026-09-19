@@ -3411,12 +3411,34 @@
     shareBtn.disabled = true;
     showToast('画像を生成中…');
     const cardEl = document.getElementById('card');
+    // 🩹 .cardはcontainer-type:inline-sizeで自身の実描画幅を見て3カラム⇔1カラムを
+    // 切り替える（@container cardbox (max-width:620px)）。スマホ等、画面が狭い状態で
+    // 画面上の#cardをそのままhtml2canvasに渡すと1カラムに折りたたまれた縦長の画像に
+    // なってしまい、X（旧Twitter）のタイムラインでタップしないと全体が見えない
+    // 比率になっていた（.cardのaspect-ratio:1.91/1はXの推奨比率そのものなのに、
+    // 実際の書き出しではその恩恵を受けられていなかった）。
+    // 画面上のライブ表示には一切手を加えず、オフスクリーンに#cardの複製を
+    // max-width相当の広い固定幅で配置してから、その複製の方をキャプチャすることで、
+    // 常に3カラムの本来の横長レイアウトで書き出す。
+    const EXPORT_WIDTH_PX = 1200; // .cardのmax-widthと合わせる（3カラムが最も余裕を持って収まる幅）
+    const cloneWrap = document.createElement('div');
+    cloneWrap.style.cssText = 'position:fixed; left:-99999px; top:0; pointer-events:none;';
+    const clone = cardEl.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id')); // #card配下のidの重複を避ける
+    clone.style.width = EXPORT_WIDTH_PX + 'px';
+    clone.style.maxWidth = 'none';
     // html2canvasは複製したDOM上でrowIn等の入場アニメーションを最初からやり直してしまい、
     // 完了前にキャプチャするとその要素が透明なまま写ってしまう。撮影中だけ止めておく。
-    cardEl.classList.add('exporting');
+    clone.classList.add('exporting');
+    cloneWrap.appendChild(clone);
+    document.body.appendChild(cloneWrap);
     try {
       await ensureHtml2Canvas();
-      const canvas = await html2canvas(cardEl, { backgroundColor: null, scale: 2, useCORS: true });
+      // 追加した直後は3カラムへのレイアウト再計算がまだ済んでいないことがあるため、
+      // 描画が1回挟まるのを待ってからキャプチャする。
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const canvas = await html2canvas(clone, { backgroundColor: null, scale: 2, useCORS: true });
       const filename = sanitizeFilename('星紡ぎカード_' + (state.name || 'card')) + '.png';
       const shareText = buildShareText();
 
@@ -3430,7 +3452,7 @@
       console.error(err);
       showToast('画像の生成に失敗しました');
     } finally {
-      cardEl.classList.remove('exporting');
+      cloneWrap.remove();
       shareBtn.disabled = false;
     }
   });
