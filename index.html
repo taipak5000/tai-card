@@ -548,10 +548,15 @@
   #cardTrendWrap .card-sec-title, #cardTrendWrap .card-sec-heading{ flex:1 1 100%; }
   .trend-block{ flex:1 1 0; min-width:0; margin-bottom:0; }
   .trend-block-label{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--card-text-3); margin-bottom:5px; }
+  .trend-svg-wrap{ position:relative; }
   .trend-svg{ width:100%; height:48px; display:block; }
   .trend-area{ fill:var(--teal); fill-opacity:0.16; }
   .trend-line{ fill:none; stroke:var(--teal); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-  .trend-dot{ fill:var(--gold); }
+  /* 🩹 先端の点はpreserveAspectRatio="none"のSVG内蔵circleだと、コンテナの縦横比が
+     viewBox(300x84)からずれるほど楕円に潰れてしまう（グラフを1つだけ表示した時に
+     顕著）。SVGの外にHTML要素として重ね、固定px×固定pxのborder-radius:50%で
+     描くことで、コンテナの伸縮に関わらず常に正円を保つ。 */
+  .trend-dot{ position:absolute; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:var(--gold); pointer-events:none; }
   .trend-empty{ font-size:12px; color:var(--card-text-3); }
 
   .card-fc{
@@ -2636,12 +2641,17 @@
     const linePath = points.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
     const last = points[points.length - 1], first = points[0];
     const areaPath = `${linePath} L${last[0].toFixed(1)} ${h - pad} L${first[0].toFixed(1)} ${h - pad} Z`;
+    // 先端の点はSVGのcircleではなくHTMLのdivで重ねる（下のCSSコメント参照）。
+    // 位置はviewBox座標をパーセントに変換し、コンテナの実サイズに関わらず正しい位置に来るようにする。
+    const dotLeftPct = (last[0] / w * 100).toFixed(2), dotTopPct = (last[1] / h * 100).toFixed(2);
     return `
-      <svg viewBox="0 0 ${w} ${h}" class="trend-svg" preserveAspectRatio="none" role="img" aria-label="入手推移グラフ">
-        <path d="${areaPath}" class="trend-area"></path>
-        <path d="${linePath}" class="trend-line"></path>
-        <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="3.5" class="trend-dot"></circle>
-      </svg>`;
+      <div class="trend-svg-wrap">
+        <svg viewBox="0 0 ${w} ${h}" class="trend-svg" preserveAspectRatio="none" role="img" aria-label="入手推移グラフ">
+          <path d="${areaPath}" class="trend-area"></path>
+          <path d="${linePath}" class="trend-line"></path>
+        </svg>
+        <div class="trend-dot" style="left:${dotLeftPct}%; top:${dotTopPct}%;"></div>
+      </div>`;
   }
 
   // 入手グラフ：ノマキャン計算機・星のキャンドル計算機は、それぞれ自分のcomputeTrendPoints()で
