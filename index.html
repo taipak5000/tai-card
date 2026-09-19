@@ -1322,10 +1322,9 @@
   const ECO_STATS = [
     { id:'item',      icon:'🗂️', label:'アイテム所持率',       source:'アイテム所持管理',   value:'', placeholder:'例: 82%', visible:true },
     { id:'emote',     icon:'🎭', label:'エモート所持率',       source:'エモート所持率管理',  value:'', placeholder:'例: 65%', visible:true },
-    { id:'spirit',    icon:'✨', label:'精霊ツリー進行度',     source:'姉妹サイト',    value:'', placeholder:'例: 47%', visible:true },
+    { id:'spirit',    icon:'✨', label:'精霊ツリー進行度',     source:'精霊ツリー管理',    value:'', placeholder:'例: 47%', visible:true },
     { id:'score',     icon:'🎵', label:'作った曲数',          source:'楽譜づくり',    value:'', placeholder:'例: 24曲', visible:true },
     { id:'share',     icon:'📌', label:'シェア中の作品数',     source:'創作物管理ツール',   value:'', placeholder:'例: 6件', visible:true },
-    { id:'companion', icon:'💗', label:'精霊のハート交換数',   source:'精霊同行ツール',    value:'', placeholder:'例: 3/4', visible:true },
   ];
 
   // 入手グラフ：数値の手入力はさせず、プロフィールに反映するかどうかのスイッチのみ。
@@ -2341,17 +2340,19 @@
     return (pct > 0 && pct < 100 ? Math.round(pct * 10) / 10 : Math.round(pct)) + '%';
   }
 
-  // 姉妹サイト：解放済みノード数 ÷ 全トラック対象ノード数（ワープ用ノードを除いた数のスナップショット）
+  // 精霊ツリー管理：解放済みノード数 ÷ 全トラック対象ノード数。
+  // 精霊ツリー管理側がrenderStats()の集計結果（totalNodes/doneNodes、item側のgameItems_*と
+  // 同じ考え方でワープ/連れ歩く等の対象外ノードを除いた実数）をspiritCatalogStats_v1に
+  // 保存するようになったため、そちらを直接読む（ハードコードのノード総数スナップショットは
+  // データ更新のたびにズレるため廃止。古いバージョンのまま一度もスタッツ集計が
+  // 走っていない場合はnullを返し、他の項目と同じくスキップされる）。
   function syncSpiritStat(){
-    const TOTAL_TRACKABLE_NODES = 2351; // spirit-tree-data.jsから算出したノード総数のスナップショット
-    let map;
-    try { map = JSON.parse(localStorage.getItem(nsKey('spiritCatalogUnlocked_v1'))); } catch (_) { map = null; }
-    if (!map || typeof map !== 'object') return null;
-    const owned = Object.values(map).filter(Boolean).length;
-    if (!owned) return null;
-    // 分母が2351と大きいため、整数丸めだと少数の解放でも「0%」に潰れてしまう。
+    let stats;
+    try { stats = JSON.parse(localStorage.getItem(nsKey('spiritCatalogStats_v1'))); } catch (_) { stats = null; }
+    if (!stats || typeof stats.totalNodes !== 'number' || !stats.totalNodes || !stats.doneNodes) return null;
+    // 分母が2000超と大きいため、整数丸めだと少数の解放でも「0%」に潰れてしまう。
     // エモート所持率と同じく、0〜100の間は小数第1位まで残す。
-    const pct = owned / TOTAL_TRACKABLE_NODES * 100;
+    const pct = stats.doneNodes / stats.totalNodes * 100;
     return (pct > 0 && pct < 100 ? Math.round(pct * 10) / 10 : Math.round(pct)) + '%';
   }
 
@@ -2379,29 +2380,8 @@
     return count ? count + '件' : null;
   }
 
-  // 精霊同行ツール：4体の精霊のうち、シーズンハートとの交換（各精霊ツリーのtier4[2]）を
-  // 完了した数（companion自身のtotalHeartsと同じ定義：spirits.filter(s => s.treeData.tier4[2].checked).length）。
-  // 保存キーはcompanion独自の命名規則（nsKey()の`__p_<id>`ではなく`__<id>`）のため、nsKey()は使わず
-  // ここで同じ規則のキーを組み立てて直接読む（プロフィール一覧・アクティブIDはskyProfiles_v1/
-  // skyActiveProfile_v1で共通なので、参照するプロフィールIDそのものはnsKey()と揃う）。
-  function syncCompanionStat(){
-    const id = getActiveProfileId();
-    const key = id === DEFAULT_PROFILE_ID ? 'sky_companion_v4_data' : ('sky_companion_v4_data__' + id);
-    let raw;
-    try { raw = localStorage.getItem(key); } catch (_) { raw = null; }
-    if (raw === null) return null; // このプロフィールで精霊同行ツールを一度も開いていない場合はスキップ
-
-    let data;
-    try { data = JSON.parse(raw); } catch (_) { data = null; }
-    const spirits = data && Array.isArray(data.spirits) ? data.spirits : null;
-    if (!spirits) return null;
-
-    const hearts = spirits.filter(s => s && s.treeData && s.treeData.tier4 && s.treeData.tier4[2] && s.treeData.tier4[2].checked).length;
-    return hearts + '/4';
-  }
-
   // ECO_STATSのidに対応する関数が無い項目は、以下のループで自動的にスキップされる。
-  const ECO_SYNC_FNS = { item: syncItemStat, emote: syncEmoteStat, spirit: syncSpiritStat, score: syncScoreStat, share: syncShareStat, companion: syncCompanionStat };
+  const ECO_SYNC_FNS = { item: syncItemStat, emote: syncEmoteStat, spirit: syncSpiritStat, score: syncScoreStat, share: syncShareStat };
 
   // 収集状況の実データ連携本体。「まとめて連携」ボタンからも同じ処理を呼べるよう、
   // トースト表示を伴わない関数として切り出す（呼び出し側でまとめて1回だけ表示する）。
