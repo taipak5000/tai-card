@@ -385,8 +385,8 @@
      している点、およびoverflow:visibleな.card自身には一切手を加えていない点は従来通り）。 */
   .card-bg-wrap{
     position:absolute; inset:0; z-index:0; overflow:hidden; border-radius:24px; pointer-events:none;
+    background-repeat:no-repeat;
   }
-  .card-bg-wrap img{ width:100%; height:100%; object-fit:cover; display:block; }
   /* .card-kicker and .card-top can't both simply declare grid-area:head — two items sharing one
      named grid area overlap (same grid line box) rather than stacking, so they're grouped under
      one real wrapper that owns the "head" area and lays them out in normal flow. .card-emblem
@@ -1156,7 +1156,7 @@
         </div>
         <div class="card-frame">
           <div class="card" id="card">
-            <div class="card-bg-wrap" id="cardBgWrap" style="display:none;"><img id="cardBgImg" src="" alt=""></div>
+            <div class="card-bg-wrap" id="cardBgWrap" style="display:none;"></div>
             <div class="card-emblem">✦</div>
             <div class="card-head">
               <div class="card-kicker">PROFILE</div>
@@ -2791,6 +2791,45 @@
     return [1,2,3].map(i => parseInt(m[i], 16)).join(',');
   }
 
+  // 🩹 背景画像は以前<img style="object-fit:cover">＋transformで表示していたが、html2canvasは
+  // object-fitを解釈できず、常に引き伸ばし(fill相当)でキャプチャしてしまう不具合があった
+  // （画面上のプレビューは正しくcoverで表示されるため気付きにくい）。background-imageの
+  // background-size/positionはhtml2canvasでも正しく解釈されるため、object-fitに頼らず
+  // 自前でcover相当のサイズ・位置をpx計算してbackground-*に反映する方式に変更している。
+  // この計算はコンテナの実描画幅に依存するため、実カード用と（1200px固定幅の）書き出し用
+  // 複製の両方に対して、その時点の実際のサイズで呼び直す必要がある（shareImageBtn側を参照）。
+  const bgNaturalSizeCache = {};
+  function getBgImageNaturalSize(src, onReady){
+    if (bgNaturalSizeCache[src]) return bgNaturalSizeCache[src];
+    const img = new Image();
+    img.onload = () => { bgNaturalSizeCache[src] = { w: img.naturalWidth, h: img.naturalHeight }; onReady(); };
+    img.src = src;
+    return null;
+  }
+  function applyCardBgStyle(wrapEl, bg){
+    if (!bg.src) { wrapEl.style.display = 'none'; wrapEl.style.backgroundImage = ''; return; }
+    wrapEl.style.display = 'block';
+    wrapEl.style.opacity = bg.opacity / 100;
+    const nat = getBgImageNaturalSize(bg.src, renderCard);
+    wrapEl.style.backgroundImage = `url("${bg.src}")`;
+    if (!nat) {
+      // 自然サイズ読み込み中（初回アップロード直後などごく短時間）の暫定表示。
+      // cover+centerはキーワードのままhtml2canvasでも正しく解釈されるので、この間も引き伸ばしはしない。
+      wrapEl.style.backgroundSize = 'cover';
+      wrapEl.style.backgroundPosition = 'center';
+      return;
+    }
+    const rect = wrapEl.getBoundingClientRect();
+    const cw = rect.width || 1, ch = rect.height || 1;
+    const coverScale = Math.max(cw / nat.w, ch / nat.h);
+    const ew = nat.w * coverScale * bg.zoom;
+    const eh = nat.h * coverScale * bg.zoom;
+    const bgX = (cw - ew) / 2 + (bg.offsetX / 100) * cw;
+    const bgY = (ch - eh) / 2 + (bg.offsetY / 100) * ch;
+    wrapEl.style.backgroundSize = `${ew}px ${eh}px`;
+    wrapEl.style.backgroundPosition = `${bgX}px ${bgY}px`;
+  }
+
   function renderCard(){
     const card = document.getElementById('card');
     const theme = THEMES.find(t => t.id === state.theme) || THEMES[0];
@@ -2807,15 +2846,7 @@
     }
 
     const cardBgWrap = document.getElementById('cardBgWrap');
-    const cardBgImg = document.getElementById('cardBgImg');
-    if (state.cardBgImage.src) {
-      cardBgWrap.style.display = 'block';
-      cardBgWrap.style.opacity = state.cardBgImage.opacity / 100;
-      cardBgImg.src = state.cardBgImage.src;
-      cardBgImg.style.transform = `scale(${state.cardBgImage.zoom}) translate(${state.cardBgImage.offsetX}%, ${state.cardBgImage.offsetY}%)`;
-    } else {
-      cardBgWrap.style.display = 'none';
-    }
+    applyCardBgStyle(cardBgWrap, state.cardBgImage);
 
     document.getElementById('cardName').textContent = state.name || '（名前未入力）';
     document.getElementById('cardOneLiner').textContent = state.oneLiner || '';
@@ -3438,6 +3469,11 @@
       // 追加した直後は3カラムへのレイアウト再計算がまだ済んでいないことがあるため、
       // 描画が1回挟まるのを待ってからキャプチャする。
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      // 🩹 背景画像のbackground-size/positionはpx値で実描画幅に依存するため、ライブ表示時の
+      // 幅（複製元の#cardのその時点の幅）ではなく、複製をEXPORT_WIDTH_PXへ広げた後の実際の
+      // 幅で計算し直す必要がある（そのままだと違う幅の値を流用してしまい構図がずれる）。
+      const cloneBgWrap = clone.querySelector('.card-bg-wrap');
+      if (cloneBgWrap) applyCardBgStyle(cloneBgWrap, state.cardBgImage);
       const canvas = await html2canvas(clone, { backgroundColor: null, scale: 2, useCORS: true });
       const filename = sanitizeFilename('星紡ぎカード_' + (state.name || 'card')) + '.png';
       const shareText = buildShareText();
