@@ -2536,12 +2536,24 @@
   // （不正な余分なキーが入り得るのはユーザー自身がDevToolsで書き換えた場合のみで、対象外）。
   const WING_REBIRTH_BONUS = 1; // 羽トラッカー側の「原罪で転生すると光の翼+1」の固定ボーナスと同じ値
 
+  // 🩹 羽トラッカー側で過去に「精霊名が未確定のため仮のラベルで枠だけ設置」→後から実際の精霊名に
+  // 差し替え、という季節が2つあった（重なる音色の季節・砕ケル闇ノ季節）。差し替え前にチェックして
+  // いたユーザーのwingTracker_v1には、現行の精霊名リストに存在しない旧キーがtrueのまま残り得る。
+  // 羽トラッカー自身は現行の精霊名リストとの突き合わせでしかカウントしないためこの旧キーを無視するが、
+  // tai-card側は季節オブジェクトの中身を全部数えていたため、羽トラッカー側の表示より旧キーの数だけ
+  // 多く表示される不具合があった（判明分：常に+1）。判明している旧キーを明示的に除外する
+  // （同種の差し替えが今後見つかった場合はここに追記する）。
+  const LEGACY_ORPHANED_SEASON_SPIRIT_KEYS = {
+    '重なる音色の季節': ['未確認（再訪の有無・精霊名は要確認）'],
+    '砕ケル闇ノ季節': ['万古の光', '万古の闇'],
+  };
   // wingTracker_v1: { [季節名]: { [精霊名]: {at}|true } } — 季節精霊・再訪で獲得した枚数
   function countSeasonWingFeathers(tracker){
     let n = 0;
-    Object.values(tracker || {}).forEach(seasonObj => {
+    Object.entries(tracker || {}).forEach(([season, seasonObj]) => {
       if (seasonObj && typeof seasonObj === 'object') {
-        Object.values(seasonObj).forEach(v => { if (v) n++; });
+        const legacyKeys = LEGACY_ORPHANED_SEASON_SPIRIT_KEYS[season] || [];
+        Object.entries(seasonObj).forEach(([spirit, v]) => { if (v && !legacyKeys.includes(spirit)) n++; });
       }
     });
     return n;
