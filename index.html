@@ -762,6 +762,15 @@
   }
   .settings-theme-btn:hover{ background:var(--teal); color:#fff; }
   .settings-theme-btn:active{ transform:scale(0.97); }
+  .settings-lang-row{ display:flex; gap:8px; }
+  .lang-select-btn{
+    appearance:none; cursor:pointer; font-family:"Zen Kaku Gothic New",sans-serif; font-size:12.5px; font-weight:700;
+    color:var(--text-2); background:var(--surface-2); border:1px solid var(--border); border-radius:100px; padding:7px 16px;
+    transition:background .15s var(--ease-snap), color .15s, border-color .15s;
+  }
+  .lang-select-btn:hover{ background:var(--teal-bg); color:var(--teal-ink); }
+  .lang-select-btn:active{ transform:scale(0.97); }
+  .lang-select-btn.active{ background:var(--teal); color:#fff; border-color:transparent; }
 
   /* ── プロフィール切替モーダル（他のtaipak5000.github.io系ツールと同じ複数保存枠の仕組み） ── */
   .profile-row{ padding:9px 4px; border-bottom:1px solid var(--border); }
@@ -959,77 +968,77 @@
 
 <div class="wrap">
   <header>
-    <h1>星紡ぎカード</h1>
+    <h1 data-i18n="pageHeading">星紡ぎカード</h1>
   </header>
-  <p class="lede">Sky 星を紡ぐ子どもたちの自己紹介カードを作れるサイトです。入力した項目はその場でシェア用のカードにまとめられ、<b>項目ごとに公開・非公開を選べます。</b></p>
+  <p class="lede" data-i18n-html="ledeHtml">Sky 星を紡ぐ子どもたちの自己紹介カードを作れるサイトです。入力した項目はその場でシェア用のカードにまとめられ、<b>項目ごとに公開・非公開を選べます。</b></p>
 
   <div class="board" id="cardBoard">
     <section class="panel" id="editorPanel">
       <div class="panel-head">
-        <h2>編集</h2>
+        <h2 data-i18n="editorHeading">編集</h2>
       </div>
       <div class="panel-body">
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">背景テーマ</div></div>
+          <div class="sec-head"><div class="sec-title" data-i18n="secThemeTitle">背景テーマ</div></div>
           <div class="theme-row" id="themeRow"></div>
         </div>
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">プロフィール画像</div></div>
-          <label class="upload-btn">画像をアップロード<input type="file" accept="image/*" id="avatarFileInput"></label>
+          <div class="sec-head"><div class="sec-title" data-i18n="secAvatarTitle">プロフィール画像</div></div>
+          <label class="upload-btn"><span data-i18n="uploadImageBtn">画像をアップロード</span><input type="file" accept="image/*" id="avatarFileInput"></label>
           <div class="crop-tool" id="cropTool" style="display:none;">
             <div class="crop-box" id="cropBox"><img id="cropImg" src="" alt=""></div>
             <div class="crop-controls">
-              <label>ズーム</label>
+              <label data-i18n="zoomLabel">ズーム</label>
               <input type="range" id="zoomSlider" min="100" max="300" value="100">
-              <div class="crop-hint">ドラッグで位置調整・スライダーで拡大</div>
-              <button type="button" class="remove-img-btn" id="removeImgBtn">画像を削除する</button>
+              <div class="crop-hint" data-i18n="cropHintAvatar">ドラッグで位置調整・スライダーで拡大</div>
+              <button type="button" class="remove-img-btn" id="removeImgBtn" data-i18n="removeImageBtn">画像を削除する</button>
             </div>
           </div>
         </div>
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">背景画像</div></div>
-          <label class="upload-btn">画像をアップロード<input type="file" accept="image/*" id="bgFileInput"></label>
+          <div class="sec-head"><div class="sec-title" data-i18n="secBgImageTitle">背景画像</div></div>
+          <label class="upload-btn"><span data-i18n="uploadImageBtn">画像をアップロード</span><input type="file" accept="image/*" id="bgFileInput"></label>
           <div class="crop-tool" id="bgCropTool" style="display:none;">
             <div class="crop-box crop-box-wide" id="bgCropBox"><img id="bgCropImg" src="" alt=""></div>
             <div class="crop-controls">
-              <label>ズーム</label>
+              <label data-i18n="zoomLabel">ズーム</label>
               <input type="range" id="bgZoomSlider" min="100" max="300" value="100">
-              <label>不透明度</label>
+              <label data-i18n="opacityLabel">不透明度</label>
               <input type="range" id="bgOpacitySlider" min="0" max="100" value="35">
-              <div class="crop-hint">ドラッグで位置調整・スライダーで拡大縮小・不透明度を調整</div>
-              <button type="button" class="remove-img-btn" id="removeBgImgBtn">画像を削除する</button>
+              <div class="crop-hint" data-i18n="cropHintBg">ドラッグで位置調整・スライダーで拡大縮小・不透明度を調整</div>
+              <button type="button" class="remove-img-btn" id="removeBgImgBtn" data-i18n="removeImageBtn">画像を削除する</button>
             </div>
           </div>
         </div>
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">基本情報</div></div>
-          <div class="f"><label>名前</label><input type="text" id="in_name" placeholder="例: たい"></div>
-          <div class="f"><label>ひとこと</label><input type="text" id="in_oneLiner" placeholder="例: ものづくりが好きです"></div>
+          <div class="sec-head"><div class="sec-title" data-i18n="secBasicInfoTitle">基本情報</div></div>
+          <div class="f"><label data-i18n="nameLabel">名前</label><input type="text" id="in_name" placeholder="例: たい" data-i18n-placeholder="namePlaceholder"></div>
+          <div class="f"><label data-i18n="oneLinerLabel">ひとこと</label><input type="text" id="in_oneLiner" placeholder="例: ものづくりが好きです" data-i18n-placeholder="oneLinerPlaceholder"></div>
         </div>
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">旅の記録</div></div>
-          <div class="f"><label>星の子が生まれた時期</label><input type="text" id="in_journeyYear" placeholder="例: 2023"></div>
+          <div class="sec-head"><div class="sec-title" data-i18n="secJourneyTitle">旅の記録</div></div>
+          <div class="f"><label data-i18n="journeyYearLabel">星の子が生まれた時期</label><input type="text" id="in_journeyYear" placeholder="例: 2023" data-i18n-placeholder="journeyYearPlaceholder"></div>
           <div id="favRows"></div>
-          <button type="button" class="fav-add-btn" id="favAddBtn">＋好きな○○を追加</button>
+          <button type="button" class="fav-add-btn" id="favAddBtn" data-i18n="favAddBtn">＋好きな○○を追加</button>
         </div>
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">SNS <span class="n">空欄の行は非表示</span></div>
+            <div class="sec-title"><span data-i18n="secSnsTitle">SNS</span> <span class="n" data-i18n="snsHint">空欄の行は非表示</span></div>
             <label class="switch"><input type="checkbox" id="vis_sns" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div id="snsRows"></div>
-          <button type="button" class="fav-add-btn" id="snsAddBtn">＋SNSを追加</button>
+          <button type="button" class="fav-add-btn" id="snsAddBtn" data-i18n="snsAddBtn">＋SNSを追加</button>
         </div>
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">よく遊ぶ時間帯</div>
+            <div class="sec-title" data-i18n="secPlayTimeTitle">よく遊ぶ時間帯</div>
             <label class="switch"><input type="checkbox" id="vis_playTime" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div class="clock-dial-wrap">
@@ -1037,32 +1046,32 @@
               <span class="clock-tick t0">🌙</span><span class="clock-tick t6">🌅</span><span class="clock-tick t12">☀️</span><span class="clock-tick t18">🌆</span>
               <div id="clockHourTicks"></div>
               <div id="clockArcCaps"></div>
-              <div class="clock-dial-hole"><div class="clock-center" id="clockCenter">未入力</div></div>
+              <div class="clock-dial-hole"><div class="clock-center" id="clockCenter" data-i18n="notSetLabel">未入力</div></div>
             </div>
-            <p class="clock-drag-hint">◎をつかんでドラッグ、または数字で入力</p>
+            <p class="clock-drag-hint" data-i18n="clockDragHint">◎をつかんでドラッグ、または数字で入力</p>
             <div class="clock-num-inputs" id="playTimeRangeRows"></div>
-            <button type="button" class="fav-add-btn" id="playTimeAddBtn">＋時間帯を追加</button>
-            <button type="button" class="chip-opt" id="irregularBtn">不定期</button>
+            <button type="button" class="fav-add-btn" id="playTimeAddBtn" data-i18n="playTimeAddBtn">＋時間帯を追加</button>
+            <button type="button" class="chip-opt" id="irregularBtn" data-i18n="irregularBtnLabel">不定期</button>
           </div>
         </div>
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">カスタム欄 <span class="n">文章や画像を自由に追加できます</span></div>
+            <div class="sec-title"><span data-i18n="secCustomNoteTitle">カスタム欄</span> <span class="n" data-i18n="customNoteHint">文章や画像を自由に追加できます</span></div>
             <label class="switch"><input type="checkbox" id="vis_customNote" checked><span class="track"></span><span class="knob"></span></label>
           </div>
-          <div class="f"><label>見出し</label><input type="text" id="in_customNoteTitle" maxlength="14" placeholder="カスタム欄"></div>
-          <div class="f"><textarea id="in_customNoteText" rows="3" maxlength="200" placeholder="自由にどうぞ（一言メッセージ、こだわりポイントなど）"></textarea></div>
-          <label class="upload-btn">画像を追加<input type="file" accept="image/*" id="customNoteFileInput"></label>
+          <div class="f"><label data-i18n="customNoteTitleLabel">見出し</label><input type="text" id="in_customNoteTitle" maxlength="14" placeholder="カスタム欄" data-i18n-placeholder="customNoteTitlePlaceholder"></div>
+          <div class="f"><textarea id="in_customNoteText" rows="3" maxlength="200" placeholder="自由にどうぞ（一言メッセージ、こだわりポイントなど）" data-i18n-placeholder="customNoteTextPlaceholder"></textarea></div>
+          <label class="upload-btn"><span data-i18n="addImageBtn">画像を追加</span><input type="file" accept="image/*" id="customNoteFileInput"></label>
           <div class="custom-note-preview" id="customNotePreview" style="display:none;">
             <img id="customNoteImgPreview" src="" alt="">
-            <button type="button" class="remove-img-btn" id="removeCustomNoteImgBtn">画像を削除する</button>
+            <button type="button" class="remove-img-btn" id="removeCustomNoteImgBtn" data-i18n="removeImageBtn">画像を削除する</button>
           </div>
         </div>
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">詳細プロフィール <span class="n">タップで選択・もう一度で解除</span></div>
+            <div class="sec-title"><span data-i18n="secDetailsTitle">詳細プロフィール</span> <span class="n" data-i18n="detailsHint">タップで選択・もう一度で解除</span></div>
             <label class="switch"><input type="checkbox" id="vis_details" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div id="detailGroups"></div>
@@ -1070,23 +1079,23 @@
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">フレンドコード <span class="n">空欄で非表示</span></div>
+            <div class="sec-title"><span data-i18n="secFriendCodeTitle">フレンドコード</span> <span class="n" data-i18n="friendCodeHint">空欄で非表示</span></div>
             <label class="switch"><input type="checkbox" id="vis_friendCode" checked><span class="track"></span><span class="knob"></span></label>
           </div>
-          <div class="f"><input type="text" id="in_friendCode" placeholder="任意"></div>
+          <div class="f"><input type="text" id="in_friendCode" placeholder="任意" data-i18n-placeholder="optionalPlaceholder"></div>
           <div class="chips" id="friendContactChips"></div>
         </div>
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">まとめて連携 <span class="n">下の3つを1回で実行</span></div></div>
+          <div class="sec-head"><div class="sec-title"><span data-i18n="secAllSyncTitle">まとめて連携</span> <span class="n" data-i18n="allSyncHint">下の3つを1回で実行</span></div></div>
           <div class="eco-sync-row">
-            <button type="button" class="eco-sync-btn" id="allSyncBtn">収集状況・称号・光の翼をまとめて連携</button>
+            <button type="button" class="eco-sync-btn" id="allSyncBtn" data-i18n="allSyncBtn">収集状況・称号・光の翼をまとめて連携</button>
           </div>
           <div class="eco-field-head" style="margin-top:10px;">
-            <label for="autoSyncToggle">開くたびに自動で連携する</label>
+            <label for="autoSyncToggle" data-i18n="autoSyncLabel">開くたびに自動で連携する</label>
             <label class="switch eco-vis-switch"><input type="checkbox" id="autoSyncToggle"><span class="track"></span><span class="knob"></span></label>
           </div>
-          <div class="hint-box">
+          <div class="hint-box" data-i18n-html="allSyncHintHtml">
             「まとめて連携」を押すと、下にある<b>ケープレベル・収集状況・称号</b>それぞれの「実データと連携」ボタンをまとめて1回で実行します。個別に更新したい場合は、各セクションのボタンもそのまま使えます。<br><br>
             「開くたびに自動で連携する」をONにすると、次回からこのページを開くたびに3つを自動で連携します。毎回ボタンを押す手間がなくなります(手入力での上書きはこれまで通り可能です)。
           </div>
@@ -1094,50 +1103,50 @@
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">ケープレベル <span class="n">→ 羽トラッカー</span></div>
+            <div class="sec-title"><span data-i18n="secCapeTitle">ケープレベル</span> <span class="n" data-i18n="capeArrowHint">→ 羽トラッカー</span></div>
             <label class="switch"><input type="checkbox" id="vis_cape" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div class="eco-sync-row">
-            <button type="button" class="eco-sync-btn" id="wingSyncBtn">羽トラッカーと連携</button>
+            <button type="button" class="eco-sync-btn" id="wingSyncBtn" data-i18n="wingSyncBtn">羽トラッカーと連携</button>
           </div>
-          <div class="f"><label>光の翼 合計枚数</label><input type="text" inputmode="numeric" id="in_wingTotal" placeholder="例: 77"></div>
-          <div class="hint-box">
+          <div class="f"><label data-i18n="wingTotalLabel">光の翼 合計枚数</label><input type="text" inputmode="numeric" id="in_wingTotal" placeholder="例: 77" data-i18n-placeholder="wingTotalPlaceholder"></div>
+          <div class="hint-box" data-i18n-html="wingSyncHintHtml">
             「羽トラッカーと連携」を押すと、この端末に保存されている<b>羽トラッカー</b>の実データ（季節精霊の再訪・恒常精霊・光の子の獲得状況）から、光の翼の合計枚数を自動で計算します(羽トラッカーを一度でも開いたことがある場合のみ反映されます)。連携後も手入力で上書きできます。
           </div>
         </div>
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">収集状況 <span class="n">自分の他サイトのデータと連携可能</span></div>
+            <div class="sec-title"><span data-i18n="secEcoStatsTitle">収集状況</span> <span class="n" data-i18n="ecoStatsHint">自分の他サイトのデータと連携可能</span></div>
             <label class="switch"><input type="checkbox" id="vis_ecoStats" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div class="eco-sync-row">
-            <button type="button" class="eco-sync-btn" id="ecoSyncBtn">実データと連携</button>
+            <button type="button" class="eco-sync-btn" id="ecoSyncBtn" data-i18n="ecoSyncBtn">実データと連携</button>
           </div>
           <div id="ecoStatFields"></div>
-          <div class="hint-box">
+          <div class="hint-box" data-i18n-html="ecoSyncHintHtml">
             「実データと連携」を押すと、この端末に保存されている<b>アイテム所持管理・エモート所持率管理・姉妹サイト・創作物管理ツール</b>の実データを自動で読み込みます(該当サイトを一度でも開いたことがある場合のみ反映されます)。連携後も手入力で上書きできます。
           </div>
         </div>
 
         <div class="sec">
           <div class="sec-head">
-            <div class="sec-title">称号 <span class="n">獲得した称号をカードに飾れる</span></div>
+            <div class="sec-title"><span data-i18n="secTitlesTitle">称号</span> <span class="n" data-i18n="titlesHint">獲得した称号をカードに飾れる</span></div>
             <label class="switch"><input type="checkbox" id="vis_titles" checked><span class="track"></span><span class="knob"></span></label>
           </div>
           <div class="eco-sync-row">
-            <button type="button" class="eco-sync-btn" id="titleSyncBtn">称号を読み込む</button>
+            <button type="button" class="eco-sync-btn" id="titleSyncBtn" data-i18n="titleSyncBtn">称号を読み込む</button>
           </div>
           <div id="titlePickerArea"></div>
-          <div class="hint-box">
+          <div class="hint-box" data-i18n-html="titleSyncHintHtml">
             「称号を読み込む」を押すと、この端末に保存されている他ツールで獲得済みの称号を読み込みます。飾りたいものだけタップして選んでください(複数選択可)。
           </div>
         </div>
 
         <div class="sec">
-          <div class="sec-head"><div class="sec-title">入手グラフ <span class="n">任意・各サイトの推移チャート</span></div></div>
+          <div class="sec-head"><div class="sec-title"><span data-i18n="secTrendTitle">入手グラフ</span> <span class="n" data-i18n="trendHint">任意・各サイトの推移チャート</span></div></div>
           <div id="trendGraphFields"></div>
-          <div class="hint-box">
+          <div class="hint-box" data-i18n-html="trendHintBoxHtml">
             数値の手入力はできません。ONにすると、この端末の同じプロフィールでノマキャン計算機・星のキャンドル計算機に実際に記録された入手履歴からグラフを表示します（該当サイトを使って2件以上の履歴が記録されている場合のみ表示されます）。
           </div>
         </div>
@@ -1148,9 +1157,9 @@
     <div class="preview-col">
       <section class="panel">
         <div class="panel-head">
-          <h2>プレビュー</h2>
+          <h2 data-i18n="previewHeading">プレビュー</h2>
           <div class="panel-head-actions">
-            <button type="button" class="share-btn" id="shareImageBtn">
+            <button type="button" class="share-btn" id="shareImageBtn" data-i18n="shareImageBtn">
               画像を保存してXへ投稿
             </button>
           </div>
@@ -1190,7 +1199,7 @@
               </div>
             </div>
             <div class="card-foot">
-              <span>🕯️ Sky: 星を紡ぐ子どもたち</span>
+              <span data-i18n="cardWatermark">🕯️ Sky: 星を紡ぐ子どもたち</span>
               <span class="tag" id="cardDate"></span>
             </div>
           </div>
@@ -1200,49 +1209,50 @@
   </div>
 
   <footer>
-    <p>このサイトはSky 星を紡ぐ子どもたちの非公式ファンサイトです。thatgamecompanyは一切関与していません。</p>
-    <p style="margin-top:10px;">作成・ご意見: <a href="https://x.com/Skyzztai" target="_blank" rel="noopener noreferrer" style="font-weight:bold;">@Skyzztai</a>　／　<a href="https://odaibako.net/u/Skyzztai" target="_blank" rel="noopener noreferrer" style="font-weight:bold;">リクエストフォーム</a></p>
-    <p style="margin-top:10px;"><a href="https://taipak5000.github.io/tai-info/">設定・更新情報・クレジット・プライバシーポリシー</a></p>
+    <p data-i18n="footerDisclaimer">このサイトはSky 星を紡ぐ子どもたちの非公式ファンサイトです。thatgamecompanyは一切関与していません。</p>
+    <p style="margin-top:10px;"><span data-i18n="footerCreditLabel">作成・ご意見: </span><a href="https://x.com/Skyzztai" target="_blank" rel="noopener noreferrer" style="font-weight:bold;">@Skyzztai</a>　／　<a href="https://odaibako.net/u/Skyzztai" target="_blank" rel="noopener noreferrer" style="font-weight:bold;" data-i18n="requestFormLink">リクエストフォーム</a></p>
+    <p style="margin-top:10px;"><a href="https://taipak5000.github.io/tai-info/" data-i18n="footerInfoLink">設定・更新情報・クレジット・プライバシーポリシー</a></p>
   </footer>
 </div>
 
 <!-- ── 共通レイアウト規約: site-dockには他ドメインへの直リンクを一切置かない。
      データ連携(tai-transfer)・設定・更新情報(tai-info)は他の姉妹サイトと同じ「他のツール」
      ドロワー(#toolsModalOverlay)内のリストへ統合済み。ここでの「表示設定」はそれとは別物で、
-     本ページ内でダーク/ライト表示を切り替えるだけの機能（姉妹サイト共通の"?"キーショートカットにも対応） ── -->
-<div class="site-dock" role="navigation" aria-label="クイックメニュー">
+     本ページ内でダーク/ライト表示・言語を切り替えるだけの機能（姉妹サイト共通の"?"キー
+     ショートカットにも対応） ── -->
+<div class="site-dock" role="navigation" aria-label="クイックメニュー" data-i18n-aria-label="quickMenuAriaLabel">
   <button type="button" id="profileDockBtn">
     <span class="dock-icon"><span class="icon-chip" style="width:28px; height:28px;"><svg width="22" height="22"><use href="#i-folder"/></svg></span></span><span class="dock-label" id="siteDockProfileLabel">メイン</span>
   </button>
   <button type="button" id="toolsDockBtn">
-    <span class="dock-icon"><span class="icon-chip" style="width:28px; height:28px;"><svg width="22" height="22"><use href="#i-menu"/></svg></span></span><span class="dock-label">他のツール</span>
+    <span class="dock-icon"><span class="icon-chip" style="width:28px; height:28px;"><svg width="22" height="22"><use href="#i-menu"/></svg></span></span><span class="dock-label" data-i18n="otherToolsLabel">他のツール</span>
   </button>
   <button type="button" id="settingsDockBtn">
-    <span class="dock-icon"><span class="icon-chip" style="width:28px; height:28px;"><svg width="22" height="22"><use href="#i-settings"/></svg></span></span><span class="dock-label">表示設定</span>
+    <span class="dock-icon"><span class="icon-chip" style="width:28px; height:28px;"><svg width="22" height="22"><use href="#i-settings"/></svg></span></span><span class="dock-label" data-i18n="displaySettingsLabel">表示設定</span>
   </button>
 </div>
 
 <div class="tools-modal-overlay" id="toolsModalOverlay">
   <div class="tools-modal">
     <div class="tools-modal-head">
-      <span>関連ツール</span>
-      <button type="button" class="tools-modal-close" id="toolsModalCloseBtn" aria-label="閉じる"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
+      <span data-i18n="relatedToolsTitle">関連ツール</span>
+      <button type="button" class="tools-modal-close" id="toolsModalCloseBtn" aria-label="閉じる" data-i18n-aria-label="closeAriaLabel"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
     </div>
-    <p class="tools-modal-hint">同じ作者によるSky: 星を紡ぐ子どもたち向けの他のツールです（同一オリジンなので、遷移してもこの端末のデータは共有されます）。</p>
+    <p class="tools-modal-hint" data-i18n="toolsModalHint">同じ作者によるSky: 星を紡ぐ子どもたち向けの他のツールです（同一オリジンなので、遷移してもこの端末のデータは共有されます）。</p>
     <nav class="tools-modal-links">
-      <a href="https://taipak5000.github.io/tai-item/"><svg class="inline-icon" width="14" height="14"><use href="#i-folder"/></svg> アイテム所持管理</a>
-      <a href="https://taipak5000.github.io/tai-emote/"><svg class="inline-icon" width="14" height="14"><use href="#i-masks"/></svg> エモート所持率管理</a>
-      <a href="https://taipak5000.github.io/share/"><svg class="inline-icon" width="14" height="14"><use href="#i-pin"/></svg> 創作物管理ツール</a>
-      <a href="https://taipak5000.github.io/tai-nomacan/"><svg class="inline-icon" width="14" height="14"><use href="#i-candle"/></svg> ノマキャン計算機</a>
-      <a href="https://taipak5000.github.io/star-candle/"><svg class="inline-icon" width="14" height="14"><use href="#i-star-candle"/></svg> 星のキャンドル計算機</a>
-      <a href="https://taipak5000.github.io/companion/"><svg class="inline-icon" width="14" height="14"><use href="#i-sparkle"/></svg> 精霊同行ツール</a>
-      <a href="https://taipak5000.github.io/wings/"><svg class="inline-icon" width="14" height="14"><use href="#i-wing"/></svg> 羽トラッカー</a>
-      <a href="https://taipak5000.github.io/tai-catalog/"><svg class="inline-icon" width="14" height="14"><use href="#i-tree"/></svg><span class="tool-badge-test">test</span> 精霊ツリー管理</a>
-      <a href="https://taipak5000.github.io/tai-revisit/"><svg class="inline-icon" width="14" height="14"><use href="#i-wing"/></svg> 再訪精霊データベース</a>
-      <a href="https://taipak5000.github.io/tai-score/"><svg class="inline-icon" width="14" height="14"><use href="#i-music-note"/></svg><span class="tool-badge-test">test</span> 楽譜づくり</a>
-      <a href="https://taipak5000.github.io/tai-transfer/"><svg class="inline-icon" width="14" height="14"><use href="#i-sync"/></svg> データ引継ぎ</a>
-      <a href="https://taipak5000.github.io/tai-info/"><svg class="inline-icon" width="14" height="14"><use href="#i-settings"/></svg> 設定・更新情報</a>
-      <a href="https://taipak5000.github.io/skyzztai-profile/"><svg class="inline-icon" width="14" height="14"><use href="#i-person"/></svg> 作者プロフィール</a>
+      <a href="https://taipak5000.github.io/tai-item/"><svg class="inline-icon" width="14" height="14"><use href="#i-folder"/></svg> <span data-i18n="toolItem">アイテム所持管理</span></a>
+      <a href="https://taipak5000.github.io/tai-emote/"><svg class="inline-icon" width="14" height="14"><use href="#i-masks"/></svg> <span data-i18n="toolEmote">エモート所持率管理</span></a>
+      <a href="https://taipak5000.github.io/share/"><svg class="inline-icon" width="14" height="14"><use href="#i-pin"/></svg> <span data-i18n="toolShare">創作物管理ツール</span></a>
+      <a href="https://taipak5000.github.io/tai-nomacan/"><svg class="inline-icon" width="14" height="14"><use href="#i-candle"/></svg> <span data-i18n="toolNomacan">ノマキャン計算機</span></a>
+      <a href="https://taipak5000.github.io/star-candle/"><svg class="inline-icon" width="14" height="14"><use href="#i-star-candle"/></svg> <span data-i18n="toolStarCandle">星のキャンドル計算機</span></a>
+      <a href="https://taipak5000.github.io/companion/"><svg class="inline-icon" width="14" height="14"><use href="#i-sparkle"/></svg> <span data-i18n="toolCompanion">精霊同行ツール</span></a>
+      <a href="https://taipak5000.github.io/wings/"><svg class="inline-icon" width="14" height="14"><use href="#i-wing"/></svg> <span data-i18n="toolWings">羽トラッカー</span></a>
+      <a href="https://taipak5000.github.io/tai-catalog/"><svg class="inline-icon" width="14" height="14"><use href="#i-tree"/></svg><span class="tool-badge-test">test</span> <span data-i18n="toolCatalog">精霊ツリー管理</span></a>
+      <a href="https://taipak5000.github.io/tai-revisit/"><svg class="inline-icon" width="14" height="14"><use href="#i-wing"/></svg> <span data-i18n="toolRevisit">再訪精霊データベース</span></a>
+      <a href="https://taipak5000.github.io/tai-score/"><svg class="inline-icon" width="14" height="14"><use href="#i-music-note"/></svg><span class="tool-badge-test">test</span> <span data-i18n="toolScore">楽譜づくり</span></a>
+      <a href="https://taipak5000.github.io/tai-transfer/"><svg class="inline-icon" width="14" height="14"><use href="#i-sync"/></svg> <span data-i18n="toolTransfer">データ引継ぎ</span></a>
+      <a href="https://taipak5000.github.io/tai-info/"><svg class="inline-icon" width="14" height="14"><use href="#i-settings"/></svg> <span data-i18n="toolInfo">設定・更新情報</span></a>
+      <a href="https://taipak5000.github.io/skyzztai-profile/"><svg class="inline-icon" width="14" height="14"><use href="#i-person"/></svg> <span data-i18n="toolProfile">作者プロフィール</span></a>
     </nav>
   </div>
 </div>
@@ -1250,21 +1260,21 @@
 <div class="preview-modal-overlay" id="imagePreviewOverlay">
   <div class="preview-modal">
     <div class="preview-modal-head">
-      <span id="previewModalTitle">画像を保存</span>
-      <button type="button" class="preview-modal-close" id="previewModalCloseBtn" aria-label="閉じる"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
+      <span id="previewModalTitle" data-i18n="imageSaveDefaultTitle">画像を保存</span>
+      <button type="button" class="preview-modal-close" id="previewModalCloseBtn" aria-label="閉じる" data-i18n-aria-label="closeAriaLabel"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
     </div>
     <div class="preview-modal-hint">
       <span id="previewHintText"></span>
     </div>
-    <img id="previewImg" class="preview-img" src="" alt="保存用のカード画像">
+    <img id="previewImg" class="preview-img" src="" alt="保存用のカード画像" data-i18n-alt="previewImgAlt">
     <div class="preview-action-row">
-      <a id="previewDownloadLink" class="preview-action-btn primary" href="" download="">ダウンロード</a>
+      <a id="previewDownloadLink" class="preview-action-btn primary" href="" download="" data-i18n="downloadBtn">ダウンロード</a>
     </div>
     <div class="preview-action-row" id="previewCopyRow" style="display:none;">
-      <button type="button" id="previewCopyBtn" class="preview-action-btn copy">クリップボードにコピー</button>
+      <button type="button" id="previewCopyBtn" class="preview-action-btn copy" data-i18n="copyToClipboardBtn">クリップボードにコピー</button>
     </div>
     <div class="preview-action-row" id="previewTwitterRow" style="display:none;">
-      <a id="previewTwitterLink" class="preview-action-btn twitter" href="" target="_blank" rel="noopener noreferrer">Xの投稿画面を開く</a>
+      <a id="previewTwitterLink" class="preview-action-btn twitter" href="" target="_blank" rel="noopener noreferrer" data-i18n="openXBtn">Xの投稿画面を開く</a>
     </div>
   </div>
 </div>
@@ -1272,14 +1282,14 @@
 <div class="tools-modal-overlay" id="profileModalOverlay">
   <div class="tools-modal profile-modal-card">
     <div class="tools-modal-head">
-      <span>プロフィール切替</span>
-      <button type="button" class="tools-modal-close" id="profileModalCloseBtn" aria-label="閉じる"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
+      <span data-i18n="profileSwitchTitle">プロフィール切替</span>
+      <button type="button" class="tools-modal-close" id="profileModalCloseBtn" aria-label="閉じる" data-i18n-aria-label="closeAriaLabel"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
     </div>
-    <p class="tools-modal-hint">プロフィールを切り替えると、この端末の他のツール(アイテム所持管理など)のアクティブな保存枠も一緒に切り替わります。称号もプロフィールごとに獲得できます。</p>
+    <p class="tools-modal-hint" data-i18n="profileSwitchHint">プロフィールを切り替えると、この端末の他のツール(アイテム所持管理など)のアクティブな保存枠も一緒に切り替わります。称号もプロフィールごとに獲得できます。</p>
     <div id="profileListArea"></div>
     <div class="profile-add-row">
-      <input type="text" id="profileNewNameInput" placeholder="新しいプロフィール名" maxlength="30">
-      <button type="button" id="profileAddBtn">＋追加</button>
+      <input type="text" id="profileNewNameInput" placeholder="新しいプロフィール名" maxlength="30" data-i18n-placeholder="newProfileNamePlaceholder">
+      <button type="button" id="profileAddBtn" data-i18n="addProfileBtn">＋追加</button>
     </div>
   </div>
 </div>
@@ -1287,14 +1297,21 @@
 <div class="tools-modal-overlay" id="settingsModalOverlay">
   <div class="tools-modal">
     <div class="tools-modal-head">
-      <span>表示設定</span>
-      <button type="button" class="tools-modal-close" id="settingsModalCloseBtn" aria-label="閉じる"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
+      <span data-i18n="displaySettingsLabel">表示設定</span>
+      <button type="button" class="tools-modal-close" id="settingsModalCloseBtn" aria-label="閉じる" data-i18n-aria-label="closeAriaLabel"><span class="icon-chip" style="width:22px; height:22px;"><svg width="16" height="16"><use href="#i-close"/></svg></span></button>
     </div>
     <div class="settings-row">
-      <span class="settings-row-label">テーマ</span>
+      <span class="settings-row-label" data-i18n="uiThemeLabel">テーマ</span>
       <button type="button" class="settings-theme-btn" id="settingsThemeBtn"></button>
     </div>
-    <p class="tools-modal-hint" style="margin-top:10px;">ショートカット: <b>?</b>で開く／<b>D</b>でテーマ切替／<b>Esc</b>で閉じる</p>
+    <div class="settings-row" style="margin-top:10px;">
+      <span class="settings-row-label" data-i18n="settingsLangSection">言語</span>
+      <div class="settings-lang-row">
+        <button type="button" class="mini-btn lang-select-btn" id="settingsLangJaBtn" onclick="setLang('ja')">日本語</button>
+        <button type="button" class="mini-btn lang-select-btn" id="settingsLangEnBtn" onclick="setLang('en')">English</button>
+      </div>
+    </div>
+    <p class="tools-modal-hint" style="margin-top:10px;" data-i18n-html="shortcutsHintHtml">ショートカット: <b>?</b>で開く／<b>D</b>でテーマ切替／<b>Esc</b>で閉じる</p>
   </div>
 </div>
 
@@ -1303,43 +1320,67 @@
 <script>
 (function(){
   const THEMES = [
-    { id:'night',   name:'夜空',   grad:'linear-gradient(165deg, #F7F5FB 0%, #ECE9F5 100%)', ca:'#8B7BAE', ca2:'#6B5A93' },
-    { id:'dawn',    name:'夜明け', grad:'linear-gradient(165deg, #FBF3ED 0%, #F6E6DA 100%)', ca:'#D08A5C', ca2:'#B5673D' },
-    { id:'morning', name:'朝',     grad:'linear-gradient(165deg, #F2F8F6 0%, #E5F1EE 100%)', ca:'#4F8B79', ca2:'#3A6B5C' },
-    { id:'day',     name:'昼',     grad:'linear-gradient(165deg, #FDFBF4 0%, #F7F0DF 100%)', ca:'#C99A4A', ca2:'#A87A32' },
-    { id:'dusk',    name:'夕暮れ', grad:'linear-gradient(165deg, #FBF0F1 0%, #F4E0E4 100%)', ca:'#C46F82', ca2:'#A24F63' },
-    { id:'aurora',  name:'オーロラ', grad:'linear-gradient(165deg, #F1F7F6 0%, #EAEEF9 100%)', ca:'#5C9E8E', ca2:'#6C74B0' },
+    { id:'night',   name:'夜空',   nameEn:'Night Sky',   grad:'linear-gradient(165deg, #F7F5FB 0%, #ECE9F5 100%)', ca:'#8B7BAE', ca2:'#6B5A93' },
+    { id:'dawn',    name:'夜明け', nameEn:'Dawn',        grad:'linear-gradient(165deg, #FBF3ED 0%, #F6E6DA 100%)', ca:'#D08A5C', ca2:'#B5673D' },
+    { id:'morning', name:'朝',     nameEn:'Morning',     grad:'linear-gradient(165deg, #F2F8F6 0%, #E5F1EE 100%)', ca:'#4F8B79', ca2:'#3A6B5C' },
+    { id:'day',     name:'昼',     nameEn:'Day',         grad:'linear-gradient(165deg, #FDFBF4 0%, #F7F0DF 100%)', ca:'#C99A4A', ca2:'#A87A32' },
+    { id:'dusk',    name:'夕暮れ', nameEn:'Dusk',        grad:'linear-gradient(165deg, #FBF0F1 0%, #F4E0E4 100%)', ca:'#C46F82', ca2:'#A24F63' },
+    { id:'aurora',  name:'オーロラ', nameEn:'Aurora',    grad:'linear-gradient(165deg, #F1F7F6 0%, #EAEEF9 100%)', ca:'#5C9E8E', ca2:'#6C74B0' },
   ];
+  // 🩹 PLAY_TIME_IRREGULAR/FREE_TEXT/DETAIL_GROUPS.optionsは、state.detail[groupId]配列や
+  // state.playTimeIrregularに「表示文字列そのもの」が値として保存・比較される（===やincludes()）
+  // ため、英語表示用に別オブジェクト化するとFREE_TEXT判定が常にfalseになる等、既存の保存データと
+  // 整合しなくなる。値は日本語の原文のまま維持し、表示だけをtranslateDetailOption()で英語に
+  // 差し替える方式にする（下記参照）。
   const PLAY_TIME_IRREGULAR = '不定期';
   const FREE_TEXT = '自由記述';
   // ケープレベルごとの累計必要光の翼数（羽トラッカーの実装と同じ値・同じロジックを使用）
   const CAPE_LEVELS = [1, 2, 5, 10, 20, 35, 55, 75, 100, 120, 150, 200, 250];
 
   const DETAIL_GROUPS = [
-    { id:'playStyle',      icon:'🎮', label:'プレイスタイル', options:['ソロ','サブと','フレンド', FREE_TEXT] },
-    { id:'friendRecruit',  icon:'🤝', label:'フレンド募集',   options:['募集中','フレ申大歓迎','していない', FREE_TEXT] },
-    { id:'chat',           icon:'💬', label:'チャット解放',   options:['フレコで解放する','ミュートしたい','ミュートされたい','開放しない', FREE_TEXT] },
-    { id:'heartTrade',     icon:'❤️', label:'ハート交換',    options:['募集中','頼まれたらやる','やらない', FREE_TEXT] },
-    { id:'warp',           icon:'🌀', label:'ワープ',        options:['したい','されたい', FREE_TEXT] },
-    { id:'candleMarathon', icon:'🕯️', label:'キャンマラ',    options:['毎日灰まで','毎日15本くらい','マイペースに','しない', FREE_TEXT] },
-    { id:'carry',          icon:'🎒', label:'キャリー',      options:['まかせろ','お願いしたい','どちらでも可能', FREE_TEXT] },
-    { id:'eden',           icon:'⛰️', label:'原罪',          options:['毎週','月に2、3回','不定期','必要時のみ', FREE_TEXT] },
+    { id:'playStyle',      icon:'🎮', label:'プレイスタイル', labelEn:'Play Style',      options:['ソロ','サブと','フレンド', FREE_TEXT] },
+    { id:'friendRecruit',  icon:'🤝', label:'フレンド募集',   labelEn:'Friend Requests', options:['募集中','フレ申大歓迎','していない', FREE_TEXT] },
+    { id:'chat',           icon:'💬', label:'チャット解放',   labelEn:'Chat',            options:['フレコで解放する','ミュートしたい','ミュートされたい','開放しない', FREE_TEXT] },
+    { id:'heartTrade',     icon:'❤️', label:'ハート交換',    labelEn:'Heart Trades',    options:['募集中','頼まれたらやる','やらない', FREE_TEXT] },
+    { id:'warp',           icon:'🌀', label:'ワープ',        labelEn:'Warps',           options:['したい','されたい', FREE_TEXT] },
+    { id:'candleMarathon', icon:'🕯️', label:'キャンマラ',    labelEn:'Candle Runs',     options:['毎日灰まで','毎日15本くらい','マイペースに','しない', FREE_TEXT] },
+    { id:'carry',          icon:'🎒', label:'キャリー',      labelEn:'Carrying',        options:['まかせろ','お願いしたい','どちらでも可能', FREE_TEXT] },
+    { id:'eden',           icon:'⛰️', label:'原罪',          labelEn:'Eye of Eden',     options:['毎週','月に2、3回','不定期','必要時のみ', FREE_TEXT] },
   ];
 
+  // 表示専用の英訳テーブル（state.detail[groupId]には日本語の原文のまま保存されるため、
+  // 保存値と表示文字列を分離する必要がある）。DETAIL_GROUPS.optionsに出てくる文字列を
+  // 網羅している。未登録の文字列（自由記述で入力された内容など）はそのまま表示する。
+  const DETAIL_OPTION_EN = {
+    'ソロ':'Solo', 'サブと':'With alts', 'フレンド':'With friends',
+    '募集中':'Open', 'フレ申大歓迎':'Welcome anytime', 'していない':'Not accepting',
+    'フレコで解放する':'Unlock via friend code', 'ミュートしたい':'Prefer to mute', 'ミュートされたい':'OK to be muted', '開放しない':'Keep muted',
+    '頼まれたらやる':'If asked', 'やらない':'Not doing them',
+    'したい':'Want to warp', 'されたい':'Want to be warped',
+    '毎日灰まで':'Daily, to full reset', '毎日15本くらい':'~15 candles daily', 'マイペースに':'At my own pace', 'しない':'Not doing them',
+    'まかせろ':'I can carry', 'お願いしたい':'Looking for a carry', 'どちらでも可能':'Either way',
+    '毎週':'Every week', '月に2、3回':'2-3x a month', '不定期':'Irregularly', '必要時のみ':'Only when needed',
+    '自由記述':'Custom',
+  };
+  function translateDetailOption(ja){
+    if (LANG !== 'en') return ja;
+    return DETAIL_OPTION_EN[ja] || ja;
+  }
+
   const ECO_STATS = [
-    { id:'item',      icon:'🗂️', label:'アイテム所持率',       source:'アイテム所持管理',   value:'', placeholder:'例: 82%', visible:true },
-    { id:'emote',     icon:'🎭', label:'エモート所持率',       source:'エモート所持率管理',  value:'', placeholder:'例: 65%', visible:true },
-    { id:'spirit',    icon:'✨', label:'精霊ツリー進行度',     source:'精霊ツリー管理',    value:'', placeholder:'例: 47%', visible:true },
-    { id:'score',     icon:'🎵', label:'作った曲数',          source:'楽譜づくり',    value:'', placeholder:'例: 24曲', visible:true },
-    { id:'share',     icon:'📌', label:'シェア中の作品数',     source:'創作物管理ツール',   value:'', placeholder:'例: 6件', visible:true },
+    { id:'item',      icon:'🗂️', label:'アイテム所持率',       labelEn:'Item Ownership',        source:'アイテム所持管理',   sourceEn:'Item Collection Tracker',   value:'', placeholder:'例: 82%', placeholderEn:'e.g. 82%', visible:true },
+    { id:'emote',     icon:'🎭', label:'エモート所持率',       labelEn:'Emote Ownership',       source:'エモート所持率管理',  sourceEn:'Emote Collection Tracker',  value:'', placeholder:'例: 65%', placeholderEn:'e.g. 65%', visible:true },
+    { id:'spirit',    icon:'✨', label:'精霊ツリー進行度',     labelEn:'Spirit Tree Progress',  source:'精霊ツリー管理',    sourceEn:'Spirit Tree Catalog',       value:'', placeholder:'例: 47%', placeholderEn:'e.g. 47%', visible:true },
+    { id:'score',     icon:'🎵', label:'作った曲数',          labelEn:'Songs Made',            source:'楽譜づくり',    sourceEn:'Sheet Music Maker',         value:'', placeholder:'例: 24曲', placeholderEn:'e.g. 24', visible:true },
+    { id:'share',     icon:'📌', label:'シェア中の作品数',     labelEn:'Shared Creations',      source:'創作物管理ツール',   sourceEn:'Creation Manager',          value:'', placeholder:'例: 6件', placeholderEn:'e.g. 6', visible:true },
   ];
 
   // 入手グラフ：数値の手入力はさせず、プロフィールに反映するかどうかのスイッチのみ。
   // 反映ONのときは、同一オリジンの姉妹サイト自身のlocalStorage（現在値＋獲得履歴）を
   // 直接読み、getTrendSeriesFromTool()で実データの推移を逆算して表示する（下記参照）。
   const TREND_GRAPHS = [
-    { id:'nomacan',    icon:'🕯️', label:'ノマキャンの入手推移',       source:'ノマキャン計算機',   visible:false, rawCurrentKey:'skyNomacanCalc_v1',    rawHistoryKey:'skyNomacanCalc_history_v1' },
-    { id:'starcandle', icon:'🕯️', label:'星のキャンドルの入手推移', source:'星のキャンドル計算機', visible:false, rawCurrentKey:'skyStarCandleCalc_v1', rawHistoryKey:'skyStarCandleCalc_history_v1' },
+    { id:'nomacan',    icon:'🕯️', label:'ノマキャンの入手推移',       labelEn:'Candle Calculator Trend',      source:'ノマキャン計算機',   sourceEn:'Candle Calculator',      visible:false, rawCurrentKey:'skyNomacanCalc_v1',    rawHistoryKey:'skyNomacanCalc_history_v1' },
+    { id:'starcandle', icon:'🕯️', label:'星のキャンドルの入手推移', labelEn:'Star Candle Calculator Trend', source:'星のキャンドル計算機', sourceEn:'Star Candle Calculator', visible:false, rawCurrentKey:'skyStarCandleCalc_v1', rawHistoryKey:'skyStarCandleCalc_history_v1' },
   ];
 
   // ── 称号カタログ：他ツールに実装済みの称号（実績）システムの定義を、tai-card側にも
@@ -1348,88 +1389,480 @@
   // バラバラ（フラットなid→{earnedAt}のもの、{earned:{...}}や{earned:[...]}でラップした
   // ものなど）なので、extract()でそれぞれの形から「獲得済みidの配列」に正規化する。
   const TITLE_CATALOG = {
-    item: { storageKey:'itemTitles_v1', namespaced:true, source:'アイテム所持管理',
+    item: { storageKey:'itemTitles_v1', namespaced:true, source:'アイテム所持管理', sourceEn:'Item Collection Tracker',
       extract: d => Object.keys((d && d.earned) || {}),
       titles: {
-        rate25:{ icon:'🕯️', name:'灯火の旅人', desc:'全アイテムの所持率が25%に到達', descEn:'Reached 25% overall ownership' },
-        rate50:{ icon:'🌙', name:'星屑の収集家', desc:'全アイテムの所持率が50%に到達', descEn:'Reached 50% overall ownership' },
-        rate75:{ icon:'✨', name:'煌めきの探究者', desc:'全アイテムの所持率が75%に到達', descEn:'Reached 75% overall ownership' },
-        rate100:{ icon:'👑', name:'光の守護者', desc:'登録した全アイテムを100%所持', descEn:'Reached 100% overall ownership' },
-        catmaster1:{ icon:'🏅', name:'コレクションの第一歩', desc:'いずれか1カテゴリを100%達成', descEn:'Completed at least 1 category' },
-        catmaster6:{ icon:'🏆', name:'熟練コレクター', desc:'6カテゴリ以上を100%達成', descEn:'Completed 6 or more categories' },
-        spend1k:{ icon:'💴', name:'灯火の支援者', desc:'実額の合計が¥1,000に到達', descEn:'Real-money total reached ¥1,000' },
-        spend5k:{ icon:'🎁', name:'季節の後援者', desc:'実額の合計が¥5,000に到達', descEn:'Real-money total reached ¥5,000' },
-        spend15k:{ icon:'💎', name:'彩りの後援者', desc:'実額の合計が¥15,000に到達', descEn:'Real-money total reached ¥15,000' },
-        spend30k:{ icon:'🌌', name:'星空の大後援者', desc:'実額の合計が¥30,000に到達', descEn:'Real-money total reached ¥30,000' },
-        spend50k:{ icon:'🌟', name:'光の大後援者', desc:'実額の合計が¥50,000に到達', descEn:'Real-money total reached ¥50,000' },
+        rate25:{ icon:'🕯️', name:'灯火の旅人', nameEn:'Traveler of the Flame', desc:'全アイテムの所持率が25%に到達', descEn:'Reached 25% overall ownership' },
+        rate50:{ icon:'🌙', name:'星屑の収集家', nameEn:'Stardust Collector', desc:'全アイテムの所持率が50%に到達', descEn:'Reached 50% overall ownership' },
+        rate75:{ icon:'✨', name:'煌めきの探究者', nameEn:'Seeker of Radiance', desc:'全アイテムの所持率が75%に到達', descEn:'Reached 75% overall ownership' },
+        rate100:{ icon:'👑', name:'光の守護者', nameEn:'Guardian of the Light', desc:'登録した全アイテムを100%所持', descEn:'Reached 100% overall ownership' },
+        catmaster1:{ icon:'🏅', name:'コレクションの第一歩', nameEn:'First Steps of a Collection', desc:'いずれか1カテゴリを100%達成', descEn:'Completed at least 1 category' },
+        catmaster6:{ icon:'🏆', name:'熟練コレクター', nameEn:'Master Collector', desc:'6カテゴリ以上を100%達成', descEn:'Completed 6 or more categories' },
+        spend1k:{ icon:'💴', name:'灯火の支援者', nameEn:'Supporter of the Flame', desc:'実額の合計が¥1,000に到達', descEn:'Real-money total reached ¥1,000' },
+        spend5k:{ icon:'🎁', name:'季節の後援者', nameEn:'Patron of the Season', desc:'実額の合計が¥5,000に到達', descEn:'Real-money total reached ¥5,000' },
+        spend15k:{ icon:'💎', name:'彩りの後援者', nameEn:'Patron of Colors', desc:'実額の合計が¥15,000に到達', descEn:'Real-money total reached ¥15,000' },
+        spend30k:{ icon:'🌌', name:'星空の大後援者', nameEn:'Grand Patron of the Stars', desc:'実額の合計が¥30,000に到達', descEn:'Real-money total reached ¥30,000' },
+        spend50k:{ icon:'🌟', name:'光の大後援者', nameEn:'Grand Patron of Light', desc:'実額の合計が¥50,000に到達', descEn:'Real-money total reached ¥50,000' },
       } },
-    emote: { storageKey:'emoteTitles_v1', namespaced:true, source:'エモート所持率管理',
+    emote: { storageKey:'emoteTitles_v1', namespaced:true, source:'エモート所持率管理', sourceEn:'Emote Collection Tracker',
       extract: d => Object.keys(d || {}),
       titles: {
-        apprentice:{ icon:'🔰', name:'一芸見習い', desc:'所持レベル数が全体の10%に到達', descEn:'Owned levels reached 10% of the total' },
-        performer:{ icon:'🎭', name:'芸達者', desc:'所持レベル数が全体の50%に到達', descEn:'Owned levels reached 50% of the total' },
-        grandmaster:{ icon:'👑', name:'エモート完全制覇', desc:'全エモートの全レベルを所持', descEn:'Owns every level of every emote' },
-        completionist:{ icon:'🗺️', name:'全種踏破', desc:'全エモートを最低1レベルずつ所持', descEn:'Owns at least one level of every emote' },
-        guideFan:{ icon:'🧭', name:'案内人めぐり', desc:'「案内人」エモートを全種最低1レベルずつ所持', descEn:'Owns at least one level of every Guide emote' },
+        apprentice:{ icon:'🔰', name:'一芸見習い', nameEn:'Emote Apprentice', desc:'所持レベル数が全体の10%に到達', descEn:'Owned levels reached 10% of the total' },
+        performer:{ icon:'🎭', name:'芸達者', nameEn:'Skilled Performer', desc:'所持レベル数が全体の50%に到達', descEn:'Owned levels reached 50% of the total' },
+        grandmaster:{ icon:'👑', name:'エモート完全制覇', nameEn:'Emote Grandmaster', desc:'全エモートの全レベルを所持', descEn:'Owns every level of every emote' },
+        completionist:{ icon:'🗺️', name:'全種踏破', nameEn:'Full Collection', desc:'全エモートを最低1レベルずつ所持', descEn:'Owns at least one level of every emote' },
+        guideFan:{ icon:'🧭', name:'案内人めぐり', nameEn:'Guide Enthusiast', desc:'「案内人」エモートを全種最低1レベルずつ所持', descEn:'Owns at least one level of every Guide emote' },
       } },
-    wings: { storageKey:'wingsTitles_v1', namespaced:true, source:'羽トラッカー',
+    wings: { storageKey:'wingsTitles_v1', namespaced:true, source:'羽トラッカー', sourceEn:'Wing Tracker',
       extract: d => Object.keys(d || {}),
       titles: {
-        cape_lv5:{ icon:'🪶', name:'羽ばたきの証', desc:'ケープレベル5に到達（光の翼20枚）', descEn:'Reached Cape Level 5 (20 Wings of Light)' },
-        cape_lv10:{ icon:'🧥', name:'旅するケープ使い', desc:'ケープレベル10に到達（光の翼120枚）', descEn:'Reached Cape Level 10 (120 Wings of Light)' },
-        cape_lv13:{ icon:'👑', name:'光の翼、極めし者', desc:'ケープレベル最大の13に到達（光の翼250枚）', descEn:'Reached the max Cape Level 13 (250 Wings of Light)' },
-        lc_half:{ icon:'🔦', name:'光を辿る探検家', desc:'光の子を62体（半数）発見', descEn:'Found 62 Children of Light (half)' },
-        lc_all:{ icon:'🌟', name:'光の子コンプリート', desc:'光の子124体すべてを発見', descEn:'Found all 124 Children of Light' },
+        cape_lv5:{ icon:'🪶', name:'羽ばたきの証', nameEn:'Budding Wings', desc:'ケープレベル5に到達（光の翼20枚）', descEn:'Reached Cape Level 5 (20 Wings of Light)' },
+        cape_lv10:{ icon:'🧥', name:'旅するケープ使い', nameEn:'Traveling Cloak-Bearer', desc:'ケープレベル10に到達（光の翼120枚）', descEn:'Reached Cape Level 10 (120 Wings of Light)' },
+        cape_lv13:{ icon:'👑', name:'光の翼、極めし者', nameEn:'Master of the Winged Light', desc:'ケープレベル最大の13に到達（光の翼250枚）', descEn:'Reached the max Cape Level 13 (250 Wings of Light)' },
+        lc_half:{ icon:'🔦', name:'光を辿る探検家', nameEn:'Light-Tracing Explorer', desc:'光の子を62体（半数）発見', descEn:'Found 62 Children of Light (half)' },
+        lc_all:{ icon:'🌟', name:'光の子コンプリート', nameEn:'Children of Light Completionist', desc:'光の子124体すべてを発見', descEn:'Found all 124 Children of Light' },
       } },
-    spirit: { storageKey:'spiritCatalogTitles_v1', namespaced:true, source:'姉妹サイト',
+    spirit: { storageKey:'spiritCatalogTitles_v1', namespaced:true, source:'姉妹サイト', sourceEn:'Sibling Site',
       extract: d => Object.keys(d || {}),
       titles: {
-        pct1:{ icon:'🌱', name:'芽吹きの精霊使い', desc:'精霊ツリーのノードを1%以上解放した', descEn:'Unlocked 1%+ of all spirit tree nodes' },
-        pct10:{ icon:'🕯️', name:'灯火の道しるべ', desc:'精霊ツリーのノードを10%以上解放した', descEn:'Unlocked 10%+ of all spirit tree nodes' },
-        pct25:{ icon:'🌿', name:'深緑の探求者', desc:'精霊ツリーのノードを25%以上解放した', descEn:'Unlocked 25%+ of all spirit tree nodes' },
-        pct50:{ icon:'🌳', name:'満開の森の守り人', desc:'精霊ツリーのノードを50%以上解放した', descEn:'Unlocked 50%+ of all spirit tree nodes' },
-        pct100:{ icon:'👑', name:'精霊の森の賢者', desc:'精霊ツリーの全ノードをコンプリートした', descEn:'Unlocked 100% of all spirit tree nodes' },
+        pct1:{ icon:'🌱', name:'芽吹きの精霊使い', nameEn:'Budding Spirit Keeper', desc:'精霊ツリーのノードを1%以上解放した', descEn:'Unlocked 1%+ of all spirit tree nodes' },
+        pct10:{ icon:'🕯️', name:'灯火の道しるべ', nameEn:'Candlelit Trailblazer', desc:'精霊ツリーのノードを10%以上解放した', descEn:'Unlocked 10%+ of all spirit tree nodes' },
+        pct25:{ icon:'🌿', name:'深緑の探求者', nameEn:'Verdant Explorer', desc:'精霊ツリーのノードを25%以上解放した', descEn:'Unlocked 25%+ of all spirit tree nodes' },
+        pct50:{ icon:'🌳', name:'満開の森の守り人', nameEn:'Guardian of the Blooming Grove', desc:'精霊ツリーのノードを50%以上解放した', descEn:'Unlocked 50%+ of all spirit tree nodes' },
+        pct100:{ icon:'👑', name:'精霊の森の賢者', nameEn:'Sage of the Spirit Forest', desc:'精霊ツリーの全ノードをコンプリートした', descEn:'Unlocked 100% of all spirit tree nodes' },
       } },
-    score: { storageKey:'taiScoreTitles_v1', namespaced:false, source:'姉妹サイト',
+    score: { storageKey:'taiScoreTitles_v1', namespaced:false, source:'姉妹サイト', sourceEn:'Sibling Site',
       extract: d => ((d && d.earned) || []).map(e => e.id),
       titles: {
-        firstSong:{ icon:'🎼', name:'はじめの一歩', desc:'はじめての1曲をライブラリに加えた', descEn:'Added your first song to the library' },
-        apprentice:{ icon:'🎶', name:'作曲家見習い', desc:'曲を5曲、ライブラリに加えた', descEn:'Added 5 songs to the library' },
-        craftsman:{ icon:'🎹', name:'楽譜職人', desc:'曲を20曲、ライブラリに加えた', descEn:'Added 20 songs to the library' },
-        legend:{ icon:'🏅', name:'伝説の作曲家', desc:'曲を50曲、ライブラリに加えた', descEn:'Added 50 songs to the library' },
-        passionate:{ icon:'🔥', name:'情熱の演奏者', desc:'1曲に100音を超える演奏を詰め込んだ', descEn:'Packed over 100 notes into a single song' },
-        virtuoso:{ icon:'⚡', name:'超絶技巧', desc:'1曲に300音を超える演奏を詰め込んだ', descEn:'Packed over 300 notes into a single song' },
+        firstSong:{ icon:'🎼', name:'はじめの一歩', nameEn:'First Step', desc:'はじめての1曲をライブラリに加えた', descEn:'Added your first song to the library' },
+        apprentice:{ icon:'🎶', name:'作曲家見習い', nameEn:'Aspiring Composer', desc:'曲を5曲、ライブラリに加えた', descEn:'Added 5 songs to the library' },
+        craftsman:{ icon:'🎹', name:'楽譜職人', nameEn:'Sheet Music Craftsman', desc:'曲を20曲、ライブラリに加えた', descEn:'Added 20 songs to the library' },
+        legend:{ icon:'🏅', name:'伝説の作曲家', nameEn:'Legendary Composer', desc:'曲を50曲、ライブラリに加えた', descEn:'Added 50 songs to the library' },
+        passionate:{ icon:'🔥', name:'情熱の演奏者', nameEn:'Passionate Performer', desc:'1曲に100音を超える演奏を詰め込んだ', descEn:'Packed over 100 notes into a single song' },
+        virtuoso:{ icon:'⚡', name:'超絶技巧', nameEn:'Virtuoso', desc:'1曲に300音を超える演奏を詰め込んだ', descEn:'Packed over 300 notes into a single song' },
       } },
-    share: { storageKey:'shareTitles_v1', namespaced:true, source:'創作物管理ツール',
+    share: { storageKey:'shareTitles_v1', namespaced:true, source:'創作物管理ツール', sourceEn:'Creation Manager',
       extract: d => ((d && d.earned) || []).map(e => e.id),
       titles: {
-        first:{ icon:'🌱', name:'はじめての一歩', desc:'創作物をはじめて追加した', descEn:'Added your first creation' },
-        apprentice:{ icon:'🔨', name:'見習い設置職人', desc:'累計5個の創作物を追加した', descEn:'5 creations added (lifetime)' },
-        skilled:{ icon:'🏗️', name:'熟練の設置職人', desc:'累計15個の創作物を追加した', descEn:'15 creations added (lifetime)' },
-        master:{ icon:'🏛️', name:'創作の匠', desc:'累計30個の創作物を追加した', descEn:'30 creations added (lifetime)' },
-        legend:{ icon:'👑', name:'伝説の創作者', desc:'累計50個の創作物を追加した', descEn:'50 creations added (lifetime)' },
+        first:{ icon:'🌱', name:'はじめての一歩', nameEn:'First Steps', desc:'創作物をはじめて追加した', descEn:'Added your first creation' },
+        apprentice:{ icon:'🔨', name:'見習い設置職人', nameEn:'Apprentice Builder', desc:'累計5個の創作物を追加した', descEn:'5 creations added (lifetime)' },
+        skilled:{ icon:'🏗️', name:'熟練の設置職人', nameEn:'Skilled Builder', desc:'累計15個の創作物を追加した', descEn:'15 creations added (lifetime)' },
+        master:{ icon:'🏛️', name:'創作の匠', nameEn:'Master Creator', desc:'累計30個の創作物を追加した', descEn:'30 creations added (lifetime)' },
+        legend:{ icon:'👑', name:'伝説の創作者', nameEn:'Legendary Creator', desc:'累計50個の創作物を追加した', descEn:'50 creations added (lifetime)' },
       } },
-    nomacan: { storageKey:'skyNomacanTitles_v1', namespaced:true, source:'ノマキャン計算機',
+    nomacan: { storageKey:'skyNomacanTitles_v1', namespaced:true, source:'ノマキャン計算機', sourceEn:'Candle Calculator',
       extract: d => Object.keys((d && d.earned) || {}),
       titles: {
-        streak3:{ icon:'🔥', name:'灯し始め', desc:'3日連続で記録', descEn:'Recorded 3 days in a row' },
-        streak7:{ icon:'🕯️', name:'一週間の灯火', desc:'7日連続で記録', descEn:'Recorded 7 days in a row' },
-        streak30:{ icon:'🌟', name:'絶やさぬ灯', desc:'30日連続で記録', descEn:'Recorded 30 days in a row' },
-        hold100:{ icon:'🕯️', name:'灯の蓄え', desc:'所持本数が100本に到達', descEn:'Reached 100 candles held' },
-        hold300:{ icon:'🏮', name:'光の貯蔵庫', desc:'所持本数が300本に到達', descEn:'Reached 300 candles held' },
-        hold600:{ icon:'👑', name:'灯火の富豪', desc:'所持本数が600本に到達', descEn:'Reached 600 candles held' },
+        streak3:{ icon:'🔥', name:'灯し始め', nameEn:'Spark of a Streak', desc:'3日連続で記録', descEn:'Recorded 3 days in a row' },
+        streak7:{ icon:'🕯️', name:'一週間の灯火', nameEn:'A Week of Flame', desc:'7日連続で記録', descEn:'Recorded 7 days in a row' },
+        streak30:{ icon:'🌟', name:'絶やさぬ灯', nameEn:'Unwavering Flame', desc:'30日連続で記録', descEn:'Recorded 30 days in a row' },
+        hold100:{ icon:'🕯️', name:'灯の蓄え', nameEn:'Candle Stockpile', desc:'所持本数が100本に到達', descEn:'Reached 100 candles held' },
+        hold300:{ icon:'🏮', name:'光の貯蔵庫', nameEn:'Vault of Light', desc:'所持本数が300本に到達', descEn:'Reached 300 candles held' },
+        hold600:{ icon:'👑', name:'灯火の富豪', nameEn:'Candle Baron', desc:'所持本数が600本に到達', descEn:'Reached 600 candles held' },
       } },
-    starcandle: { storageKey:'skyStarCandleCalc_titles_v1', namespaced:true, source:'星のキャンドル計算機',
+    starcandle: { storageKey:'skyStarCandleCalc_titles_v1', namespaced:true, source:'星のキャンドル計算機', sourceEn:'Star Candle Calculator',
       extract: d => Object.keys(d || {}),
       titles: {
-        streak_3:{ icon:'🕯️', name:'灯を絶やさぬ者', desc:'赤闇を3日連続で取りこぼさず回収', descEn:'Collected shard rewards 3 days in a row without missing one' },
-        streak_7:{ icon:'🔥', name:'一週間の灯火番', desc:'赤闇を7日連続で取りこぼさず回収', descEn:'Collected shard rewards 7 days in a row without missing one' },
-        streak_20:{ icon:'🌌', name:'常夜の灯守', desc:'赤闇を20日連続で取りこぼさず回収', descEn:'Collected shard rewards 20 days in a row without missing one' },
-        candle_30:{ icon:'⭐', name:'星屑の蒐集者', desc:'所持本数が最高30本に到達', descEn:'Held 30 candles at once for the first time' },
-        candle_100:{ icon:'🌟', name:'百連の灯', desc:'所持本数が最高100本に到達', descEn:'Held 100 candles at once for the first time' },
-        candle_300:{ icon:'👑', name:'星々の帳を統べる者', desc:'所持本数が最高300本に到達', descEn:'Held 300 candles at once for the first time' },
+        streak_3:{ icon:'🕯️', name:'灯を絶やさぬ者', nameEn:'Flame Unwavering', desc:'赤闇を3日連続で取りこぼさず回収', descEn:'Collected shard rewards 3 days in a row without missing one' },
+        streak_7:{ icon:'🔥', name:'一週間の灯火番', nameEn:'Week-Long Keeper of Flame', desc:'赤闇を7日連続で取りこぼさず回収', descEn:'Collected shard rewards 7 days in a row without missing one' },
+        streak_20:{ icon:'🌌', name:'常夜の灯守', nameEn:"Eternal Night's Keeper", desc:'赤闇を20日連続で取りこぼさず回収', descEn:'Collected shard rewards 20 days in a row without missing one' },
+        candle_30:{ icon:'⭐', name:'星屑の蒐集者', nameEn:'Stardust Gatherer', desc:'所持本数が最高30本に到達', descEn:'Held 30 candles at once for the first time' },
+        candle_100:{ icon:'🌟', name:'百連の灯', nameEn:'Hundredfold Flame', desc:'所持本数が最高100本に到達', descEn:'Held 100 candles at once for the first time' },
+        candle_300:{ icon:'👑', name:'星々の帳を統べる者', nameEn:'Sovereign of the Starry Veil', desc:'所持本数が最高300本に到達', descEn:'Held 300 candles at once for the first time' },
       } },
   };
+
+  /* ================================================================
+     多言語対応（i18n）
+     sky_app_lang は taipak5000.github.io 系ツール共通のプレーンな
+     グローバルキー（プロフィールごとの保存枠の対象外。端末ごとの表示設定のため、
+     sky_app_theme と同じ扱い）。他サイトのloadX()/saveX()命名規則に合わせている。
+     ================================================================ */
+  const LANG_KEY = 'sky_app_lang';
+  function loadLang() {
+    const v = localStorage.getItem(LANG_KEY);
+    return v === 'en' ? 'en' : 'ja';
+  }
+  function saveLang(lang) { localStorage.setItem(LANG_KEY, lang === 'en' ? 'en' : 'ja'); }
+  let LANG = loadLang();
+
+  const I18N = {
+    ja: {
+      pageTitle: '星紡ぎカード - Sky 星を紡ぐ子どもたち',
+      pageHeading: '星紡ぎカード',
+      ledeHtml: 'Sky 星を紡ぐ子どもたちの自己紹介カードを作れるサイトです。入力した項目はその場でシェア用のカードにまとめられ、<b>項目ごとに公開・非公開を選べます。</b>',
+      editorHeading: '編集',
+      secThemeTitle: '背景テーマ',
+      secAvatarTitle: 'プロフィール画像',
+      uploadImageBtn: '画像をアップロード',
+      zoomLabel: 'ズーム',
+      cropHintAvatar: 'ドラッグで位置調整・スライダーで拡大',
+      removeImageBtn: '画像を削除する',
+      secBgImageTitle: '背景画像',
+      opacityLabel: '不透明度',
+      cropHintBg: 'ドラッグで位置調整・スライダーで拡大縮小・不透明度を調整',
+      secBasicInfoTitle: '基本情報',
+      nameLabel: '名前',
+      namePlaceholder: '例: たい',
+      oneLinerLabel: 'ひとこと',
+      oneLinerPlaceholder: '例: ものづくりが好きです',
+      secJourneyTitle: '旅の記録',
+      journeyYearLabel: '星の子が生まれた時期',
+      journeyYearPlaceholder: '例: 2023',
+      favAddBtn: '＋好きな○○を追加',
+      secSnsTitle: 'SNS',
+      snsHint: '空欄の行は非表示',
+      snsAddBtn: '＋SNSを追加',
+      secPlayTimeTitle: 'よく遊ぶ時間帯',
+      notSetLabel: '未入力',
+      clockDragHint: '◎をつかんでドラッグ、または数字で入力',
+      playTimeAddBtn: '＋時間帯を追加',
+      irregularBtnLabel: '不定期',
+      secCustomNoteTitle: 'カスタム欄',
+      customNoteHint: '文章や画像を自由に追加できます',
+      customNoteTitleLabel: '見出し',
+      customNoteTitlePlaceholder: 'カスタム欄',
+      customNoteTextPlaceholder: '自由にどうぞ（一言メッセージ、こだわりポイントなど）',
+      addImageBtn: '画像を追加',
+      secDetailsTitle: '詳細プロフィール',
+      detailsHint: 'タップで選択・もう一度で解除',
+      secFriendCodeTitle: 'フレンドコード',
+      friendCodeHint: '空欄で非表示',
+      optionalPlaceholder: '任意',
+      secAllSyncTitle: 'まとめて連携',
+      allSyncHint: '下の3つを1回で実行',
+      allSyncBtn: '収集状況・称号・光の翼をまとめて連携',
+      autoSyncLabel: '開くたびに自動で連携する',
+      allSyncHintHtml: '「まとめて連携」を押すと、下にある<b>ケープレベル・収集状況・称号</b>それぞれの「実データと連携」ボタンをまとめて1回で実行します。個別に更新したい場合は、各セクションのボタンもそのまま使えます。<br><br>「開くたびに自動で連携する」をONにすると、次回からこのページを開くたびに3つを自動で連携します。毎回ボタンを押す手間がなくなります(手入力での上書きはこれまで通り可能です)。',
+      secCapeTitle: 'ケープレベル',
+      capeArrowHint: '→ 羽トラッカー',
+      wingSyncBtn: '羽トラッカーと連携',
+      wingTotalLabel: '光の翼 合計枚数',
+      wingTotalPlaceholder: '例: 77',
+      wingSyncHintHtml: '「羽トラッカーと連携」を押すと、この端末に保存されている<b>羽トラッカー</b>の実データ（季節精霊の再訪・恒常精霊・光の子の獲得状況）から、光の翼の合計枚数を自動で計算します(羽トラッカーを一度でも開いたことがある場合のみ反映されます)。連携後も手入力で上書きできます。',
+      secEcoStatsTitle: '収集状況',
+      ecoStatsHint: '自分の他サイトのデータと連携可能',
+      ecoSyncBtn: '実データと連携',
+      ecoSyncHintHtml: '「実データと連携」を押すと、この端末に保存されている<b>アイテム所持管理・エモート所持率管理・姉妹サイト・創作物管理ツール</b>の実データを自動で読み込みます(該当サイトを一度でも開いたことがある場合のみ反映されます)。連携後も手入力で上書きできます。',
+      secTitlesTitle: '称号',
+      titlesHint: '獲得した称号をカードに飾れる',
+      titleSyncBtn: '称号を読み込む',
+      titleSyncHintHtml: '「称号を読み込む」を押すと、この端末に保存されている他ツールで獲得済みの称号を読み込みます。飾りたいものだけタップして選んでください(複数選択可)。',
+      secTrendTitle: '入手グラフ',
+      trendHint: '任意・各サイトの推移チャート',
+      trendHintBoxHtml: '数値の手入力はできません。ONにすると、この端末の同じプロフィールでノマキャン計算機・星のキャンドル計算機に実際に記録された入手履歴からグラフを表示します（該当サイトを使って2件以上の履歴が記録されている場合のみ表示されます）。',
+      previewHeading: 'プレビュー',
+      shareImageBtn: '画像を保存してXへ投稿',
+      cardWatermark: '🕯️ Sky: 星を紡ぐ子どもたち',
+      footerDisclaimer: 'このサイトはSky 星を紡ぐ子どもたちの非公式ファンサイトです。thatgamecompanyは一切関与していません。',
+      footerCreditLabel: '作成・ご意見: ',
+      requestFormLink: 'リクエストフォーム',
+      footerInfoLink: '設定・更新情報・クレジット・プライバシーポリシー',
+      quickMenuAriaLabel: 'クイックメニュー',
+      mainLabel: 'メイン',
+      otherToolsLabel: '他のツール',
+      displaySettingsLabel: '表示設定',
+      relatedToolsTitle: '関連ツール',
+      closeAriaLabel: '閉じる',
+      toolsModalHint: '同じ作者によるSky: 星を紡ぐ子どもたち向けの他のツールです（同一オリジンなので、遷移してもこの端末のデータは共有されます）。',
+      toolItem: 'アイテム所持管理', toolEmote: 'エモート所持率管理', toolShare: '創作物管理ツール',
+      toolNomacan: 'ノマキャン計算機', toolStarCandle: '星のキャンドル計算機', toolCompanion: '精霊同行ツール',
+      toolWings: '羽トラッカー', toolCatalog: '精霊ツリー管理', toolRevisit: '再訪精霊データベース',
+      toolScore: '楽譜づくり', toolTransfer: 'データ引継ぎ', toolInfo: '設定・更新情報', toolProfile: '作者プロフィール',
+      imageSaveDefaultTitle: '画像を保存',
+      previewImgAlt: '保存用のカード画像',
+      downloadBtn: 'ダウンロード',
+      copyToClipboardBtn: 'クリップボードにコピー',
+      openXBtn: 'Xの投稿画面を開く',
+      profileSwitchTitle: 'プロフィール切替',
+      profileSwitchHint: 'プロフィールを切り替えると、この端末の他のツール(アイテム所持管理など)のアクティブな保存枠も一緒に切り替わります。称号もプロフィールごとに獲得できます。',
+      newProfileNamePlaceholder: '新しいプロフィール名',
+      addProfileBtn: '＋追加',
+      uiThemeLabel: 'テーマ',
+      shortcutsHintHtml: 'ショートカット: <b>?</b>で開く／<b>D</b>でテーマ切替／<b>Esc</b>で閉じる',
+      settingsLangSection: '言語',
+      removeItemAriaLabel: 'この項目を削除',
+      favLabelPrefix: '好きな',
+      favLabelPlaceholder: '季節',
+      favValuePlaceholder: '感謝の季節',
+      snsIdPlaceholder: 'ID（@ 不要）',
+      removeSnsAriaLabel: 'このSNSを削除',
+      hourUnitLabel: '時',
+      removeTimeRangeAriaLabel: 'この時間帯を削除',
+      freeTextPlaceholder: '自由に入力',
+      playTimeSingleRangeTemplate: '{start}時〜{end}時',
+      playTimeMultiRangeTemplate: '{n}つの時間帯',
+      startTimeHandleTitle: '開始時刻：ドラッグ、または←→キーで調整',
+      endTimeHandleTitle: '終了時刻：ドラッグ、または←→キーで調整',
+      notConfiguredLabel: '未設定',
+      cardNameFallback: '（名前未入力）',
+      bornPrefix: 'うまれ：',
+      capeMaxTemplate: '現在 光の翼 {n}枚 — 最大ケープレベル {max} に到達済み！',
+      capeProgressTemplate: '現在 光の翼 {n}枚（レベル{level}まであと {remain}枚）',
+      trendEmptyTemplate: 'まだ十分なデータがありません（{source}を使うと表示されます）',
+      issueDateTemplate: '発行日 {date}',
+      currentlySelectedLabel: '選択中',
+      switchLabel: '切替',
+      duplicateLabel: '複製',
+      renameLabel: '名前変更',
+      deleteLabel: '削除',
+      titlesCountTemplate: '{n}個の称号',
+      noTitlesYetMsg: 'まだ称号を獲得していません',
+      copyOfTemplate: '{name}のコピー',
+      duplicateProfilePromptTemplate: '「{name}」を複製した新しいプロフィールの名前を入力してください',
+      renamePromptMsg: '新しい名前を入力してください',
+      deleteProfileConfirmTemplate: '「{name}」を削除しますか？この操作は取り消せません。',
+      themeModeDark: 'ダーク',
+      themeModeLight: 'ライト',
+      themeModeSystem: 'システムに合わせる',
+      themeAriaLabelTemplate: 'テーマ: {current}（押すと{next}に切り替え）',
+      shareTweetTemplate: '星紡ぎカードで自己紹介カードを作りました！\n\nあなたもプロフィールを作ってみてね！\n\n{url}\n#Sky星紡ぎカード',
+      quotaBgDroppedMsg: '背景画像のサイズが大きいため保存されませんでした',
+      quotaBgAndNoteDroppedMsg: '画像サイズが大きいため、背景画像とカスタム欄の画像は保存されませんでした',
+      quotaAllDroppedMsg: '画像サイズが大きいため、一部の画像は保存されませんでした',
+      ecoSyncedTemplate: '{n}件のデータを連携しました',
+      allSyncNotFoundMsg: '連携できるデータが見つかりませんでした（各サイトを一度開いてから、もう一度お試しください）',
+      wingSyncedTemplate: '光の翼 合計{n}枚を連携しました',
+      wingSyncNotFoundMsg: '連携できるデータが見つかりませんでした（羽トラッカーを一度開いてから、もう一度お試しください）',
+      allSyncEcoPartTemplate: '収集状況{n}件',
+      allSyncTitlePartTemplate: '称号{n}個',
+      allSyncWingPart: '光の翼の合計枚数',
+      allSyncedTemplate: '{parts}を連携しました',
+      titlesLoadedTemplate: '{n}個の称号を読み込みました',
+      titlesNotFoundMsg: '称号が見つかりませんでした（各サイトで称号を獲得してから、もう一度お試しください）',
+      acquisitionGraphAriaLabel: '入手推移グラフ',
+      titlePickerEmptyMsg: 'まだ称号が見つかっていません。「称号を読み込む」を押してください。',
+      previewModalSaveTitle: '画像を保存してXへ投稿',
+      previewHintMsg: '① 下の「ダウンロード」で画像を保存 → ② 「Xの投稿画面を開く」を押して、保存した画像を添付して投稿してください',
+      copiedToClipboardMsg: '画像をクリップボードにコピーしました',
+      clipboardCopyFailedMsg: 'クリップボードへのコピーに失敗しました',
+      generatingImageMsg: '画像を生成中…',
+      cardFilenamePrefix: '星紡ぎカード_',
+      sharedMsg: '共有しました！',
+      imageGenerationFailedMsg: '画像の生成に失敗しました',
+      makePublicAriaLabelTemplate: '{label}を公開する',
+      reflectInProfileAriaLabelTemplate: '{label}をプロフィールに反映する',
+    },
+    en: {
+      pageTitle: 'Star-Spun Card - Sky: Children of the Light',
+      pageHeading: 'Star-Spun Card',
+      ledeHtml: 'A site for making a self-intro card for Sky: Children of the Light. Everything you enter is instantly gathered into a shareable card, and <b>each item can be shown or hidden individually.</b>',
+      editorHeading: 'Edit',
+      secThemeTitle: 'Background Theme',
+      secAvatarTitle: 'Profile Picture',
+      uploadImageBtn: 'Upload Image',
+      zoomLabel: 'Zoom',
+      cropHintAvatar: 'Drag to reposition, use the slider to zoom',
+      removeImageBtn: 'Remove Image',
+      secBgImageTitle: 'Background Image',
+      opacityLabel: 'Opacity',
+      cropHintBg: 'Drag to reposition, use the sliders to zoom and adjust opacity',
+      secBasicInfoTitle: 'Basic Info',
+      nameLabel: 'Name',
+      namePlaceholder: 'e.g. Tai',
+      oneLinerLabel: 'One-liner',
+      oneLinerPlaceholder: 'e.g. I love making things',
+      secJourneyTitle: 'Journey Record',
+      journeyYearLabel: 'When your Star Child was born',
+      journeyYearPlaceholder: 'e.g. 2023',
+      favAddBtn: '+ Add a favorite',
+      secSnsTitle: 'Social Links',
+      snsHint: 'Blank rows are hidden',
+      snsAddBtn: '+ Add a social link',
+      secPlayTimeTitle: 'Usual Play Time',
+      notSetLabel: 'Not set',
+      clockDragHint: 'Grab and drag the ◎, or type a number',
+      playTimeAddBtn: '+ Add a time range',
+      irregularBtnLabel: 'Irregular',
+      secCustomNoteTitle: 'Custom Section',
+      customNoteHint: 'Freely add your own text and image',
+      customNoteTitleLabel: 'Heading',
+      customNoteTitlePlaceholder: 'Custom Section',
+      customNoteTextPlaceholder: 'Anything goes here (a short message, things you care about, etc.)',
+      addImageBtn: 'Add Image',
+      secDetailsTitle: 'Detailed Profile',
+      detailsHint: 'Tap to select, tap again to deselect',
+      secFriendCodeTitle: 'Friend Code',
+      friendCodeHint: 'Hidden when blank',
+      optionalPlaceholder: 'Optional',
+      secAllSyncTitle: 'Sync All',
+      allSyncHint: 'Runs the 3 below in one go',
+      allSyncBtn: 'Sync Collection, Titles & Wings',
+      autoSyncLabel: 'Auto-sync every time this page opens',
+      allSyncHintHtml: 'Tapping "Sync All" runs the "sync with real data" button for <b>Cape Level, Collection, and Titles</b> below, all at once. You can still use each section\'s own button to update it individually.<br><br>Turning on "Auto-sync every time this page opens" will sync all 3 automatically every time you open this page from now on, so you don\'t have to tap the buttons yourself (you can still overwrite the values by hand as before).',
+      secCapeTitle: 'Cape Level',
+      capeArrowHint: '→ Wing Tracker',
+      wingSyncBtn: 'Sync with Wing Tracker',
+      wingTotalLabel: 'Total Wings of Light',
+      wingTotalPlaceholder: 'e.g. 77',
+      wingSyncHintHtml: 'Tapping "Sync with Wing Tracker" automatically calculates your total Wings of Light from the real data saved on this device in <b>Wing Tracker</b> (seasonal spirit revisits, permanent spirits, and Children of Light found) — only reflected if you\'ve opened Wing Tracker at least once. You can still overwrite it by hand afterward.',
+      secEcoStatsTitle: 'Collection Progress',
+      ecoStatsHint: 'Can sync with your data from other sites',
+      ecoSyncBtn: 'Sync with Real Data',
+      ecoSyncHintHtml: 'Tapping "Sync with Real Data" automatically loads the real data saved on this device from <b>Item Collection Tracker, Emote Collection Tracker, the sibling spirit-tree site, and Creation Manager</b> — only reflected for sites you\'ve opened at least once. You can still overwrite the values by hand afterward.',
+      secTitlesTitle: 'Titles',
+      titlesHint: 'Show titles you\'ve earned on your card',
+      titleSyncBtn: 'Load Titles',
+      titleSyncHintHtml: 'Tapping "Load Titles" loads the titles you\'ve already earned in other tools, saved on this device. Tap only the ones you\'d like to show (multiple selection allowed).',
+      secTrendTitle: 'Acquisition Graphs',
+      trendHint: 'Optional — a trend chart from each site',
+      trendHintBoxHtml: 'Values can\'t be entered by hand. When turned on, this shows a graph built from the actual acquisition history recorded for the same profile on this device in the Candle Calculator / Star Candle Calculator (only shown once 2 or more history entries have been recorded using that site).',
+      previewHeading: 'Preview',
+      shareImageBtn: 'Save Image & Post to X',
+      cardWatermark: '🕯️ Sky: Children of the Light',
+      footerDisclaimer: 'This is an unofficial fan site for Sky: Children of the Light. thatgamecompany is not involved in any way.',
+      footerCreditLabel: 'Made by / feedback: ',
+      requestFormLink: 'Request Form',
+      footerInfoLink: 'Settings, Updates, Credits & Privacy Policy',
+      quickMenuAriaLabel: 'Quick Menu',
+      mainLabel: 'Main',
+      otherToolsLabel: 'Other Tools',
+      displaySettingsLabel: 'Display Settings',
+      relatedToolsTitle: 'Related Tools',
+      closeAriaLabel: 'Close',
+      toolsModalHint: 'Other tools by the same author for Sky: Children of the Light (same origin, so your data on this device carries over when you switch).',
+      toolItem: 'Item Collection Tracker', toolEmote: 'Emote Collection Tracker', toolShare: 'Creation Manager',
+      toolNomacan: 'Candle Calculator', toolStarCandle: 'Star Candle Calculator', toolCompanion: 'Spirit Companion Tool',
+      toolWings: 'Wing Tracker', toolCatalog: 'Spirit Tree Catalog', toolRevisit: 'Revisit Spirit Database',
+      toolScore: 'Sheet Music Maker', toolTransfer: 'Data Transfer', toolInfo: 'Settings & Updates', toolProfile: 'Creator Profile',
+      imageSaveDefaultTitle: 'Save Image',
+      previewImgAlt: 'Card image for saving',
+      downloadBtn: 'Download',
+      copyToClipboardBtn: 'Copy to Clipboard',
+      openXBtn: 'Open X Post Screen',
+      profileSwitchTitle: 'Switch Profile',
+      profileSwitchHint: 'Switching profiles also switches the active save slot on this device for other tools (like Item Collection Tracker). Titles are earned separately per profile too.',
+      newProfileNamePlaceholder: 'New profile name',
+      addProfileBtn: '+ Add',
+      uiThemeLabel: 'Theme',
+      shortcutsHintHtml: 'Shortcuts: <b>?</b> to open, <b>D</b> to toggle theme, <b>Esc</b> to close',
+      settingsLangSection: 'Language',
+      removeItemAriaLabel: 'Remove this item',
+      favLabelPrefix: 'Favorite ',
+      favLabelPlaceholder: 'Season',
+      favValuePlaceholder: 'Season of Gratitude',
+      snsIdPlaceholder: 'ID (no @ needed)',
+      removeSnsAriaLabel: 'Remove this social link',
+      hourUnitLabel: 'h',
+      removeTimeRangeAriaLabel: 'Remove this time range',
+      freeTextPlaceholder: 'Type your own',
+      playTimeSingleRangeTemplate: '{start}:00–{end}:00',
+      playTimeMultiRangeTemplate: '{n} time ranges',
+      startTimeHandleTitle: 'Start time: drag, or use ← → keys to adjust',
+      endTimeHandleTitle: 'End time: drag, or use ← → keys to adjust',
+      notConfiguredLabel: 'Not set',
+      cardNameFallback: '(No name entered)',
+      bornPrefix: 'Born: ',
+      capeMaxTemplate: 'Currently {n} Wings of Light — reached max Cape Level {max}!',
+      capeProgressTemplate: 'Currently {n} Wings of Light ({remain} more to reach Level {level})',
+      trendEmptyTemplate: 'Not enough data yet (this appears once you use {source})',
+      issueDateTemplate: 'Issued {date}',
+      currentlySelectedLabel: 'Selected',
+      switchLabel: 'Switch',
+      duplicateLabel: 'Duplicate',
+      renameLabel: 'Rename',
+      deleteLabel: 'Delete',
+      titlesCountTemplate: '{n} title(s)',
+      noTitlesYetMsg: 'No titles earned yet',
+      copyOfTemplate: 'Copy of {name}',
+      duplicateProfilePromptTemplate: 'Enter a name for the new profile duplicated from "{name}"',
+      renamePromptMsg: 'Enter a new name',
+      deleteProfileConfirmTemplate: 'Delete "{name}"? This cannot be undone.',
+      themeModeDark: 'Dark',
+      themeModeLight: 'Light',
+      themeModeSystem: 'Match System',
+      themeAriaLabelTemplate: 'Theme: {current} (tap to switch to {next})',
+      shareTweetTemplate: 'I made a self-intro card with Star-Spun Card!\n\nMake your own profile too!\n\n{url}\n#SkyStarSpunCard',
+      quotaBgDroppedMsg: 'The background image was too large and was not saved',
+      quotaBgAndNoteDroppedMsg: 'The images were too large — the background image and custom section image were not saved',
+      quotaAllDroppedMsg: 'The images were too large — some images were not saved',
+      ecoSyncedTemplate: 'Synced {n} item(s) of data',
+      allSyncNotFoundMsg: 'No data to sync was found (open each site at least once, then try again)',
+      wingSyncedTemplate: 'Synced total Wings of Light: {n}',
+      wingSyncNotFoundMsg: 'No data to sync was found (open Wing Tracker at least once, then try again)',
+      allSyncEcoPartTemplate: '{n} collection stat(s)',
+      allSyncTitlePartTemplate: '{n} title(s)',
+      allSyncWingPart: 'total Wings of Light',
+      allSyncedTemplate: 'Synced {parts}',
+      titlesLoadedTemplate: 'Loaded {n} title(s)',
+      titlesNotFoundMsg: 'No titles found (earn some titles on each site, then try again)',
+      acquisitionGraphAriaLabel: 'Acquisition trend graph',
+      titlePickerEmptyMsg: 'No titles found yet. Tap "Load Titles".',
+      previewModalSaveTitle: 'Save Image & Post to X',
+      previewHintMsg: '① Save the image with "Download" below → ② Tap "Open X Post Screen" and attach the saved image to your post',
+      copiedToClipboardMsg: 'Copied the image to your clipboard',
+      clipboardCopyFailedMsg: 'Failed to copy to clipboard',
+      generatingImageMsg: 'Generating image…',
+      cardFilenamePrefix: 'star-spun-card_',
+      sharedMsg: 'Shared!',
+      imageGenerationFailedMsg: 'Failed to generate the image',
+      makePublicAriaLabelTemplate: 'Show {label} on the card',
+      reflectInProfileAriaLabelTemplate: 'Reflect {label} on the card',
+    },
+  };
+
+  function t(key, vars) {
+    const dict = I18N[LANG] || I18N.ja;
+    let str = dict[key] !== undefined ? dict[key] : (I18N.ja[key] !== undefined ? I18N.ja[key] : key);
+    if (vars) {
+      Object.keys(vars).forEach(k => { str = str.split('{' + k + '}').join(vars[k]); });
+    }
+    return str;
+  }
+
+  function applyI18n() {
+    document.documentElement.lang = LANG;
+    document.title = t('pageTitle');
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n-html')); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
+    document.querySelectorAll('[data-i18n-alt]').forEach(el => { el.alt = t(el.getAttribute('data-i18n-alt')); });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
+    document.querySelectorAll('[data-i18n-aria-label]').forEach(el => { el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria-label'))); });
+    const langBtn = document.getElementById('langToggleBtn');
+    if (langBtn) langBtn.textContent = LANG === 'ja' ? 'EN' : '日本語';
+    const jaBtn = document.getElementById('settingsLangJaBtn');
+    const enBtn = document.getElementById('settingsLangEnBtn');
+    if (jaBtn) jaBtn.classList.toggle('active', LANG === 'ja');
+    if (enBtn) enBtn.classList.toggle('active', LANG === 'en');
+  }
+
+  function toggleLang() { setLang(LANG === 'ja' ? 'en' : 'ja'); }
+  function setLang(lang) {
+    lang = lang === 'en' ? 'en' : 'ja';
+    if (LANG === lang) return;
+    LANG = lang;
+    saveLang(LANG);
+    applyI18n();
+    refreshDynamicUI();
+    syncSettingsModalUI(); // テーマボタンの文言（ダーク/ライト/システムに合わせる）も言語依存のため追従させる
+  }
+  window.setLang = setLang; // 設定モーダルのonclick="setLang(...)"（インライン属性はグローバルスコープで評価される）から参照される
+  // このスクリプトはbody末尾で読み込まれるため、この時点で静的HTMLは既にDOMに存在する。
+  // 動的レンダリング（renderCard()等）が走る前に、まず静的なdata-i18n*属性を現在の言語で適用しておく。
+  applyI18n();
+  // renderCard()等、日本語を直接テンプレートリテラルに埋め込んでいた動的生成箇所は
+  // 全てt()経由に書き換え済みなので、LANG変更後に再実行するだけで新しい言語で再描画される
+  // （tai-score等の姉妹サイトと同じ考え方）。ただし詳細プロフィール・収集状況・入手グラフの
+  // 編集欄は、ページ初回描画時に一度だけ実行される非関数化ブロックとしてクリック
+  // リスナー等が組み上げられているため、丸ごと再構築するのではなく既存DOMのラベル文字列
+  // だけを再適用する（applyDetailGroupsI18n等、下記参照）。呼び出し順はDOM構築が
+  // 終わっている前提。
+  function refreshDynamicUI() {
+    drawFriendContactChips();
+    drawFavRows();
+    drawSnsRows();
+    drawPlayTimeRanges();
+    updateDialVisual();
+    drawArcHandles();
+    applyDetailGroupsI18n();
+    applyEcoFieldsI18n();
+    applyTrendFieldsI18n();
+    drawTitlePicker();
+    renderCard();
+    renderProfileDockLabel();
+    if (document.getElementById('profileModalOverlay')?.classList.contains('show')) drawProfileModalList();
+  }
 
   const state = {
     theme: 'night',
@@ -1464,7 +1897,9 @@
   const DEFAULT_PROFILE_ID = 'default';
 
   function pfIsSafeId(id){ return typeof id === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(id); }
-  function pfDisplayName(p){ return p.isDefaultName ? 'メイン' : p.name; }
+  // skyProfiles_v1は姉妹サイト共通のキーなので、他サイト側で作られた「isDefaultName無し・
+  // name:'メイン'固定」形式のデフォルトプロフィールも表示時に翻訳できるようにする（保存データ自体は書き換えない）。
+  function pfDisplayName(p){ return (p.isDefaultName || (p.id === DEFAULT_PROFILE_ID && p.name === 'メイン')) ? t('mainLabel') : p.name; }
 
   function loadProfiles(){
     try {
@@ -1576,9 +2011,9 @@
     clearTimeout(saveStateTimer);
     const dropSteps = [
       { patch: {}, msg: null }, // まずは無加工でそのまま保存を試みる
-      { patch: { cardBgImage: Object.assign({}, state.cardBgImage, { src: null }) }, msg: '背景画像のサイズが大きいため保存されませんでした' },
-      { patch: { cardBgImage: Object.assign({}, state.cardBgImage, { src: null }), customNote: Object.assign({}, state.customNote, { image: null }) }, msg: '画像サイズが大きいため、背景画像とカスタム欄の画像は保存されませんでした' },
-      { patch: { cardBgImage: Object.assign({}, state.cardBgImage, { src: null }), customNote: Object.assign({}, state.customNote, { image: null }), avatarImage: Object.assign({}, state.avatarImage, { src: null }) }, msg: '画像サイズが大きいため、一部の画像は保存されませんでした' },
+      { patch: { cardBgImage: Object.assign({}, state.cardBgImage, { src: null }) }, msg: t('quotaBgDroppedMsg') },
+      { patch: { cardBgImage: Object.assign({}, state.cardBgImage, { src: null }), customNote: Object.assign({}, state.customNote, { image: null }) }, msg: t('quotaBgAndNoteDroppedMsg') },
+      { patch: { cardBgImage: Object.assign({}, state.cardBgImage, { src: null }), customNote: Object.assign({}, state.customNote, { image: null }), avatarImage: Object.assign({}, state.avatarImage, { src: null }) }, msg: t('quotaAllDroppedMsg') },
     ];
     for (let i = 0; i < dropSteps.length; i++) {
       try {
@@ -1893,14 +2328,19 @@
   bindText('in_friendCode', 'friendCode');
 
   // ── フレンドコードの連絡方法（DMへ／リプで） ──
+  // 🩹 state.friendCodeContactにはこの配列の要素（日本語の原文）がそのまま保存されるため、
+  // DETAIL_OPTION_ENと同じ理由でオブジェクト化せず、表示だけtranslateFriendContactOption()
+  // で英訳する。
   const FRIEND_CONTACT_OPTIONS = ['DMへ', 'リプで'];
+  const FRIEND_CONTACT_OPTION_EN = { 'DMへ':'By DM', 'リプで':'By reply' };
+  function translateFriendContactOption(ja){ return LANG === 'en' ? (FRIEND_CONTACT_OPTION_EN[ja] || ja) : ja; }
   function drawFriendContactChips(){
     const c = document.getElementById('friendContactChips');
     c.innerHTML = '';
     FRIEND_CONTACT_OPTIONS.forEach(opt => {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'chip-opt' + (state.friendCodeContact === opt ? ' selected' : '');
-      b.textContent = opt;
+      b.textContent = translateFriendContactOption(opt);
       b.addEventListener('click', () => {
         state.friendCodeContact = (state.friendCodeContact === opt) ? null : opt;
         drawFriendContactChips();
@@ -1925,11 +2365,11 @@
     state.favorites.forEach((f, idx) => {
       const row = el('div', 'fav-row');
       row.innerHTML = `
-        <span class="fav-label-wrap">好きな</span>
-        <input type="text" class="fav-label" placeholder="季節" value="${(f.label||'').replace(/"/g,'&quot;')}">
+        <span class="fav-label-wrap">${t('favLabelPrefix')}</span>
+        <input type="text" class="fav-label" placeholder="${escapeHtml(t('favLabelPlaceholder'))}" value="${(f.label||'').replace(/"/g,'&quot;')}">
         <span class="fav-label-wrap">:</span>
-        <input type="text" class="fav-value" placeholder="感謝の季節" value="${(f.value||'').replace(/"/g,'&quot;')}">
-        <button type="button" class="fav-remove" aria-label="この項目を削除"><svg class="inline-icon" width="12" height="12"><use href="#i-close"/></svg></button>
+        <input type="text" class="fav-value" placeholder="${escapeHtml(t('favValuePlaceholder'))}" value="${(f.value||'').replace(/"/g,'&quot;')}">
+        <button type="button" class="fav-remove" aria-label="${escapeHtml(t('removeItemAriaLabel'))}"><svg class="inline-icon" width="12" height="12"><use href="#i-close"/></svg></button>
       `;
       row.querySelector('.fav-label').addEventListener('input', e => { f.label = e.target.value; renderCard(); });
       row.querySelector('.fav-value').addEventListener('input', e => { f.value = e.target.value; renderCard(); });
@@ -1958,8 +2398,8 @@
       const options = SNS_PLATFORMS.map(p => `<option value="${p}" ${s.platform === p ? 'selected' : ''}>${p}</option>`).join('');
       row.innerHTML = `
         <select class="sns-platform">${options}</select>
-        <input type="text" class="fav-value" placeholder="ID（@ 不要）" value="${(s.id||'').replace(/"/g,'&quot;')}">
-        <button type="button" class="fav-remove" aria-label="このSNSを削除"><svg class="inline-icon" width="12" height="12"><use href="#i-close"/></svg></button>
+        <input type="text" class="fav-value" placeholder="${escapeHtml(t('snsIdPlaceholder'))}" value="${(s.id||'').replace(/"/g,'&quot;')}">
+        <button type="button" class="fav-remove" aria-label="${escapeHtml(t('removeSnsAriaLabel'))}"><svg class="inline-icon" width="12" height="12"><use href="#i-close"/></svg></button>
       `;
       row.querySelector('.sns-platform').addEventListener('change', e => { s.platform = e.target.value; renderCard(); });
       row.querySelector('.fav-value').addEventListener('input', e => { s.id = e.target.value; renderCard(); });
@@ -2099,13 +2539,13 @@
   function updateDialVisual(){
     if (state.playTimeIrregular) {
       clockDial.style.background = 'var(--surface-2)';
-      clockCenter.innerHTML = `<span class="cc-icon">🌀</span>不定期`;
+      clockCenter.innerHTML = `<span class="cc-icon">🌀</span>${t('irregularBtnLabel')}`;
     } else {
       const filled = state.playTimeRanges.filter(r => r.start != null && r.end != null);
       clockDial.style.background = buildDialBackground(filled);
-      const label = !filled.length ? '未入力'
-        : filled.length === 1 ? `${filled[0].start}時〜${filled[0].end}時`
-        : `${filled.length}つの時間帯`;
+      const label = !filled.length ? t('notSetLabel')
+        : filled.length === 1 ? t('playTimeSingleRangeTemplate', { start: filled[0].start, end: filled[0].end })
+        : t('playTimeMultiRangeTemplate', { n: filled.length });
       clockCenter.innerHTML = `<span class="cc-icon">🕐</span>${label}`;
     }
     irregularBtn.classList.toggle('selected', state.playTimeIrregular);
@@ -2122,7 +2562,7 @@
         const handle = document.createElement('span');
         handle.className = 'clock-arc-handle' + (isSet ? '' : ' unset');
         handle.dataset.mark = field === 'start' ? 'S' : 'E';
-        handle.title = (field === 'start' ? '開始' : '終了') + '時刻：ドラッグ、または←→キーで調整';
+        handle.title = t(field === 'start' ? 'startTimeHandleTitle' : 'endTimeHandleTitle');
         handle.setAttribute('role', 'slider');
         handle.setAttribute('tabindex', '0');
         handle.setAttribute('aria-label', handle.title);
@@ -2202,10 +2642,10 @@
     state.playTimeRanges.forEach((r, idx) => {
       const row = el('div', 'clock-range-row');
       row.innerHTML = `
-        <div class="clock-num-f-row"><input type="number" min="0" max="23" placeholder="20" value="${r.start ?? ''}" data-field="start"><span>時</span></div>
+        <div class="clock-num-f-row"><input type="number" min="0" max="23" placeholder="20" value="${r.start ?? ''}" data-field="start"><span>${t('hourUnitLabel')}</span></div>
         <span class="clock-num-sep">〜</span>
-        <div class="clock-num-f-row"><input type="number" min="0" max="24" placeholder="24" value="${r.end ?? ''}" data-field="end"><span>時</span></div>
-        <button type="button" class="clock-range-remove" aria-label="この時間帯を削除"><svg class="inline-icon" width="12" height="12"><use href="#i-close"/></svg></button>`;
+        <div class="clock-num-f-row"><input type="number" min="0" max="24" placeholder="24" value="${r.end ?? ''}" data-field="end"><span>${t('hourUnitLabel')}</span></div>
+        <button type="button" class="clock-range-remove" aria-label="${escapeHtml(t('removeTimeRangeAriaLabel'))}"><svg class="inline-icon" width="12" height="12"><use href="#i-close"/></svg></button>`;
       row.querySelector('[data-field="start"]').addEventListener('input', e => {
         r.start = clampHour(e.target.value, 23);
         // 0〜23の範囲外を打ち込めないよう、補正後の値を表示欄にも即座に書き戻す
@@ -2256,16 +2696,23 @@
 
   // ── Detail groups (tap to select / tap again to clear; supports a free-text option) ──
   const detailGroupsEl = document.getElementById('detailGroups');
+  // 🩹 言語切替時にg.labelとchipsの選択肢表示だけを再適用できるよう、グループごとの
+  // 見出し要素とdraw()関数（下記）を配列で外に持っておく（applyDetailGroupsI18n参照）。
+  const detailGroupLabelEls = [];
+  const detailGroupDrawFns = [];
   DETAIL_GROUPS.forEach(g => {
     const wrap = el('div', 'chipgroup');
-    wrap.innerHTML = `<div class="chip-label"><span class="ic">${g.icon}</span>${g.label}</div>`;
+    const labelEl = el('div', 'chip-label');
+    labelEl.innerHTML = `<span class="ic">${g.icon}</span><span class="chip-label-text">${LANG === 'en' ? g.labelEn : g.label}</span>`;
+    wrap.appendChild(labelEl);
     detailGroupsEl.appendChild(wrap);
+    detailGroupLabelEls.push({ g, labelEl });
 
     const chips = el('div', 'chips');
     wrap.appendChild(chips);
     const freeTextWrap = el('div', 'free-text-input');
     freeTextWrap.style.display = 'none';
-    freeTextWrap.innerHTML = `<input type="text" placeholder="自由に入力" data-group="${g.id}">`;
+    freeTextWrap.innerHTML = `<input type="text" placeholder="${escapeHtml(t('freeTextPlaceholder'))}" data-group="${g.id}">`;
     wrap.appendChild(freeTextWrap);
     freeTextWrap.querySelector('input').value = state.detailFreeText[g.id] || '';
 
@@ -2281,7 +2728,7 @@
       g.options.forEach(opt => {
         const b = document.createElement('button');
         b.type = 'button'; b.className = 'chip-opt' + (selected.includes(opt) ? ' selected' : '');
-        b.textContent = opt;
+        b.textContent = translateDetailOption(opt);
         b.addEventListener('click', () => {
           const cur = state.detail[g.id] || [];
           state.detail[g.id] = cur.includes(opt) ? cur.filter(x => x !== opt) : [...cur, opt];
@@ -2294,7 +2741,16 @@
       freeTextWrap.style.display = selected.includes(FREE_TEXT) ? 'block' : 'none';
     }
     draw();
+    detailGroupDrawFns.push(draw);
   });
+  // 言語切替時：見出し文字列を差し替え、各グループのチップも選択状態を保ったまま再描画する
+  function applyDetailGroupsI18n(){
+    detailGroupLabelEls.forEach(({ g, labelEl }) => {
+      const textEl = labelEl.querySelector('.chip-label-text');
+      if (textEl) textEl.textContent = LANG === 'en' ? g.labelEn : g.label;
+    });
+    detailGroupDrawFns.forEach(fn => fn());
+  }
 
   // ── Eco stat fields (each with its own visibility switch) ──
   const ecoEl = document.getElementById('ecoStatFields');
@@ -2302,14 +2758,25 @@
     const row = el('div', 'f eco-field-row');
     row.innerHTML = `
       <div class="eco-field-head">
-        <label>${f.icon} ${f.label} <span style="color:var(--teal-ink);font-family:'IBM Plex Mono',monospace;font-size:10px;">→ ${f.source}</span></label>
-        <label class="switch eco-vis-switch"><input type="checkbox" ${f.visible ? 'checked' : ''} data-eco-vis="${f.id}" aria-label="${f.label}を公開する"><span class="track"></span><span class="knob"></span></label>
+        <label>${f.icon} <span class="eco-field-label-text"></span> <span class="eco-field-source" style="color:var(--teal-ink);font-family:'IBM Plex Mono',monospace;font-size:10px;">→ <span class="eco-field-source-text"></span></span></label>
+        <label class="switch eco-vis-switch"><input type="checkbox" ${f.visible ? 'checked' : ''} data-eco-vis="${f.id}"><span class="track"></span><span class="knob"></span></label>
       </div>
-      <input type="text" placeholder="${f.placeholder}" value="${escapeHtml(f.value || '')}" data-eco="${f.id}">`;
+      <input type="text" value="${escapeHtml(f.value || '')}" data-eco="${f.id}">`;
     ecoEl.appendChild(row);
     row.querySelector('input[data-eco]').addEventListener('input', e => { f.value = e.target.value; renderCard(); });
     row.querySelector('input[data-eco-vis]').addEventListener('change', e => { f.visible = e.target.checked; renderCard(); });
   });
+  // 言語切替時：ラベル・連携元名・プレースホルダー・aria-labelを差し替える（入力値には触れない）
+  function applyEcoFieldsI18n(){
+    Array.from(ecoEl.children).forEach((row, i) => {
+      const f = ECO_STATS[i];
+      row.querySelector('.eco-field-label-text').textContent = LANG === 'en' ? f.labelEn : f.label;
+      row.querySelector('.eco-field-source-text').textContent = LANG === 'en' ? f.sourceEn : f.source;
+      row.querySelector('input[data-eco]').placeholder = LANG === 'en' ? f.placeholderEn : f.placeholder;
+      row.querySelector('input[data-eco-vis]').setAttribute('aria-label', t('makePublicAriaLabelTemplate', { label: LANG === 'en' ? f.labelEn : f.label }));
+    });
+  }
+  applyEcoFieldsI18n();
 
   // ── 収集状況：実データ連携（同一オリジンの他ツールのlocalStorageを直接読む） ──
   // アクティブな共有プロフィールの解決には、上で定義済みのnsKey()をそのまま使う
@@ -2412,8 +2879,8 @@
     const syncedCount = runEcoStatsSync();
     renderCard();
     showToast(syncedCount > 0
-      ? `${syncedCount}件のデータを連携しました`
-      : '連携できるデータが見つかりませんでした（各サイトを一度開いてから、もう一度お試しください）');
+      ? t('ecoSyncedTemplate', { n: syncedCount })
+      : t('allSyncNotFoundMsg'));
   });
 
   // ── 称号：他ツールで獲得済みの称号を読み込み、飾りたいものだけタップで選べるようにする ──
@@ -2435,7 +2902,7 @@
       ids.forEach(id => {
         const def = tool.titles[id];
         if (!def) return; // 未知のid（想定外のデータ形式）は無視する
-        earned.push({ key: `${toolId}:${id}`, icon: def.icon, name: def.name, desc: def.desc, descEn: def.descEn, source: tool.source });
+        earned.push({ key: `${toolId}:${id}`, icon: def.icon, name: def.name, nameEn: def.nameEn, desc: def.desc, descEn: def.descEn, source: tool.source, sourceEn: tool.sourceEn });
       });
     });
     return earned;
@@ -2444,19 +2911,23 @@
 
   function drawTitlePicker(){
     if (!syncedTitlesCache.length) {
-      titlePickerEl.innerHTML = '<p class="title-picker-empty">まだ称号が見つかっていません。「称号を読み込む」を押してください。</p>';
+      titlePickerEl.innerHTML = `<p class="title-picker-empty">${escapeHtml(t('titlePickerEmptyMsg'))}</p>`;
       return;
     }
     const wrap = el('div', 'chips');
-    syncedTitlesCache.forEach(t => {
+    // 🩹 ループ変数名titleはグローバルのt()（翻訳関数）と衝突するため、このスコープ内だけtiとする
+    syncedTitlesCache.forEach(ti => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'chip-opt' + (state.titles.selected.includes(t.key) ? ' selected' : '');
-      b.title = t.desc ? `${t.source} — ${t.desc}` : t.source;
-      b.innerHTML = `<span>${t.icon}</span> ${t.name}`;
+      b.className = 'chip-opt' + (state.titles.selected.includes(ti.key) ? ' selected' : '');
+      const tiName = LANG === 'en' ? (ti.nameEn || ti.name) : ti.name;
+      const tiDesc = LANG === 'en' ? ti.descEn : ti.desc;
+      const tiSource = LANG === 'en' ? (ti.sourceEn || ti.source) : ti.source;
+      b.title = tiDesc ? `${tiSource} — ${tiDesc}` : tiSource;
+      b.innerHTML = `<span>${ti.icon}</span> ${escapeHtml(tiName)}`;
       b.addEventListener('click', () => {
-        const idx = state.titles.selected.indexOf(t.key);
-        if (idx === -1) state.titles.selected.push(t.key); else state.titles.selected.splice(idx, 1);
+        const idx = state.titles.selected.indexOf(ti.key);
+        if (idx === -1) state.titles.selected.push(ti.key); else state.titles.selected.splice(idx, 1);
         drawTitlePicker();
         renderCard();
       });
@@ -2484,8 +2955,8 @@
     const n = runTitleSync();
     renderCard();
     showToast(n > 0
-      ? `${n}個の称号を読み込みました`
-      : '称号が見つかりませんでした（各サイトで称号を獲得してから、もう一度お試しください）');
+      ? t('titlesLoadedTemplate', { n })
+      : t('titlesNotFoundMsg'));
   });
 
   // ── 入手グラフ（数値の手入力はなし。プロフィールに反映するかどうかのスイッチのみ） ──
@@ -2494,12 +2965,22 @@
     const row = el('div', 'f eco-field-row');
     row.innerHTML = `
       <div class="eco-field-head">
-        <label>${g.icon} ${g.label} <span style="color:var(--teal-ink);font-family:'IBM Plex Mono',monospace;font-size:10px;">→ ${g.source}</span></label>
-        <label class="switch eco-vis-switch"><input type="checkbox" ${g.visible ? 'checked' : ''} data-trend-vis="${g.id}" aria-label="${g.label}をプロフィールに反映する"><span class="track"></span><span class="knob"></span></label>
+        <label>${g.icon} <span class="eco-field-label-text"></span> <span class="eco-field-source" style="color:var(--teal-ink);font-family:'IBM Plex Mono',monospace;font-size:10px;">→ <span class="eco-field-source-text"></span></span></label>
+        <label class="switch eco-vis-switch"><input type="checkbox" ${g.visible ? 'checked' : ''} data-trend-vis="${g.id}"><span class="track"></span><span class="knob"></span></label>
       </div>`;
     trendEditEl.appendChild(row);
     row.querySelector('input[data-trend-vis]').addEventListener('change', e => { g.visible = e.target.checked; renderCard(); });
   });
+  // 言語切替時：ラベル・連携元名・aria-labelを差し替える
+  function applyTrendFieldsI18n(){
+    Array.from(trendEditEl.children).forEach((row, i) => {
+      const g = TREND_GRAPHS[i];
+      row.querySelector('.eco-field-label-text').textContent = LANG === 'en' ? g.labelEn : g.label;
+      row.querySelector('.eco-field-source-text').textContent = LANG === 'en' ? g.sourceEn : g.source;
+      row.querySelector('input[data-trend-vis]').setAttribute('aria-label', t('reflectInProfileAriaLabelTemplate', { label: LANG === 'en' ? g.labelEn : g.label }));
+    });
+  }
+  applyTrendFieldsI18n();
 
   // ── Cape level: same thresholds/tier logic as 羽トラッカー's renderCapeLevels() ──
   function computeCape(total){
@@ -2608,8 +3089,8 @@
     const ok = runWingSync();
     renderCard();
     showToast(ok
-      ? `光の翼 合計${state.wingTotal}枚を連携しました`
-      : '連携できるデータが見つかりませんでした（羽トラッカーを一度開いてから、もう一度お試しください）');
+      ? t('wingSyncedTemplate', { n: state.wingTotal })
+      : t('wingSyncNotFoundMsg'));
   });
 
   // ── まとめて連携：収集状況・称号・光の翼の3つの同期処理を1回でまとめて実行する。
@@ -2621,12 +3102,12 @@
     const wingOk = runWingSync();
     renderCard();
     const parts = [];
-    if (ecoCount > 0) parts.push(`収集状況${ecoCount}件`);
-    if (titleCount > 0) parts.push(`称号${titleCount}個`);
-    if (wingOk) parts.push('光の翼の合計枚数');
+    if (ecoCount > 0) parts.push(t('allSyncEcoPartTemplate', { n: ecoCount }));
+    if (titleCount > 0) parts.push(t('allSyncTitlePartTemplate', { n: titleCount }));
+    if (wingOk) parts.push(t('allSyncWingPart'));
     showToast(parts.length
-      ? `${parts.join('・')}を連携しました`
-      : '連携できるデータが見つかりませんでした（各サイトを一度開いてから、もう一度お試しください）');
+      ? t('allSyncedTemplate', { parts: parts.join(LANG === 'en' ? ', ' : '・') })
+      : t('allSyncNotFoundMsg'));
   }
   document.getElementById('allSyncBtn').addEventListener('click', runAllSyncWithToast);
 
@@ -2660,7 +3141,7 @@
     const dotLeftPct = (last[0] / w * 100).toFixed(2), dotTopPct = (last[1] / h * 100).toFixed(2);
     return `
       <div class="trend-svg-wrap">
-        <svg viewBox="0 0 ${w} ${h}" class="trend-svg" preserveAspectRatio="none" role="img" aria-label="入手推移グラフ">
+        <svg viewBox="0 0 ${w} ${h}" class="trend-svg" preserveAspectRatio="none" role="img" aria-label="${escapeHtml(t('acquisitionGraphAriaLabel'))}">
           <path d="${areaPath}" class="trend-area"></path>
           <path d="${linePath}" class="trend-line"></path>
         </svg>
@@ -2771,10 +3252,10 @@
   function playTimeVibeLabel(ranges){
     if (!ranges.length) return null;
     const QUARTERS = [
-      { icon:'🌙', text:'夜ふかし型' }, // 0-6時
-      { icon:'🌅', text:'朝型' },      // 6-12時
-      { icon:'☀️', text:'昼型' },      // 12-18時
-      { icon:'🌆', text:'夕方型' },    // 18-24時
+      { icon:'🌙', text:'夜ふかし型', textEn:'Night Owl' },   // 0-6時
+      { icon:'🌅', text:'朝型', textEn:'Early Bird' },        // 6-12時
+      { icon:'☀️', text:'昼型', textEn:'Daytime Player' },    // 12-18時
+      { icon:'🌆', text:'夕方型', textEn:'Evening Player' },  // 18-24時
     ];
     const hoursByQuarter = [0, 0, 0, 0];
     const coveredHours = new Set(); // 複数レンジの重なりを二重カウントしないよう、実時刻の集合で管理する
@@ -2790,7 +3271,7 @@
     coveredHours.forEach(h => { hoursByQuarter[Math.floor(h / 6)]++; });
     const totalHours = coveredHours.size;
     if (!totalHours) return null; // 実際は0時間（ゼロ時間レンジのみ等）なら雰囲気タグ自体を出さない
-    if (totalHours >= 16) return { icon:'🌈', text:'いつでも歓迎' };
+    if (totalHours >= 16) return { icon:'🌈', text:'いつでも歓迎', textEn:'Anytime Welcome' };
     let bestIdx = 0;
     hoursByQuarter.forEach((v, i) => { if (v > hoursByQuarter[bestIdx]) bestIdx = i; });
     return QUARTERS[bestIdx];
@@ -2862,7 +3343,7 @@
     const cardBgWrap = document.getElementById('cardBgWrap');
     applyCardBgStyle(cardBgWrap, state.cardBgImage);
 
-    document.getElementById('cardName').textContent = state.name || '（名前未入力）';
+    document.getElementById('cardName').textContent = state.name || t('cardNameFallback');
     document.getElementById('cardOneLiner').textContent = state.oneLiner || '';
 
     // journey: 生まれた時期バッジ＋好きな〇〇を、1本の横並びピル帯(card-journey-strip)にまとめる。
@@ -2872,10 +3353,10 @@
     const jEl = document.getElementById('cardJourney');
     let jItems = '';
     if (state.journeyYear) {
-      jItems += `<span class="card-pill-badge">うまれ：${escapeHtml(state.journeyYear)}</span>`;
+      jItems += `<span class="card-pill-badge">${t('bornPrefix')}${escapeHtml(state.journeyYear)}</span>`;
     }
     const filledFavs = state.favorites.filter(f => f.label && f.value);
-    jItems += filledFavs.map(f => `<span class="jr-pill"><span class="jr-fav-label">好きな${escapeHtml(f.label)}</span><span class="jr-fav-value">${escapeHtml(f.value)}</span></span>`).join('');
+    jItems += filledFavs.map(f => `<span class="jr-pill"><span class="jr-fav-label">${t('favLabelPrefix')}${escapeHtml(f.label)}</span><span class="jr-fav-value">${escapeHtml(f.value)}</span></span>`).join('');
     setSection(jEl, jItems ? `<div class="card-journey-strip">${jItems}</div>` : '');
     staggerRows(jEl, '.card-pill-badge, .jr-pill');
 
@@ -2892,15 +3373,15 @@
     if (state.vis.playTime) {
       const filledRanges = state.playTimeRanges.filter(r => r.start != null && r.end != null);
       const listHtml = state.playTimeIrregular
-        ? `<div class="card-clock-range">${PLAY_TIME_IRREGULAR}</div>`
+        ? `<div class="card-clock-range">${t('irregularBtnLabel')}</div>`
         : filledRanges.length
-          ? filledRanges.map(r => `<div class="card-clock-range"><span class="pt-num">${r.start}</span><span class="pt-unit">時</span>〜<span class="pt-num">${r.end}</span><span class="pt-unit">時</span></div>`).join('')
-          : `<div class="card-clock-range na">未設定</div>`;
+          ? filledRanges.map(r => `<div class="card-clock-range"><span class="pt-num">${r.start}</span><span class="pt-unit">${t('hourUnitLabel')}</span>〜<span class="pt-num">${r.end}</span><span class="pt-unit">${t('hourUnitLabel')}</span></div>`).join('')
+          : `<div class="card-clock-range na">${t('notConfiguredLabel')}</div>`;
       const vibe = !state.playTimeIrregular ? playTimeVibeLabel(filledRanges) : null;
-      const vibeHtml = vibe ? `<div class="card-clock-vibe"><span>${vibe.icon}</span>${vibe.text}</div>` : '';
+      const vibeHtml = vibe ? `<div class="card-clock-vibe"><span>${vibe.icon}</span>${LANG === 'en' ? vibe.textEn : vibe.text}</div>` : '';
       setSection(ptEl, `
         <div class="card-sec-title">PLAY TIME</div>
-        <div class="card-sec-heading">よく遊ぶ時間帯</div>
+        <div class="card-sec-heading">${t('secPlayTimeTitle')}</div>
         <div class="card-clock-module">
           ${renderCardClockHtml(theme)}
           <div class="card-clock-list">${listHtml}${vibeHtml}</div>
@@ -2914,7 +3395,7 @@
     const noteText = (state.customNote.text || '').trim();
     const noteImgSrc = state.customNote.image && state.customNote.image.src;
     if (state.vis.customNote && (noteText || noteImgSrc)) {
-      const noteTitle = (state.customNote.title || '').trim() || 'カスタム欄';
+      const noteTitle = (state.customNote.title || '').trim() || t('secCustomNoteTitle');
       const imgHtml = noteImgSrc ? `<img class="card-custom-note-img" src="${escapeHtml(noteImgSrc)}" alt="">` : '';
       const textHtml = noteText ? `<p class="card-custom-note-text">${escapeHtml(noteText).replace(/\n/g, '<br>')}</p>` : '';
       setSection(noteEl, `
@@ -2931,13 +3412,13 @@
         const selected = state.detail[g.id] || [];
         const parts = selected.map(x => x === FREE_TEXT ? (state.detailFreeText[g.id] || FREE_TEXT) : x).filter(Boolean);
         if (!parts.length) return '';
-        const valueHtml = parts.map((p, i) => (i > 0 ? '<span class="dc-value-sep">・</span>' : '') + `<span class="dc-value-part">${escapeHtml(p)}</span>`).join('');
-        return `<div class="detail-chip"><span class="dc-icon">${g.icon}</span><div class="dc-body"><span class="dc-label">${g.label}</span><span class="dc-value">${valueHtml}</span></div></div>`;
+        const valueHtml = parts.map((p, i) => (i > 0 ? '<span class="dc-value-sep">・</span>' : '') + `<span class="dc-value-part">${escapeHtml(translateDetailOption(p))}</span>`).join('');
+        return `<div class="detail-chip"><span class="dc-icon">${g.icon}</span><div class="dc-body"><span class="dc-label">${LANG === 'en' ? g.labelEn : g.label}</span><span class="dc-value">${valueHtml}</span></div></div>`;
       }).join('');
       if (chips) {
         setSection(dtEl, `
           <div class="card-sec-title">DETAILS</div>
-          <div class="card-sec-heading">詳細プロフィール</div>
+          <div class="card-sec-heading">${t('secDetailsTitle')}</div>
           <div class="card-detail-mosaic">${chips}</div>`);
         staggerRows(dtEl, '.detail-chip');
       } else {
@@ -2947,12 +3428,13 @@
 
     // titles — 他ツールで獲得した称号のうち、選んで飾ることにしたものだけをバッジで見せる
     const titlesWrapEl = document.getElementById('cardTitlesWrap');
-    const selectedTitles = syncedTitlesCache.filter(t => state.titles.selected.includes(t.key));
+    // 🩹 ループ変数名tはグローバルのt()（翻訳関数）と衝突するため、ここだけtiとする
+    const selectedTitles = syncedTitlesCache.filter(ti => state.titles.selected.includes(ti.key));
     if (state.vis.titles && selectedTitles.length) {
-      const badges = selectedTitles.map(t => `<span class="card-title-badge"><span class="ctb-icon">${t.icon}</span>${t.name}</span>`).join('');
+      const badges = selectedTitles.map(ti => `<span class="card-title-badge"><span class="ctb-icon">${ti.icon}</span>${escapeHtml(LANG === 'en' ? (ti.nameEn || ti.name) : ti.name)}</span>`).join('');
       setSection(titlesWrapEl, `
         <div class="card-sec-title">TITLES</div>
-        <div class="card-sec-heading">称号</div>
+        <div class="card-sec-heading">${t('secTitlesTitle')}</div>
         <div class="card-titles-strip">${badges}</div>`);
       staggerRows(titlesWrapEl, '.card-title-badge');
     } else { setSection(titlesWrapEl, ''); }
@@ -2966,14 +3448,15 @@
     const wingTotalNum = /[-.]/.test(wingTotalRaw) ? NaN : parseInt(wingTotalRaw.replace(/[^0-9]/g, ''), 10);
     if (state.vis.cape && !isNaN(wingTotalNum) && wingTotalNum >= 0) {
       const c = computeCape(wingTotalNum);
+      const wingTotalLocalized = wingTotalNum.toLocaleString(LANG === 'en' ? 'en-US' : 'ja-JP');
       const sub = c.isMax
-        ? `現在 光の翼 ${wingTotalNum.toLocaleString('ja-JP')}枚 — 最大ケープレベル ${CAPE_LEVELS.length} に到達済み！`
-        : `現在 光の翼 ${wingTotalNum.toLocaleString('ja-JP')}枚（レベル${c.reachedLevel + 1}まであと ${c.remain}枚）`;
+        ? t('capeMaxTemplate', { n: wingTotalLocalized, max: CAPE_LEVELS.length })
+        : t('capeProgressTemplate', { n: wingTotalLocalized, level: c.reachedLevel + 1, remain: c.remain });
       setSection(capeEl, `
         <div class="card-sec-title">CAPE LEVEL</div>
-        <div class="card-sec-heading">ケープレベル</div>
+        <div class="card-sec-heading">${t('secCapeTitle')}</div>
         <div class="cape-widget">
-          <div class="cape-widget-title">✦ ケープレベル</div>
+          <div class="cape-widget-title">✦ ${t('secCapeTitle')}</div>
           <div class="cape-widget-sub">${sub}</div>
           <div class="cape-level-label">Lv${c.reachedLevel}</div>
           <div class="cape-pips">${renderCapePipsHtml(c.reachedLevel)}</div>
@@ -2988,7 +3471,7 @@
     if (state.vis.ecoStats && hasAnyEco) {
       let html = `
         <div class="card-sec-title">COLLECTION</div>
-        <div class="card-sec-heading">収集状況</div>
+        <div class="card-sec-heading">${t('secEcoStatsTitle')}</div>
         <div class="card-eco-grid">`;
       ECO_STATS.forEach(f => {
         if (!f.value || !f.visible) return;
@@ -2997,8 +3480,8 @@
         const pctMatch = /^(\d{1,3}(?:\.\d+)?)%$/.exec((f.value || '').trim());
         const pct = pctMatch ? Math.max(0, Math.min(100, Number(pctMatch[1]))) : null;
         const bar = pct !== null ? `<div class="progress-bar"><div class="progress-bar-fill" style="width:${pct}%"></div></div>` : '';
-        const valueHtml = `<div class="soft-row-value ${f.value ? '' : 'na'}">${f.value ? splitNumUnit(f.value, 'eco-val-num', 'eco-val-unit') : '未入力'}</div>${bar}`;
-        html += `<div class="eco-tile soft-row"><div class="soft-row-icon">${f.icon}</div><div class="soft-row-body"><div class="soft-row-label">${f.label}</div>${valueHtml}</div></div>`;
+        const valueHtml = `<div class="soft-row-value ${f.value ? '' : 'na'}">${f.value ? splitNumUnit(f.value, 'eco-val-num', 'eco-val-unit') : t('notSetLabel')}</div>${bar}`;
+        html += `<div class="eco-tile soft-row"><div class="soft-row-icon">${f.icon}</div><div class="soft-row-body"><div class="soft-row-label">${LANG === 'en' ? f.labelEn : f.label}</div>${valueHtml}</div></div>`;
       });
       html += '</div>';
       setSection(ecoWrapEl, html);
@@ -3011,14 +3494,14 @@
     if (visibleTrends.length) {
       let html = `
         <div class="card-sec-title">ACQUISITION</div>
-        <div class="card-sec-heading">入手グラフ</div>`;
+        <div class="card-sec-heading">${t('secTrendTitle')}</div>`;
       visibleTrends.forEach(g => {
         const series = getTrendSeriesFromTool(g.rawCurrentKey, g.rawHistoryKey);
         const body = series.length >= 2
           ? renderTrendSparklineHtml(series)
-          : `<p class="trend-empty">まだ十分なデータがありません（${g.source}を使うと表示されます）</p>`;
+          : `<p class="trend-empty">${escapeHtml(t('trendEmptyTemplate', { source: LANG === 'en' ? g.sourceEn : g.source }))}</p>`;
         html += `<div class="trend-block">
-          <div class="trend-block-label">${g.icon} ${g.label}</div>
+          <div class="trend-block-label">${g.icon} ${LANG === 'en' ? g.labelEn : g.label}</div>
           ${body}
         </div>`;
       });
@@ -3028,16 +3511,16 @@
     // friend code
     const fcEl = document.getElementById('cardFcWrap');
     if (state.friendCode && state.vis.friendCode) {
-      const contactTag = state.friendCodeContact ? `<span class="fc-contact-tag">${escapeHtml(state.friendCodeContact)}</span>` : '';
+      const contactTag = state.friendCodeContact ? `<span class="fc-contact-tag">${escapeHtml(translateFriendContactOption(state.friendCodeContact))}</span>` : '';
       setSection(fcEl, `
         <div class="card-sec-title">FRIEND CODE</div>
-        <div class="card-sec-heading">フレンドコード</div>
+        <div class="card-sec-heading">${t('secFriendCodeTitle')}</div>
         <div class="card-fc"><span>${escapeHtml(state.friendCode)}</span>${contactTag}</div>`);
     } else { setSection(fcEl, ''); }
 
     const cardDateNow = new Date();
     const cardDateStr = cardDateNow.getFullYear() + '.' + String(cardDateNow.getMonth() + 1).padStart(2, '0') + '.' + String(cardDateNow.getDate()).padStart(2, '0');
-    document.getElementById('cardDate').textContent = '発行日 ' + cardDateStr;
+    document.getElementById('cardDate').textContent = t('issueDateTemplate', { date: cardDateStr });
 
     // ECO_STATS・TREND_GRAPHSはstate本体ではなく固定constの配列なので、保存直前にここで
     // stateへミラーする（これを怠るとリロード・プロフィール切り替えで消えてしまう）。
@@ -3213,34 +3696,34 @@
       row.innerHTML = `
         <div class="profile-row-top">
           <span class="profile-row-name">${escapeHtml(pfDisplayName(p))}</span>
-          <button type="button" class="profile-row-btn${p.id === activeId ? ' current' : ''}" data-act="switch">${p.id === activeId ? '選択中' : '切替'}</button>
-          <button type="button" class="profile-row-btn" data-act="duplicate">複製</button>
-          <button type="button" class="profile-row-btn" data-act="rename">名前変更</button>
-          ${list.length > 1 ? '<button type="button" class="profile-row-btn" data-act="delete">削除</button>' : ''}
+          <button type="button" class="profile-row-btn${p.id === activeId ? ' current' : ''}" data-act="switch">${p.id === activeId ? t('currentlySelectedLabel') : t('switchLabel')}</button>
+          <button type="button" class="profile-row-btn" data-act="duplicate">${t('duplicateLabel')}</button>
+          <button type="button" class="profile-row-btn" data-act="rename">${t('renameLabel')}</button>
+          ${list.length > 1 ? `<button type="button" class="profile-row-btn" data-act="delete">${t('deleteLabel')}</button>` : ''}
         </div>
         ${earnedTitles.length
-          ? `<button type="button" class="profile-row-titles-toggle" data-act="toggle-titles" aria-expanded="false"><svg class="inline-icon" width="13" height="13"><use href="#i-trophy"/></svg> ${earnedTitles.length}個の称号<span class="prt-caret"><svg class="inline-icon" width="11" height="11"><use href="#i-chevron-down"/></svg></span></button>
-             <div class="profile-row-titles" hidden>${earnedTitles.map(t => `
-               <div class="profile-title-item" title="${escapeHtml(t.source)}">
-                 <span class="profile-title-icon">${t.icon}</span>
-                 <span class="profile-title-text"><b>${escapeHtml(t.name)}</b>${t.desc ? ` — ${escapeHtml(t.desc)}` : ''}</span>
+          ? `<button type="button" class="profile-row-titles-toggle" data-act="toggle-titles" aria-expanded="false"><svg class="inline-icon" width="13" height="13"><use href="#i-trophy"/></svg> ${t('titlesCountTemplate', { n: earnedTitles.length })}<span class="prt-caret"><svg class="inline-icon" width="11" height="11"><use href="#i-chevron-down"/></svg></span></button>
+             <div class="profile-row-titles" hidden>${earnedTitles.map(ti => `
+               <div class="profile-title-item" title="${escapeHtml(LANG === 'en' ? (ti.sourceEn || ti.source) : ti.source)}">
+                 <span class="profile-title-icon">${ti.icon}</span>
+                 <span class="profile-title-text"><b>${escapeHtml(LANG === 'en' ? (ti.nameEn || ti.name) : ti.name)}</b>${(LANG === 'en' ? ti.descEn : ti.desc) ? ` — ${escapeHtml(LANG === 'en' ? ti.descEn : ti.desc)}` : ''}</span>
                </div>`).join('')}</div>`
-          : `<p class="profile-row-titles-empty">まだ称号を獲得していません</p>`}`;
+          : `<p class="profile-row-titles-empty">${t('noTitlesYetMsg')}</p>`}`;
       if (p.id !== activeId) row.querySelector('[data-act="switch"]').addEventListener('click', () => switchProfile(p.id));
       row.querySelector('[data-act="duplicate"]').addEventListener('click', () => {
         const cur = pfDisplayName(p);
-        const suggested = `${cur}のコピー`;
-        const name = prompt(`「${cur}」を複製した新しいプロフィールの名前を入力してください`, suggested);
+        const suggested = t('copyOfTemplate', { name: cur });
+        const name = prompt(t('duplicateProfilePromptTemplate', { name: cur }), suggested);
         if (name && name.trim()) duplicateProfile(p.id, name.trim());
       });
       row.querySelector('[data-act="rename"]').addEventListener('click', () => {
         const cur = pfDisplayName(p);
-        const name = prompt('新しい名前を入力してください', cur === 'メイン' ? '' : cur);
+        const name = prompt(t('renamePromptMsg'), cur === t('mainLabel') ? '' : cur);
         if (name && name.trim()) renameProfile(p.id, name.trim());
       });
       const deleteBtn = row.querySelector('[data-act="delete"]');
       if (deleteBtn) deleteBtn.addEventListener('click', () => {
-        if (confirm(`「${pfDisplayName(p)}」を削除しますか？この操作は取り消せません。`)) deleteProfile(p.id);
+        if (confirm(t('deleteProfileConfirmTemplate', { name: pfDisplayName(p) }))) deleteProfile(p.id);
       });
       const titlesToggle = row.querySelector('[data-act="toggle-titles"]');
       if (titlesToggle) {
@@ -3276,11 +3759,11 @@
   });
   renderProfileDockLabel();
 
-  // ── 表示設定（ダーク/ライト切替のみを扱う最小限のモーダル）── 'sky_app_theme'は<head>内の
+  // ── 表示設定（ダーク/ライト・言語切替を扱うモーダル）── 'sky_app_theme'は<head>内の
   // 先読みスクリプトと同じ、taipak5000.github.io系ツール共通のキー（sky_app_langと同様、
   // プロフィールに依存しない端末単位の設定のため nsKey() は使わない。ロジックを変更する際は
-  // <head>内の先読みスクリプトとも同期させること）。tai-cardは他の姉妹サイトと違い多言語対応や
-  // ショートカット無効化設定を持たないため、テーマ切替1つに絞っている。
+  // <head>内の先読みスクリプトとも同期させること）。tai-cardは他の姉妹サイトと違い
+  // ショートカット無効化設定を持たないため、テーマ・言語の2つに絞っている。
   const THEME_KEY = 'sky_app_theme';
   function getStoredThemeMode(){
     try {
@@ -3294,9 +3777,9 @@
   }
   function applyThemeToDOM(isDark){ document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light'); }
   function themeModeLabel(mode){
-    if (mode === 'dark') return 'ダーク';
-    if (mode === 'light') return 'ライト';
-    return 'システムに合わせる';
+    if (mode === 'dark') return t('themeModeDark');
+    if (mode === 'light') return t('themeModeLight');
+    return t('themeModeSystem');
   }
   function syncSettingsModalUI(){
     const btn = document.getElementById('settingsThemeBtn');
@@ -3305,7 +3788,7 @@
     const mode = getStoredThemeMode();
     const next = order[(order.indexOf(mode) + 1) % order.length];
     btn.textContent = themeModeLabel(mode);
-    btn.setAttribute('aria-label', `テーマ: ${themeModeLabel(mode)}（押すと${themeModeLabel(next)}に切り替え）`);
+    btn.setAttribute('aria-label', t('themeAriaLabelTemplate', { current: themeModeLabel(mode), next: themeModeLabel(next) }));
   }
   // '?'キー・表示設定モーダル内のボタンから呼ばれる。ライト→ダーク→システム追従→ライト…の順に巡回する
   function toggleTheme(){
@@ -3336,9 +3819,8 @@
 
   // ── カードを画像で保存 / Xへ投稿（アイテム所持管理のhtml2canvas書き出しと同じ仕組みを移植） ──
   const SITE_URL = 'https://taipak5000.github.io/tai-card/';
-  const SHARE_HASHTAG = '#Sky星紡ぎカード';
   function buildShareText(){
-    return `星紡ぎカードで自己紹介カードを作りました！\n\nあなたもプロフィールを作ってみてね！\n\n${SITE_URL}\n${SHARE_HASHTAG}`;
+    return t('shareTweetTemplate', { url: SITE_URL });
   }
 
   function showToast(msg){
@@ -3412,9 +3894,8 @@
     const link = document.getElementById('previewDownloadLink');
     link.href = dataUrl; link.download = filename;
 
-    document.getElementById('previewModalTitle').textContent = '画像を保存してXへ投稿';
-    document.getElementById('previewHintText').textContent =
-      '① 下の「ダウンロード」で画像を保存 → ② 「Xの投稿画面を開く」を押して、保存した画像を添付して投稿してください';
+    document.getElementById('previewModalTitle').textContent = t('previewModalSaveTitle');
+    document.getElementById('previewHintText').textContent = t('previewHintMsg');
     document.getElementById('previewTwitterLink').href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText);
     document.getElementById('previewTwitterRow').style.display = '';
     previewCopyRow.style.display = (clipboardImageSupported && currentPreviewCanvas) ? '' : 'none';
@@ -3438,10 +3919,10 @@
       const blob = await new Promise(resolve => currentPreviewCanvas.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error('toBlob failed');
       await navigator.clipboard.write([ new ClipboardItem({ 'image/png': blob }) ]);
-      showToast('画像をクリップボードにコピーしました');
+      showToast(t('copiedToClipboardMsg'));
     } catch (err) {
       console.error(err);
-      showToast('クリップボードへのコピーに失敗しました');
+      showToast(t('clipboardCopyFailedMsg'));
     } finally {
       previewCopyBtn.disabled = false;
     }
@@ -3454,7 +3935,7 @@
     // document.activeElement頼みだと復帰先を見失う。詳細はtrapPush()側のコメント参照）。
     const triggerEl = shareBtn;
     shareBtn.disabled = true;
-    showToast('画像を生成中…');
+    showToast(t('generatingImageMsg'));
     const cardEl = document.getElementById('card');
     // 🩹 .cardはcontainer-type:inline-sizeで自身の実描画幅を見て3カラム⇔1カラムを
     // 切り替える（@container cardbox (max-width:620px)）。スマホ等、画面が狭い状態で
@@ -3489,18 +3970,18 @@
       const cloneBgWrap = clone.querySelector('.card-bg-wrap');
       if (cloneBgWrap) applyCardBgStyle(cloneBgWrap, state.cardBgImage);
       const canvas = await html2canvas(clone, { backgroundColor: null, scale: 2, useCORS: true });
-      const filename = sanitizeFilename('星紡ぎカード_' + (state.name || 'card')) + '.png';
+      const filename = sanitizeFilename(t('cardFilenamePrefix') + (state.name || 'card')) + '.png';
       const shareText = buildShareText();
 
       const shareResult = await tryShareImage(canvas, filename, shareText);
       if (shareResult === 'success') {
-        showToast('共有しました！');
+        showToast(t('sharedMsg'));
       } else if (shareResult !== 'cancelled') {
         openImagePreview(canvas.toDataURL('image/png'), filename, shareText, canvas, triggerEl);
       }
     } catch (err) {
       console.error(err);
-      showToast('画像の生成に失敗しました');
+      showToast(t('imageGenerationFailedMsg'));
     } finally {
       cloneWrap.remove();
       shareBtn.disabled = false;
