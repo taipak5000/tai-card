@@ -360,6 +360,26 @@
        カード自身の文字が明るい背景の上でほぼ見えなくなっていた。--card-textはここで固定し、
        サイトの[data-theme="dark"]側では絶対に上書きしない(カード自身の配色はTHEMES選択でのみ変える)。 */
     --card-text: #25352E; --card-text-2: #727C71; --card-text-3: #A2AA9E;
+    /* 🩹 上のバグ修正は--text系のみに適用されており、カード内の各所で使われていた
+       --teal/--teal-ink/--teal-bg・--gold/--gold-ink/--gold-bg・--surface/--surface-2/--surface-3・
+       --borderは対象外のまま残っていた。これらは:root側の[data-theme="dark"]で値が
+       置き換わるため、サイトをダークモードにするとカード名・SNSチップ・好きな〇〇バッジ・
+       収集状況のアイコン丸・称号バッジ・フレンドコードタグ・時計の目盛/中心円・入手グラフの
+       線と点・カード全体の罫線が、明るいカード面の上でほぼ読めない配色に変わってしまっていた
+       （実機で確認済み: 例えばカード名の文字色がダークモード用の淡いミントグリーン
+       #8FCBB8になり、明るいカード背景の上でほとんど見えなくなる）。--card-textと同じ考え方で、
+       カード内だけで使う固定版をここにまとめて追加し、以下のカード内の各セレクタは
+       var(--teal-ink)等ではなくこちらのvar(--card-teal-ink)等を参照するようにする。 */
+    --card-surface: #FBFAF6; --card-surface-2: #F4F1E9; --card-surface-3: #ECE8DD; --card-border: #E4DFD1;
+    --card-gold: #C99A4A; --card-gold-ink: #A87A32; --card-gold-bg: rgba(201,154,74,0.12);
+    --card-teal: #4F7C6E; --card-teal-ink: #365B4F; --card-teal-bg: rgba(79,124,110,0.10);
+    /* 🩹 上のvar(--card-text)等は「参照する側」が個別に書かないと効かない。.card自身が
+       colorプロパティを持たないままだと、明示的にcolorを指定していない子要素（テキストの
+       無いラッパーdivや、将来追加される要素）はDOMツリーを遡って結局bodyのvar(--text)
+       （サイトのダーク/ライトに追従する）を継承してしまう。.card自身にcolor:var(--card-text)を
+       明示しておくことで、個別指定を忘れた要素もここで確実に止まり、サイトのダークモードに
+       巻き込まれなくなる。 */
+    color: var(--card-text);
     position:relative; overflow:visible; border-radius:24px; padding:22px 24px 18px;
     background: var(--card-grad, linear-gradient(165deg, #FCFBF7 0%, #F5F1E6 100%));
     border:1px solid rgba(255,255,255,0.7);
@@ -397,26 +417,26 @@
   .card-head{ grid-area:head; min-width:0; z-index:1; }
   .card-grid{ grid-area:cols; z-index:1; }
   .card-foot{ grid-area:foot; z-index:1; }
-  .card-kicker{ font-family:"IBM Plex Mono", monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--ca, var(--gold-ink)); margin-bottom:6px; }
+  .card-kicker{ font-family:"IBM Plex Mono", monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--ca, var(--card-gold-ink)); margin-bottom:6px; }
   .card-emblem{
     position:absolute; top:26px; right:26px; width:38px; height:38px; border-radius:50%;
-    border:1.5px solid var(--ca, var(--gold)); display:flex; align-items:center; justify-content:center;
-    font-size:15px; color:var(--ca, var(--gold-ink)); background:rgba(255,255,255,0.55);
+    border:1.5px solid var(--ca, var(--card-gold)); display:flex; align-items:center; justify-content:center;
+    font-size:15px; color:var(--ca, var(--card-gold-ink)); background:rgba(255,255,255,0.55);
   }
   .card-top{ display:flex; align-items:center; gap:12px; margin-bottom:8px; padding-right:44px; }
-  .card-avatar{ width:56px; height:56px; border-radius:50%; background:#fff; border:2px solid #fff; box-shadow:0 0 0 1px var(--border), 0 3px 10px rgba(60,50,80,0.10); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; overflow:hidden; }
+  .card-avatar{ width:56px; height:56px; border-radius:50%; background:#fff; border:2px solid #fff; box-shadow:0 0 0 1px var(--card-border), 0 3px 10px rgba(60,50,80,0.10); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; overflow:hidden; }
   .card-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
   .card-name-row{ display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; }
-  .card-name{ font-family:"Fraunces","Zen Old Mincho",serif; font-size:19px; font-weight:600; color:var(--teal-ink); line-height:1.25; }
+  .card-name{ font-family:"Fraunces","Zen Old Mincho",serif; font-size:19px; font-weight:600; color:var(--card-teal-ink); line-height:1.25; }
   .card-sns-inline{ display:inline-flex; gap:6px; flex-wrap:wrap; }
   .card-sns-chip{
-    font-family:"IBM Plex Mono", monospace; font-size:11px; font-weight:500; color:var(--teal-ink);
-    background:var(--teal-bg); border:1px solid rgba(79,124,110,0.25); border-radius:100px; padding:2px 10px;
+    font-family:"IBM Plex Mono", monospace; font-size:11px; font-weight:500; color:var(--card-teal-ink);
+    background:var(--card-teal-bg); border:1px solid rgba(79,124,110,0.25); border-radius:100px; padding:2px 10px;
   }
   /* the one deliberate prose compaction in the whole redesign (free-form caption text only —
      never applied to structured/informational fields elsewhere in the card) */
   .card-oneliner{
-    font-size:12px; color:var(--text-2); margin-top:3px; line-height:1.5;
+    font-size:12px; color:var(--card-text-2); margin-top:3px; line-height:1.5;
     display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
   }
 
@@ -457,17 +477,17 @@
      Now sits inline inside .card-journey-strip alongside the favorite pills, rather than
      on its own row, so 生まれた時期 + 好きな〇〇 read as one horizontal ribbon under the name. */
   .card-pill-badge{
-    display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:500; color:var(--teal-ink);
-    font-family:"Zen Kaku Gothic New",sans-serif; background:rgba(255,255,255,0.6); border:1px solid var(--border);
+    display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:500; color:var(--card-teal-ink);
+    font-family:"Zen Kaku Gothic New",sans-serif; background:rgba(255,255,255,0.6); border:1px solid var(--card-border);
     padding:6px 14px; border-radius:100px;
   }
-  .card-pill-badge::before{ content:"◇"; color:var(--ca, var(--gold)); }
+  .card-pill-badge::before{ content:"◇"; color:var(--ca, var(--card-gold)); }
 
   /* 旅の記録リボン：生まれた時期バッジ＋好きな〇〇を、縦積みリストではなく1本の横並びピル帯にまとめる */
   .card-journey-strip{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:-2px 0 4px; }
   .jr-pill{
     display:inline-flex; align-items:baseline; gap:6px; font-size:11.5px; color:var(--card-text-2);
-    background:rgba(255,255,255,0.55); border:1px solid var(--border); border-radius:100px; padding:5px 13px;
+    background:rgba(255,255,255,0.55); border:1px solid var(--card-border); border-radius:100px; padding:5px 13px;
   }
   .jr-fav-label{ font-size:10px; color:var(--card-text-3); }
   .jr-fav-value{ font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; color:var(--card-text); font-size:12.5px; }
@@ -475,19 +495,19 @@
   /* soft rounded card rows: circular icon bullet + stacked label/value, with real gaps between cards */
   .soft-rows{ display:flex; flex-direction:column; gap:9px; }
   .soft-row{
-    display:flex; align-items:center; gap:13px; background:rgba(255,255,255,0.65); border:1px solid var(--border);
+    display:flex; align-items:center; gap:13px; background:rgba(255,255,255,0.65); border:1px solid var(--card-border);
     border-radius:16px; padding:12px 15px;
   }
   .soft-row-icon{
-    width:32px; height:32px; border-radius:50%; background:var(--teal-bg); color:var(--teal-ink);
+    width:32px; height:32px; border-radius:50%; background:var(--card-teal-bg); color:var(--card-teal-ink);
     display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;
   }
   .soft-row-body{ flex:1; min-width:0; }
   .soft-row-label{ font-family:"IBM Plex Mono", monospace; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--card-text-3); margin-bottom:3px; }
   .soft-row-value{ font-family:"Fraunces","Zen Old Mincho",serif; font-size:15.5px; font-weight:500; color:var(--card-text); }
   .soft-row-value.na{ color:var(--card-text-3); font-weight:400; font-family:"Zen Kaku Gothic New",sans-serif; font-size:13px; }
-  .soft-row .progress-bar{ height:4px; border-radius:100px; background:var(--surface-3); margin-top:7px; overflow:hidden; }
-  .soft-row .progress-bar-fill{ height:100%; background:var(--teal); border-radius:100px; }
+  .soft-row .progress-bar{ height:4px; border-radius:100px; background:var(--card-surface-3); margin-top:7px; overflow:hidden; }
+  .soft-row .progress-bar-fill{ height:100%; background:var(--card-teal); border-radius:100px; }
 
   /* 詳細プロフィール：一行ずつ積むリストでも、長さがバラバラなピルが並ぶモザイクでもなく、
      複数選択で値の長さが大きく変わっても揃って見える「均一グリッドのタイル」にする。
@@ -495,7 +515,7 @@
      すぎてしまう — 常に2列固定にして、代わりに値は必要なら2行まで折り返させる（省略はしない）。 */
   .card-detail-mosaic{ display:grid; grid-template-columns:1fr 1fr; gap:7px; }
   .detail-chip{
-    display:flex; align-items:flex-start; gap:6px; background:rgba(255,255,255,0.65); border:1px solid var(--border);
+    display:flex; align-items:flex-start; gap:6px; background:rgba(255,255,255,0.65); border:1px solid var(--card-border);
     border-radius:12px; padding:7px 9px; min-width:0;
   }
   .detail-chip .dc-icon{ font-size:12px; flex-shrink:0; line-height:1.3; }
@@ -516,9 +536,9 @@
   .card-titles-strip{ display:flex; flex-wrap:wrap; gap:8px; }
   .card-title-badge{
     display:inline-flex; align-items:center; gap:6px; padding:7px 14px 7px 10px; border-radius:100px;
-    background:linear-gradient(135deg, var(--gold-bg) 0%, rgba(255,255,255,0.55) 100%);
+    background:linear-gradient(135deg, var(--card-gold-bg) 0%, rgba(255,255,255,0.55) 100%);
     border:1px solid rgba(201,154,74,0.38); box-shadow:0 2px 7px rgba(168,122,50,0.14);
-    font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; font-size:12.5px; color:var(--gold-ink);
+    font-family:"Fraunces","Zen Old Mincho",serif; font-weight:600; font-size:12.5px; color:var(--card-gold-ink);
   }
   .card-title-badge .ctb-icon{ font-size:15px; }
   .title-picker-empty{ font-size:12px; color:var(--text-3); margin:0 0 8px; }
@@ -550,23 +570,23 @@
   .trend-block-label{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--card-text-3); margin-bottom:5px; }
   .trend-svg-wrap{ position:relative; }
   .trend-svg{ width:100%; height:48px; display:block; }
-  .trend-area{ fill:var(--teal); fill-opacity:0.16; }
-  .trend-line{ fill:none; stroke:var(--teal); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .trend-area{ fill:var(--card-teal); fill-opacity:0.16; }
+  .trend-line{ fill:none; stroke:var(--card-teal); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
   /* 🩹 先端の点はpreserveAspectRatio="none"のSVG内蔵circleだと、コンテナの縦横比が
      viewBox(300x84)からずれるほど楕円に潰れてしまう（グラフを1つだけ表示した時に
      顕著）。SVGの外にHTML要素として重ね、固定px×固定pxのborder-radius:50%で
      描くことで、コンテナの伸縮に関わらず常に正円を保つ。 */
-  .trend-dot{ position:absolute; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:var(--gold); pointer-events:none; }
+  .trend-dot{ position:absolute; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:var(--card-gold); pointer-events:none; }
   .trend-empty{ font-size:12px; color:var(--card-text-3); }
 
   .card-fc{
     display:flex; align-items:center; gap:8px; flex-wrap:wrap;
     font-family:"Fraunces","Zen Old Mincho",serif; font-size:13px; font-weight:500; color:var(--card-text);
-    background:rgba(255,255,255,0.65); border:1px solid var(--border); border-radius:16px; padding:9px 12px;
+    background:rgba(255,255,255,0.65); border:1px solid var(--card-border); border-radius:16px; padding:9px 12px;
   }
   .fc-contact-tag{
-    font-family:"IBM Plex Mono", monospace; font-size:10.5px; font-weight:600; color:var(--teal-ink);
-    background:var(--teal-bg); border:1px solid rgba(79,124,110,0.3); padding:2px 9px; border-radius:100px;
+    font-family:"IBM Plex Mono", monospace; font-size:10.5px; font-weight:600; color:var(--card-teal-ink);
+    background:var(--card-teal-bg); border:1px solid rgba(79,124,110,0.3); padding:2px 9px; border-radius:100px;
   }
 
   /* 公開ビュー用の時計：編集パネルのダイヤルと同じconic-gradientロジック(renderCardClockHtml()で
@@ -576,14 +596,14 @@
      card-clock-rangeは通常のテキスト折り返し（nowrapなし）なので枠からはみ出すことはない。 */
   .card-clock-module{
     display:flex; flex-direction:row; align-items:center; gap:12px;
-    background:rgba(255,255,255,0.65); border:1px solid var(--border);
+    background:rgba(255,255,255,0.65); border:1px solid var(--card-border);
     border-radius:16px; padding:12px 14px;
   }
   /* dial size 104px→70px→84px. buildDialArcSvg()'s numeric size arg in renderCardClockHtml()
      changes to match (currently 84) — see script block; the SVG wedge-path renderer itself is unchanged. */
   .card-clock-dial{
     position:relative; width:84px; height:84px; border-radius:50%; flex-shrink:0; align-self:center;
-    border:2px solid #fff; box-shadow:0 0 0 1px var(--border), 0 4px 14px rgba(60,50,80,0.14);
+    border:2px solid #fff; box-shadow:0 0 0 1px var(--card-border), 0 4px 14px rgba(60,50,80,0.14);
   }
   .card-clock-arc-svg{ position:absolute; inset:0; width:100%; height:100%; display:block; }
   .card-clock-q{
@@ -595,16 +615,16 @@
   .card-clock-q.q12{ bottom:-1px; left:50%; margin-left:-5.5px; }
   .card-clock-q.q18{ top:50%; left:-3px; margin-top:-5.5px; }
   .card-clock-ticks{ position:absolute; inset:0; }
-  .card-clock-tick{ position:absolute; width:1px; height:3px; background:var(--border); border-radius:1px; }
-  .card-clock-tick.major{ width:1.3px; height:5px; background:var(--gold-ink); border-radius:1px; }
+  .card-clock-tick{ position:absolute; width:1px; height:3px; background:var(--card-border); border-radius:1px; }
+  .card-clock-tick.major{ width:1.3px; height:5px; background:var(--card-gold-ink); border-radius:1px; }
   .card-clock-caps{ position:absolute; inset:0; }
   .card-clock-cap{
     position:absolute; width:5px; height:5px; margin:-2.5px; border-radius:50%;
-    background:var(--ca, var(--gold)); box-shadow:0 0 0 1.5px #fff, 0 1px 3px rgba(0,0,0,0.25);
+    background:var(--ca, var(--card-gold)); box-shadow:0 0 0 1.5px #fff, 0 1px 3px rgba(0,0,0,0.25);
   }
   .card-clock-hole{
-    position:absolute; inset:13px; border-radius:50%; background:radial-gradient(circle at 35% 28%, #fff 0%, var(--surface) 70%);
-    box-shadow:0 0 0 1px var(--border); display:flex; align-items:center; justify-content:center;
+    position:absolute; inset:13px; border-radius:50%; background:radial-gradient(circle at 35% 28%, #fff 0%, var(--card-surface) 70%);
+    box-shadow:0 0 0 1px var(--card-border); display:flex; align-items:center; justify-content:center;
   }
   .card-clock-center-icon{ font-size:16px; }
   .card-clock-list{ flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
@@ -612,7 +632,7 @@
     font-family:"Fraunces","Zen Old Mincho",serif; font-size:13px; font-weight:500; color:var(--card-text);
     display:flex; align-items:center; gap:6px;
   }
-  .card-clock-range::before{ content:"◇"; font-size:9px; color:var(--ca, var(--gold)); }
+  .card-clock-range::before{ content:"◇"; font-size:9px; color:var(--ca, var(--card-gold)); }
   .card-clock-range.na{ font-family:"Zen Kaku Gothic New",sans-serif; font-size:11.5px; font-weight:400; color:var(--card-text-3); }
   .card-clock-range.na::before{ color:var(--card-text-3); }
   /* 数字と単位に強弱：時刻の数字だけ少し大きく太くし、「時」は控えめにする */
@@ -623,9 +643,9 @@
      一言タグを添えて余白を意味のある情報で埋める（テーマの--ca色でうっすら染める） */
   .card-clock-vibe{
     display:inline-flex; align-items:center; gap:5px; margin-top:4px; align-self:flex-start;
-    font-family:"Zen Kaku Gothic New",sans-serif; font-size:12.5px; font-weight:700; color:var(--ca, var(--gold-ink));
+    font-family:"Zen Kaku Gothic New",sans-serif; font-size:12.5px; font-weight:700; color:var(--ca, var(--card-gold-ink));
     background:rgba(var(--ca-rgb, 201,154,74), 0.14);
-    border:1px solid var(--border); border-radius:100px; padding:4px 11px 4px 8px;
+    border:1px solid var(--card-border); border-radius:100px; padding:4px 11px 4px 8px;
   }
   .card-clock-vibe span{ font-size:14px; }
 
@@ -636,12 +656,12 @@
   #cardCustomNoteWrap{ display:flex; flex-direction:column; }
   .card-custom-note-box{
     display:flex; flex-direction:column; gap:8px; flex:1; box-sizing:border-box;
-    background:rgba(255,255,255,0.65); border:1px solid var(--border); border-radius:16px; padding:10px 12px;
+    background:rgba(255,255,255,0.65); border:1px solid var(--card-border); border-radius:16px; padding:10px 12px;
   }
   /* soft-overflow zone #1 (free-form image+text, unbounded volume) — image capped at ~90px
      (down from 180px) and text line-height tightened, but never hard line-clamped: this box
      is allowed to make the whole card taller for an outlier-length note rather than truncate. */
-  .card-custom-note-img{ width:100%; max-height:90px; object-fit:cover; border-radius:10px; border:1px solid var(--border); }
+  .card-custom-note-img{ width:100%; max-height:90px; object-fit:cover; border-radius:10px; border:1px solid var(--card-border); }
   .card-custom-note-text{ font-family:"Zen Kaku Gothic New",sans-serif; font-size:12px; line-height:1.5; color:var(--card-text-2); white-space:pre-wrap; overflow-wrap:anywhere; }
 
   /* ── Cape level widget: 羽トラッカーの意匠（ひし形ピップ・二重リング・スパーク）を踏襲しつつ、
@@ -680,11 +700,11 @@
     background:rgba(247,239,221,0.2); margin-top:1px;
   }
   .cape-widget .progress-bar-fill{
-    height:100%; border-radius:100px; background:linear-gradient(90deg, var(--gold-ink) 0%, #EFC98A 100%);
+    height:100%; border-radius:100px; background:linear-gradient(90deg, var(--card-gold-ink) 0%, #EFC98A 100%);
     box-shadow:0 0 5px rgba(239,201,138,0.5);
   }
 
-  .card-foot{ padding-top:10px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-size:10.5px; color:var(--card-text-3); }
+  .card-foot{ padding-top:10px; border-top:1px solid var(--card-border); display:flex; align-items:center; justify-content:space-between; font-size:10.5px; color:var(--card-text-3); }
   .card-foot .tag{ font-family:"IBM Plex Mono", monospace; }
 
   footer{ margin-top:44px; padding-top:18px; border-top:1px solid var(--border); color:var(--text-3); font-size:12px; text-align:center; line-height:1.7; }
@@ -1311,6 +1331,11 @@
         <button type="button" class="mini-btn lang-select-btn" id="settingsLangEnBtn" onclick="setLang('en')">English</button>
       </div>
     </div>
+    <div class="settings-row" style="margin-top:10px;">
+      <span class="settings-row-label" data-i18n="showTitlesLabel">称号を表示</span>
+      <label class="switch"><input type="checkbox" id="showTitlesToggle" checked><span class="track"></span><span class="knob"></span></label>
+    </div>
+    <p class="tools-modal-hint" style="margin-top:4px;" data-i18n="showTitlesHint">カードやプロフィール一覧に獲得済みの称号を表示します</p>
     <p class="tools-modal-hint" style="margin-top:10px;" data-i18n-html="shortcutsHintHtml">ショートカット: <b>?</b>で開く／<b>D</b>でテーマ切替／<b>Esc</b>で閉じる</p>
   </div>
 </div>
@@ -1486,6 +1511,21 @@
   function saveLang(lang) { localStorage.setItem(LANG_KEY, lang === 'en' ? 'en' : 'ja'); }
   let LANG = loadLang();
 
+  // 🩹 称号表示のオン/オフ：テーマ・言語と同じ端末単位の設定（プロフィールをまたいで共通、
+  // nsKey()は使わない）。state.vis.titles（プロフィールごとに保存される「このプロフィールの
+  // カードに称号セクションを出すか」）とは別物で、こちらは「称号が表示される箇所（カード本体・
+  // プロフィール切替モーダルの獲得済み称号一覧）を、この端末では丸ごと見せるかどうか」を
+  // 切り替える。他サイトと共有しない、このサイト独自の設定なのでSTATE_KEY('taiCardState_v1')
+  // と同じ命名規則（taiCard接頭辞＋_v1）にする。デフォルトはON（キー未設定時は'0'以外＝表示）。
+  const SHOW_TITLES_KEY = 'taiCardShowTitles_v1';
+  function loadShowTitles() {
+    try { return localStorage.getItem(SHOW_TITLES_KEY) !== '0'; } catch (e) { return true; }
+  }
+  function saveShowTitles(show) {
+    try { localStorage.setItem(SHOW_TITLES_KEY, show ? '1' : '0'); } catch (e) { /* プライベートブラウジング等でlocalStorageが使えない場合も表示は継続する */ }
+  }
+  let SHOW_TITLES = loadShowTitles();
+
   const I18N = {
     ja: {
       pageTitle: '星紡ぎカード - Sky 星を紡ぐ子どもたち',
@@ -1581,6 +1621,8 @@
       uiThemeLabel: 'テーマ',
       shortcutsHintHtml: 'ショートカット: <b>?</b>で開く／<b>D</b>でテーマ切替／<b>Esc</b>で閉じる',
       settingsLangSection: '言語',
+      showTitlesLabel: '称号を表示',
+      showTitlesHint: 'カードやプロフィール一覧に獲得済みの称号を表示します',
       removeItemAriaLabel: 'この項目を削除',
       favLabelPrefix: '好きな',
       favLabelPlaceholder: '季節',
@@ -1737,6 +1779,8 @@
       uiThemeLabel: 'Theme',
       shortcutsHintHtml: 'Shortcuts: <b>?</b> to open, <b>D</b> to toggle theme, <b>Esc</b> to close',
       settingsLangSection: 'Language',
+      showTitlesLabel: 'Show Titles',
+      showTitlesHint: 'Shows earned titles on the card and in the profile list',
       removeItemAriaLabel: 'Remove this item',
       favLabelPrefix: 'Favorite ',
       favLabelPlaceholder: 'Season',
@@ -3430,7 +3474,7 @@
     const titlesWrapEl = document.getElementById('cardTitlesWrap');
     // 🩹 ループ変数名tはグローバルのt()（翻訳関数）と衝突するため、ここだけtiとする
     const selectedTitles = syncedTitlesCache.filter(ti => state.titles.selected.includes(ti.key));
-    if (state.vis.titles && selectedTitles.length) {
+    if (SHOW_TITLES && state.vis.titles && selectedTitles.length) {
       const badges = selectedTitles.map(ti => `<span class="card-title-badge"><span class="ctb-icon">${ti.icon}</span>${escapeHtml(LANG === 'en' ? (ti.nameEn || ti.name) : ti.name)}</span>`).join('');
       setSection(titlesWrapEl, `
         <div class="card-sec-title">TITLES</div>
@@ -3701,7 +3745,7 @@
           <button type="button" class="profile-row-btn" data-act="rename">${t('renameLabel')}</button>
           ${list.length > 1 ? `<button type="button" class="profile-row-btn" data-act="delete">${t('deleteLabel')}</button>` : ''}
         </div>
-        ${earnedTitles.length
+        ${!SHOW_TITLES ? '' : earnedTitles.length
           ? `<button type="button" class="profile-row-titles-toggle" data-act="toggle-titles" aria-expanded="false"><svg class="inline-icon" width="13" height="13"><use href="#i-trophy"/></svg> ${t('titlesCountTemplate', { n: earnedTitles.length })}<span class="prt-caret"><svg class="inline-icon" width="11" height="11"><use href="#i-chevron-down"/></svg></span></button>
              <div class="profile-row-titles" hidden>${earnedTitles.map(ti => `
                <div class="profile-title-item" title="${escapeHtml(LANG === 'en' ? (ti.sourceEn || ti.source) : ti.source)}">
@@ -3789,6 +3833,8 @@
     const next = order[(order.indexOf(mode) + 1) % order.length];
     btn.textContent = themeModeLabel(mode);
     btn.setAttribute('aria-label', t('themeAriaLabelTemplate', { current: themeModeLabel(mode), next: themeModeLabel(next) }));
+    const showTitlesToggle = document.getElementById('showTitlesToggle');
+    if (showTitlesToggle) showTitlesToggle.checked = SHOW_TITLES;
   }
   // '?'キー・表示設定モーダル内のボタンから呼ばれる。ライト→ダーク→システム追従→ライト…の順に巡回する
   function toggleTheme(){
@@ -3815,6 +3861,12 @@
   document.getElementById('settingsDockBtn').addEventListener('click', openSettingsModal);
   document.getElementById('settingsModalCloseBtn').addEventListener('click', closeSettingsModal);
   document.getElementById('settingsThemeBtn').addEventListener('click', toggleTheme);
+  document.getElementById('showTitlesToggle').addEventListener('change', e => {
+    SHOW_TITLES = e.target.checked;
+    saveShowTitles(SHOW_TITLES);
+    renderCard();
+    if (profileModalOverlay.classList.contains('show')) drawProfileModalList();
+  });
   settingsModalOverlay.addEventListener('click', e => { if (e.target === settingsModalOverlay) closeSettingsModal(); });
 
   // ── カードを画像で保存 / Xへ投稿（アイテム所持管理のhtml2canvas書き出しと同じ仕組みを移植） ──
